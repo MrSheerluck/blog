@@ -1,5 +1,39 @@
 {% extends "terminimal/templates/index.html" %}
 
+{% block content %}
+    {% if current_path == "/" %}
+        {% set welcome_page = get_page(path="posts/welcome-to-mrsheerluck-blog.md") %}
+        {% set posts_section = get_section(path="posts/_index.md") %}
+        {% set recent_posts = posts_section.pages | sort(attribute="date") | reverse %}
+
+        <div class="post">
+            {{ post_macros::header(page=welcome_page) }}
+            {{ post_macros::content(page=welcome_page, summary=false, show_only_description=false) }}
+        </div>
+
+        <div class="post">
+            <h2 class="post-title">recent posts</h2>
+            <ul>
+                {% set_global shown = 0 %}
+                {% for listed_page in recent_posts %}
+                    {% if shown < 7 %}
+                        {% set_global shown = shown + 1 %}
+                        <li class="post-list">
+                            <a href="{{ listed_page.permalink | safe }}">
+                                <span class="post-date">{{ listed_page.date | date(format="%Y-%m-%d") }}</span>
+                                :: <span class="post-list-title">{{ listed_page.title }}</span>
+                            </a>
+                            {{ post_macros::tags(page=listed_page, short=true) }}
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock content %}
+
 {% block footer %}
     <section class="post">
         <h2 class="post-title">subscribe</h2>

@@ -15,6 +15,6 @@ The setup includes:
 
 - theme integration
 - tags and archive pages
-- a built-in series feature for multi-part posts
+- a clean post listing page
 
 Start editing content under the `content/` directory.

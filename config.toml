@@ -30,7 +30,8 @@ enable_post_view_navigation = true
 post_view_navigation_prompt = "Thanks for reading. Continue exploring?"
 
 menu_items = [
-    { name = "blog", url = "$BASE_URL" },
+    { name = "home", url = "$BASE_URL" },
+    { name = "posts", url = "$BASE_URL/posts" },
     { name = "series", url = "$BASE_URL/series" },
     { name = "tags", url = "$BASE_URL/tags" },
     { name = "archive", url = "$BASE_URL/archive" },
