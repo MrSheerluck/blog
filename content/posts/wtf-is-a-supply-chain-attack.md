@@ -27,4 +27,10 @@ The attacker added a dependency called `plain-crypto-js`. This package is never 
 ## What to Check Right Now
 If you have installed `axios@1.14.1` or `axios@0.30.4` please remove them or revert back to a safer version. You can revert back these to `axios@1.14.0` and `axios@0.30.3`
 
+
+
+> Update 1: The axios version has been rolled back to a safer version.
+![axios-rolled-back-to-safer-version](/images/axios-rolled-back.png)
+
+
 I'll update the story as new confirmed details come in.
