@@ -15,4 +15,9 @@ Thank you so much for subscribing to my newsletter. I write mostly on whatever I
 
 My point is this is my digital garden, and I am thanking you for being a part of this journey.
 
-If you have any feedback or want to request any topic, please feel free to DM me on X or Bluesky, or email me.
+If you have any feedback or want to request any topic, please feel free to reach out.
+
+- X: [@sheerluck_io](https://x.com/sheerluck_io)
+- Bluesky: [@mrsheerluck.bsky.social](https://bsky.app/profile/mrsheerluck.bsky.social)
+- GitHub: [MrSheerluck](https://github.com/MrSheerluck)
+- YouTube: [@sheerluck-dev](https://www.youtube.com/@sheerluck-dev)
