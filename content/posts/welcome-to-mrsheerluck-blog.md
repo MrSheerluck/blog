@@ -7,14 +7,12 @@ description = "A quick intro to this Zola + Terminimal setup."
 tags = ["zola", "terminimal", "setup"]
 +++
 
-Welcome. This blog is powered by Zola and styled with the Terminimal theme.
+Hi,
 
 <!-- more -->
 
-The setup includes:
+Thank you so much for subscribing to my newsletter. I write mostly on whatever I am learning and want to share my knowledge on. The topic does not always have to be based on tech. It can be science, maths, economics, philosophy, game design, animation, and more.
 
-- theme integration
-- tags and archive pages
-- a clean post listing page
+My point is this is my digital garden, and I am thanking you for being a part of this journey.
 
-Start editing content under the `content/` directory.
+If you have any feedback or want to request any topic, please feel free to DM me on X or Bluesky, or email me.

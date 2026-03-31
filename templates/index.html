@@ -1,7 +1,23 @@
 {% extends "terminimal/templates/index.html" %}
 
+{% block extra_head %}
+    {{ super() }}
+    {% if current_path is defined and current_path == "/" %}
+        <style>
+            .home-recent-title {
+                margin-top: 35px;
+            }
+
+            .home-recent-list {
+                margin-top: 0;
+                padding-left: 0;
+            }
+        </style>
+    {% endif %}
+{% endblock extra_head %}
+
 {% block content %}
-    {% if current_path == "/" %}
+    {% if current_path is defined and current_path == "/" %}
         {% set welcome_page = get_page(path="posts/welcome-to-mrsheerluck-blog.md") %}
         {% set posts_section = get_section(path="posts/_index.md") %}
         {% set recent_posts = posts_section.pages | sort(attribute="date") | reverse %}
@@ -9,11 +25,8 @@
         <div class="post">
             {{ post_macros::header(page=welcome_page) }}
             {{ post_macros::content(page=welcome_page, summary=false, show_only_description=false) }}
-        </div>
-
-        <div class="post">
-            <h2 class="post-title">recent posts</h2>
-            <ul>
+            <h2 class="post-title home-recent-title">recent posts</h2>
+            <ul class="home-recent-list">
                 {% set_global shown = 0 %}
                 {% for listed_page in recent_posts %}
                     {% if shown < 7 %}
