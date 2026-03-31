@@ -1,0 +1,31 @@
+{% extends "terminimal/templates/index.html" %}
+
+{%- block title -%}
+{% set page_title = "Series: " ~ term.name %}
+{{ title_macros::title(page_title=page_title, main_title=config.title) }}
+{%- endblock -%}
+
+{% block content %}
+    <div class="post">
+        <h1 class="post-title">
+            series: {{ term.name }}
+            ({{ term.pages | length }} part{{ term.pages | length | pluralize }})
+        </h1>
+
+        <a href="{{ config.base_url | safe }}/series/">
+            Show all series
+        </a>
+
+        <ol>
+            {% for page in term.pages | sort(attribute="date") %}
+            <li class="post-list">
+                <a href="{{ page.permalink | safe }}">
+                    <span class="post-date">{{ page.date | date(format="%Y-%m-%d") }}</span>
+                    :: <span class="post-list-title">{{ page.title }}</span>
+                </a>
+                {{ post_macros::tags(page=page, short=true) }}
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+{% endblock content %}

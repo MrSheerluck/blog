@@ -1,0 +1,31 @@
+{% macro inline(page) %}
+    {%- if page.taxonomies and page.taxonomies.series %}
+        <div class="post-tags-inline">
+            :: series:&nbsp;
+            {%- for series_name in page.taxonomies.series | sort | unique(case_sensitive=false) %}
+                <a class="post-tag" href="{{ get_taxonomy_url(kind='series', name=series_name) | safe }}">{{ series_name }}</a>
+                {%- if not loop.last %}&nbsp;{% endif -%}
+            {% endfor -%}
+        </div>
+
+        {%- for series_name in page.taxonomies.series | sort | unique(case_sensitive=false) %}
+            {% set series_term = get_taxonomy_term(kind="series", term=series_name) %}
+            {% if series_term.pages | length > 1 %}
+                <div class="post-content">
+                    <p><strong>Read this series in order:</strong> <a href="{{ series_term.permalink | safe }}">{{ series_name }}</a></p>
+                    <ol>
+                        {% for series_page in series_term.pages | sort(attribute="date") %}
+                            <li>
+                                {% if series_page.permalink == page.permalink %}
+                                    <strong>{{ series_page.title }} (current)</strong>
+                                {% else %}
+                                    <a href="{{ series_page.permalink | safe }}">{{ series_page.title }}</a>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endmacro %}

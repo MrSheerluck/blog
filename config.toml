@@ -1,0 +1,38 @@
+base_url = "https://blog.sheerluck.dev"
+title = "Mrsheerluck Blog"
+description = "Personal notes on engineering, systems, and software."
+default_language = "en"
+theme = "terminimal"
+
+# Sass compilation is required for the theme.
+compile_sass = true
+generate_feeds = true
+feed_filenames = ["rss.xml", "atom.xml"]
+build_search_index = false
+
+taxonomies = [
+    { name = "tags", feed = true },
+    { name = "series", feed = true },
+]
+
+[markdown]
+
+[markdown.highlighting]
+theme = "catppuccin-mocha"
+
+[extra]
+accent_color = "blue"
+background_color = "dark"
+logo_text = "mrsheerluck.blog"
+author = "Mrsheerluck"
+page_titles = "combined"
+enable_post_view_navigation = true
+post_view_navigation_prompt = "Thanks for reading. Continue exploring?"
+
+menu_items = [
+    { name = "blog", url = "$BASE_URL" },
+    { name = "series", url = "$BASE_URL/series" },
+    { name = "tags", url = "$BASE_URL/tags" },
+    { name = "archive", url = "$BASE_URL/archive" },
+    { name = "about", url = "$BASE_URL/about" },
+]
