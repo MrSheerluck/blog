@@ -47,7 +47,22 @@ Use the same `series` value in each part.
 Install Zola locally and run:
 
 ```bash
+scripts/build_site.sh build
 zola serve
 ```
 
 Then open the local URL shown in your terminal.
+
+## Auto OG images for posts
+
+Text-only OpenGraph/Twitter card images are auto-generated for posts in `content/posts/`:
+
+- generator: `scripts/generate_og_images.py`
+- output path: `static/images/og/posts/<post-slug>.png`
+- metadata template: `templates/macros/head.html`
+
+Run this before publishing if you are not using `scripts/build_site.sh`:
+
+```bash
+python3 scripts/generate_og_images.py
+```
