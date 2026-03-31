@@ -3,6 +3,7 @@ title = "About"
 path = "about"
 +++
 
-This is your blog's about page.
+Hi, I'm Sahil
+This is my digital garden and all of my post are solely for my own learning. It doesn't have to be super beginner friendly, it doesn't need have any structure, it can be flawed too.
 
-Update this file with your intro, links, and anything you want readers to know.
+Thanks for being a part of my journey
