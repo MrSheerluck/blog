@@ -1,5 +1,6 @@
 +++
 title = "Learn Rust Basics By Building a Brainfuck Interpreter"
+description = "In this post, we are going to build a brainfuck language interpreter in Rust"
 date = 2026-04-04
 transparent = true
 
