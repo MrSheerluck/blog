@@ -28,6 +28,9 @@ author = "Mrsheerluck"
 page_titles = "combined"
 enable_post_view_navigation = true
 post_view_navigation_prompt = "Thanks for reading. Continue exploring?"
+katex = true
+# KaTeX version used by the theme when `extra.katex = true`.
+katex_version = "0.16.11"
 
 menu_items = [
     { name = "home", url = "$BASE_URL" },

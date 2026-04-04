@@ -25,6 +25,27 @@
     <link rel="stylesheet" href="{{ get_url(path="font-hack-subset.css", trailing_slash=false) | safe }}">
 {% endif -%}
 
+{%- if config.extra.katex | default(value=false) %}
+    {%- set katex_version = config.extra.katex_version | default(value="0.16.11") -%}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@{{ katex_version }}/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@{{ katex_version }}/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@{{ katex_version }}/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof renderMathInElement !== "function") return;
+            renderMathInElement(document.body, {
+                delimiters: [
+                    { left: "$$", right: "$$", display: true },
+                    { left: "$", right: "$", display: false },
+                    { left: "\\(", right: "\\)", display: false },
+                    { left: "\\[", right: "\\]", display: true }
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+{% endif -%}
+
 {% endmacro head %}
 
 
