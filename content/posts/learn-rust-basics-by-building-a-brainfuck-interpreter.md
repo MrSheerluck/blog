@@ -141,6 +141,8 @@ Rust has multiple integer types. They differ in size (how many bits they use) an
 | u32   | 32-bit unsigned | 0 to ~4 billion                               |
 | u64   | 64-bit unsigned | ver large range                               |
 | usize | pointer-sized   | depends on your OS (64-bit on 64-bit systems) |
+
+
 `i32` is the default integer type when Rust infers. `usize` is special because its used for indexing into collections (arrays, vectors etc) because its size matches memory address size of your machine.
 
 ### Boolean
