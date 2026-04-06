@@ -32,6 +32,16 @@ katex = true
 # KaTeX version used by the theme when `extra.katex = true`.
 katex_version = "0.16.11"
 
+music_player_enabled = true
+music_player_shuffle = true
+music_player_persist_navigation = true
+music_player_tracks = [
+    { title = "Episode 77: Phonaut", artist = "Phonaut", mp3_url = "https://datashat.net/music_for_programming_77-phonaut.mp3", page_url = "https://musicforprogramming.net/seventyseven/" },
+    { title = "Episode 76: Material Object", artist = "Material Object", mp3_url = "https://datashat.net/music_for_programming_76-material_object.mp3", page_url = "https://musicforprogramming.net/seventysix/" },
+    { title = "Episode 75: Datassette", artist = "Datassette", mp3_url = "https://datashat.net/music_for_programming_75-datassette.mp3", page_url = "https://musicforprogramming.net/seventyfive/" },
+]
+music_player_credit_html = 'Music For Programming — <a href="https://musicforprogramming.net/" target="_blank" rel="noopener noreferrer">musicforprogramming.net</a> (not affiliated).'
+
 menu_items = [
     { name = "home", url = "$BASE_URL" },
     { name = "posts", url = "$BASE_URL/posts" },

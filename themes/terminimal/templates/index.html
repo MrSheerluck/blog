@@ -35,6 +35,326 @@
 </head>
 
 <body class="">
+{%- if config.extra.music_player_enabled | default(value=false) %}
+<div class="music-player" role="region" aria-label="Music player">
+    <div class="music-player__row music-player__row--top">
+        <div class="music-player__controls">
+            <button class="music-player__btn" type="button" data-music-player-prev aria-label="Previous track">[&lt;&lt;]</button>
+            <button class="music-player__btn" type="button" data-music-player-play aria-label="Play/Pause">[play]</button>
+            <button class="music-player__btn" type="button" data-music-player-next aria-label="Next track">[&gt;&gt;]</button>
+            <span class="music-player__sep">|</span>
+            <button class="music-player__btn" type="button" data-music-player-vol-down aria-label="Volume down">[vol-]</button>
+            <button class="music-player__btn" type="button" data-music-player-vol-up aria-label="Volume up">[vol+]</button>
+            <span class="music-player__vol" data-music-player-volume>100%</span>
+        </div>
+    </div>
+
+    <div class="music-player__row music-player__row--progress">
+        <span class="music-player__time" data-music-player-current>0:00</span>
+        <input class="music-player__seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek" data-music-player-seek />
+        <span class="music-player__time" data-music-player-duration>0:00</span>
+    </div>
+
+    <audio preload="none" data-music-player-audio></audio>
+
+    <ul class="music-player__playlist" hidden data-music-player-playlist>
+    {%- if config.extra.music_player_tracks %}
+        {%- for track in config.extra.music_player_tracks %}
+        <li data-title="{{ track.title }}" data-mp3-url="{{ track.mp3_url }}" data-page-url="{{ track.page_url }}"{% if track.artist %} data-artist="{{ track.artist }}"{% endif %}></li>
+        {% endfor -%}
+    {% elif config.extra.music_player_mp3_url %}
+        <li data-title="Music For Programming" data-mp3-url="{{ config.extra.music_player_mp3_url }}" data-page-url="https://musicforprogramming.net/seventysix/"></li>
+    {% endif -%}
+    </ul>
+
+    {%- if config.extra.music_player_credit_html %}
+    <div class="music-player__credits">
+        <div class="music-player__credit music-player__credit--now" data-music-player-credit-now></div>
+        <div class="music-player__credit music-player__credit--static">{{ config.extra.music_player_credit_html | safe }}</div>
+    </div>
+    {%- else %}
+    <div class="music-player__credits">
+        <div class="music-player__credit music-player__credit--now" data-music-player-credit-now></div>
+    </div>
+    {%- endif %}
+</div>
+<script>
+(() => {
+  const player = document.querySelector(".music-player");
+  if (!player) return;
+
+  const audio = player.querySelector("[data-music-player-audio]");
+  const playlist = player.querySelector("[data-music-player-playlist]");
+  const nowLink = player.querySelector("[data-music-player-now]");
+  const playBtn = player.querySelector("[data-music-player-play]");
+  const prevBtn = player.querySelector("[data-music-player-prev]");
+  const nextBtn = player.querySelector("[data-music-player-next]");
+  const volDownBtn = player.querySelector("[data-music-player-vol-down]");
+  const volUpBtn = player.querySelector("[data-music-player-vol-up]");
+  const volumeEl = player.querySelector("[data-music-player-volume]");
+  const creditNowEl = player.querySelector("[data-music-player-credit-now]");
+  const seek = player.querySelector("[data-music-player-seek]");
+  const currentTimeEl = player.querySelector("[data-music-player-current]");
+  const durationEl = player.querySelector("[data-music-player-duration]");
+
+  if (!audio || !playlist) return;
+
+  const tracks = Array.from(playlist.querySelectorAll("li"))
+    .map((li) => ({
+      title: li.dataset.title || "Music For Programming",
+      artist: li.dataset.artist || "",
+      mp3Url: li.dataset.mp3Url,
+      pageUrl: li.dataset.pageUrl,
+    }))
+    .filter((t) => t.mp3Url);
+
+  if (!tracks.length) return;
+
+  const shuffle = {% if config.extra.music_player_shuffle | default(value=true) %}true{% else %}false{% endif %};
+  let currentIndex = 0;
+  let isSeeking = false;
+  let lastKnownDuration = 0;
+
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  const setVolume = (volume) => {
+    const clamped = clamp(volume, 0, 1);
+    audio.volume = clamped;
+    try {
+      localStorage.setItem("music_player_volume", String(clamped));
+    } catch (_) {}
+    if (volumeEl) volumeEl.textContent = `${Math.round(clamped * 100)}%`;
+  };
+
+  const formatTime = (seconds) => {
+    if (!Number.isFinite(seconds) || seconds <= 0) return "0:00";
+    const total = Math.floor(seconds);
+    const mins = Math.floor(total / 60);
+    const secs = total % 60;
+    return `${mins}:${String(secs).padStart(2, "0")}`;
+  };
+
+  const pickRandomIndex = (excludeIndex) => {
+    if (tracks.length <= 1) return 0;
+    let nextIndex = excludeIndex;
+    while (nextIndex === excludeIndex) {
+      nextIndex = Math.floor(Math.random() * tracks.length);
+    }
+    return nextIndex;
+  };
+
+  const applyTrack = (index) => {
+    currentIndex = ((index % tracks.length) + tracks.length) % tracks.length;
+    const track = tracks[currentIndex];
+    audio.src = track.mp3Url;
+    audio.load();
+    if (nowLink) {
+      nowLink.href = track.pageUrl || "https://musicforprogramming.net/";
+    }
+    if (creditNowEl) {
+      creditNowEl.replaceChildren();
+      const prefix = document.createTextNode("Now: ");
+      creditNowEl.append(prefix);
+      if (track.pageUrl) {
+        const a = document.createElement("a");
+        a.href = track.pageUrl;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = track.title;
+        creditNowEl.append(a);
+      } else {
+        creditNowEl.append(document.createTextNode(track.title));
+      }
+      if (track.artist) {
+        creditNowEl.append(document.createTextNode(` (curated by ${track.artist})`));
+      }
+    }
+    if (seek) seek.value = "0";
+    if (currentTimeEl) currentTimeEl.textContent = "0:00";
+    if (durationEl) durationEl.textContent = "0:00";
+  };
+
+  const next = () => applyTrack(shuffle ? pickRandomIndex(currentIndex) : currentIndex + 1);
+  const prev = () => applyTrack(shuffle ? pickRandomIndex(currentIndex) : currentIndex - 1);
+
+  const setPlayingUI = () => {
+    if (!playBtn) return;
+    playBtn.textContent = audio.paused ? "[play]" : "[pause]";
+  };
+
+  const updateDurationUI = () => {
+    lastKnownDuration = audio.duration;
+    if (durationEl) durationEl.textContent = formatTime(audio.duration);
+  };
+
+  const updateProgressUI = () => {
+    if (!seek || isSeeking) return;
+    if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+    const ratio = Math.max(0, Math.min(1, audio.currentTime / audio.duration));
+    seek.value = String(Math.round(ratio * 1000));
+    if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+  };
+
+  playBtn?.addEventListener("click", () => {
+    if (audio.paused) audio.play().catch(() => {});
+    else audio.pause();
+  });
+
+  volDownBtn?.addEventListener("click", () => setVolume(audio.volume - 0.1));
+  volUpBtn?.addEventListener("click", () => setVolume(audio.volume + 0.1));
+
+  nextBtn?.addEventListener("click", () => {
+    const wasPlaying = !audio.paused;
+    next();
+    if (wasPlaying) audio.play().catch(() => {});
+  });
+  prevBtn?.addEventListener("click", () => {
+    const wasPlaying = !audio.paused;
+    prev();
+    if (wasPlaying) audio.play().catch(() => {});
+  });
+  audio.addEventListener("ended", () => {
+    next();
+    audio.play().catch(() => {});
+  });
+  audio.addEventListener("play", setPlayingUI);
+  audio.addEventListener("pause", setPlayingUI);
+  audio.addEventListener("loadedmetadata", () => {
+    updateDurationUI();
+    updateProgressUI();
+  });
+  audio.addEventListener("durationchange", updateDurationUI);
+  audio.addEventListener("timeupdate", updateProgressUI);
+
+  seek?.addEventListener("pointerdown", () => {
+    isSeeking = true;
+  });
+  seek?.addEventListener("pointerup", () => {
+    isSeeking = false;
+  });
+  seek?.addEventListener("input", () => {
+    if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+    const ratio = Number(seek.value) / 1000;
+    audio.currentTime = ratio * audio.duration;
+    if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+  });
+
+  applyTrack(shuffle ? pickRandomIndex(-1) : 0);
+  const savedVolume = (() => {
+    try {
+      return parseFloat(localStorage.getItem("music_player_volume") || "");
+    } catch (_) {
+      return NaN;
+    }
+  })();
+  setVolume(Number.isFinite(savedVolume) ? savedVolume : 0.7);
+  setPlayingUI();
+})();
+</script>
+
+{%- if config.extra.music_player_persist_navigation | default(value=true) %}
+<script>
+(() => {
+  const containerSelector = ".container";
+
+  const isModifiedClick = (event) =>
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey;
+
+  const shouldHandleLink = (anchor) => {
+    if (!anchor) return false;
+    if (anchor.target && anchor.target !== "_self") return false;
+    if (anchor.hasAttribute("download")) return false;
+    const href = anchor.getAttribute("href");
+    if (!href || href.startsWith("mailto:") || href.startsWith("tel:")) return false;
+    return true;
+  };
+
+  const toUrl = (href) => {
+    try {
+      return new URL(href, window.location.href);
+    } catch (_) {
+      return null;
+    }
+  };
+
+  const isInternal = (url) => url && url.origin === window.location.origin;
+
+  const swapTo = async (url, { pushState } = { pushState: true }) => {
+    const currentContainer = document.querySelector(containerSelector);
+    if (!currentContainer) {
+      window.location.href = url.href;
+      return;
+    }
+
+    try {
+      const res = await fetch(url.href, {
+        headers: {
+          "X-Requested-With": "mrsheerluck-pjax",
+        },
+      });
+
+      if (!res.ok) throw new Error("bad_status");
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const nextContainer = doc.querySelector(containerSelector);
+      if (!nextContainer) throw new Error("no_container");
+
+      document.title = doc.title || document.title;
+      currentContainer.replaceWith(nextContainer);
+
+      if (pushState) history.pushState({}, "", url.href);
+
+      if (typeof window.__katexRender === "function") window.__katexRender();
+
+      if (url.hash) {
+        const id = decodeURIComponent(url.hash.slice(1));
+        document.getElementById(id)?.scrollIntoView();
+      } else {
+        window.scrollTo(0, 0);
+      }
+    } catch (_) {
+      window.location.href = url.href;
+    }
+  };
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (isModifiedClick(event)) return;
+
+      const anchor = event.target.closest("a");
+      if (!shouldHandleLink(anchor)) return;
+
+      const url = toUrl(anchor.getAttribute("href"));
+      if (!isInternal(url)) return;
+
+      // Let same-page hash jumps behave normally.
+      if (
+        url.pathname === window.location.pathname &&
+        url.search === window.location.search &&
+        url.hash
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      swapTo(url, { pushState: true });
+    },
+    { capture: true }
+  );
+
+  window.addEventListener("popstate", () => {
+    swapTo(new URL(window.location.href), { pushState: false });
+  });
+})();
+</script>
+{% endif -%}
+{% endif -%}
 <div class="container">
     {% block header %}
     <header class="header">

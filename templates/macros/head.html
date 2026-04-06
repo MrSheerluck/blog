@@ -31,7 +31,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@{{ katex_version }}/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@{{ katex_version }}/dist/contrib/auto-render.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        window.__katexRender = () => {
             if (typeof renderMathInElement !== "function") return;
             renderMathInElement(document.body, {
                 delimiters: [
@@ -42,7 +42,8 @@
                 ],
                 throwOnError: false
             });
-        });
+        };
+        document.addEventListener("DOMContentLoaded", () => window.__katexRender());
     </script>
 {% endif -%}
 
