@@ -1,11 +1,11 @@
 .music-player {
   position: fixed;
-  top: 12px;
-  right: 12px;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
   z-index: 2000;
 
-  width: 340px;
-  max-width: calc(100vw - 24px);
+  width: 360px;
+  max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
   padding: 10px 10px 8px;
   border: 2px dashed var(--accent);
   border-radius: 0;

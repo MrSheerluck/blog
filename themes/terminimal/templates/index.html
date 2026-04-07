@@ -268,9 +268,11 @@
   const shouldHandleLink = (anchor) => {
     if (!anchor) return false;
     if (anchor.target && anchor.target !== "_self") return false;
+    if (anchor.dataset && anchor.dataset.noPjax != null) return false;
     if (anchor.hasAttribute("download")) return false;
     const href = anchor.getAttribute("href");
     if (!href || href.startsWith("mailto:") || href.startsWith("tel:")) return false;
+    if (href.endsWith(".xml")) return false;
     return true;
   };
 
@@ -354,6 +356,33 @@
 })();
 </script>
 {% endif -%}
+{% endif -%}
+
+{%- if config.extra.subscribe_widget_enabled | default(value=false) and config.extra.subscribe_widget_iframe_url %}
+<details class="subscribe-widget" role="region" aria-label="Subscribe">
+    <summary class="subscribe-widget__summary">
+        [subscribe]
+        <span class="subscribe-widget__summary-links">
+            <a class="subscribe-widget__link" data-no-pjax href="{{ get_url(path="rss.xml", trailing_slash=false) | safe }}">[rss]</a>
+            <a class="subscribe-widget__link" data-no-pjax href="{{ get_url(path="atom.xml", trailing_slash=false) | safe }}">[atom]</a>
+        </span>
+    </summary>
+    <div class="subscribe-widget__panel">
+        <iframe
+            src="{{ config.extra.subscribe_widget_iframe_url | safe }}"
+            title="Subscribe"
+            width="480"
+            height="150"
+            style="border: 1px solid #EEE; background: white"
+            class="subscribe-widget__frame"
+            frameborder="0"
+            scrolling="no">
+        </iframe>
+        <div class="subscribe-widget__note">
+            Powered by <a href="https://substack.com/" target="_blank" rel="noopener noreferrer">Substack</a>.
+        </div>
+    </div>
+</details>
 {% endif -%}
 <div class="container">
     {% block header %}

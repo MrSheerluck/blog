@@ -47,18 +47,4 @@
     {% endif %}
 {% endblock content %}
 
-{% block footer %}
-    <section class="post">
-        <h2 class="post-title">subscribe</h2>
-        <script async src="https://subscribe-forms.beehiiv.com/embed.js"></script>
-        <iframe
-            src="https://subscribe-forms.beehiiv.com/43239cc2-c8eb-4e2a-8362-69d89b686bc7"
-            class="beehiiv-embed"
-            data-test-id="beehiiv-embed"
-            frameborder="0"
-            scrolling="no"
-            style="width: 560px; height: 315px; margin: 0; border-radius: 0 !important; background-color: transparent; box-shadow: 0 0 #0000; max-width: 100%;">
-        </iframe>
-    </section>
-    {{ super() }}
-{% endblock footer %}
+{# Subscribe widget is rendered globally in the base theme template so it persists across PJAX navigation. #}
