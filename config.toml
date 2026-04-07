@@ -44,6 +44,7 @@ music_player_credit_html = 'Music For Programming — <a href="https://musicforp
 
 subscribe_widget_enabled = true
 subscribe_widget_iframe_url = "https://mrsheerluck.substack.com/embed"
+subscribe_widget_subscribe_url = "https://mrsheerluck.substack.com/subscribe"
 
 menu_items = [
     { name = "home", url = "$BASE_URL" },

@@ -368,16 +368,25 @@
         </span>
     </summary>
     <div class="subscribe-widget__panel">
+        {%- if config.extra.subscribe_widget_subscribe_url %}
+        <form class="subscribe-widget__form" action="{{ config.extra.subscribe_widget_subscribe_url | safe }}" method="get" target="_blank">
+            <label class="subscribe-widget__label" for="subscribe-email">email:</label>
+            <input class="subscribe-widget__input" id="subscribe-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@domain.com" required>
+            <button class="subscribe-widget__submit" type="submit">[subscribe]</button>
+        </form>
+        <div class="subscribe-widget__hint">
+            Opens Substack to confirm.
+            <a href="{{ config.extra.subscribe_widget_subscribe_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>[open]</a>
+        </div>
+        {%- else %}
         <iframe
             src="{{ config.extra.subscribe_widget_iframe_url | safe }}"
             title="Subscribe"
-            width="480"
-            height="150"
-            style="border: 1px solid #EEE; background: white"
             class="subscribe-widget__frame"
             frameborder="0"
             scrolling="no">
         </iframe>
+        {% endif -%}
         <div class="subscribe-widget__note">
             Powered by <a href="https://substack.com/" target="_blank" rel="noopener noreferrer">Substack</a>.
         </div>
