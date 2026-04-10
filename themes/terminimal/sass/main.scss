@@ -227,6 +227,10 @@ ol ol {
   min-height: 100vh;
   margin: 0 auto;
 
+  @media (max-width: $tablet-max-width) {
+    padding: 24px;
+  }
+
   @media (max-width: $phone-max-width) {
     padding: 20px;
   }

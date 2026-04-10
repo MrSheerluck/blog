@@ -1,3 +1,5 @@
+@import "variables";
+
 .subscribe-widget {
   position: fixed;
   top: 50%;
@@ -156,7 +158,7 @@
   overflow-wrap: anywhere;
 }
 
-@media (max-width: 760px) {
+@media (max-width: $overlay-collapse-width) {
   .subscribe-widget {
     right: auto;
     left: auto;

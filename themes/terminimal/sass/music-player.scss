@@ -1,3 +1,5 @@
+@import "variables";
+
 .music-player {
   position: fixed;
   top: max(12px, env(safe-area-inset-top));
@@ -146,7 +148,7 @@
   opacity: 0.85;
 }
 
-@media (max-width: 760px) {
+@media (max-width: $overlay-collapse-width) {
   .music-player {
     position: static;
     margin: 10px auto 0;
