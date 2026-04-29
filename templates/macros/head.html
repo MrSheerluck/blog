@@ -25,6 +25,14 @@
     <link rel="stylesheet" href="{{ get_url(path="font-hack-subset.css", trailing_slash=false, cachebust=true) | safe }}">
 {% endif -%}
 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FTJ10CMM55"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-FTJ10CMM55');
+    </script>
+
 {%- if config.extra.katex | default(value=false) %}
     {%- set katex_version = config.extra.katex_version | default(value="0.16.11") -%}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@{{ katex_version }}/dist/katex.min.css">
