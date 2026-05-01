@@ -3,19 +3,31 @@
 .subscribe-widget {
   position: fixed;
   top: 50%;
-  right: max(12px, env(safe-area-inset-right));
-  transform: translateY(-50%);
+  right: 0;
   z-index: 1500;
 
+  --overlay-peek-width: 132px;
   width: $overlay-widget-width;
   max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
   margin: 0;
   padding: 0;
-  border: 2px dashed var(--accent);
+  border: 1px dashed var(--border-color);
   border-radius: 0;
   background: var(--background);
   max-height: calc(100vh - 24px);
   overflow: hidden;
+  transform: translateY(-50%) translateX(calc(100% - var(--overlay-peek-width)));
+  transition: transform 180ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+.subscribe-widget[open] {
+  transform: translateY(-50%) translateX(0);
+}
+
+.subscribe-widget:hover,
+.subscribe-widget:focus-within,
+.subscribe-widget[open] {
+  border-color: var(--accent-alpha-70);
 }
 
 .subscribe-widget__summary {
@@ -26,15 +38,9 @@
   list-style: none;
   user-select: none;
   padding: 10px;
-  color: var(--accent);
-  flex-wrap: wrap;
-}
-
-.subscribe-widget__summary-links {
-  margin-left: auto;
-  display: inline-flex;
-  gap: 8px;
-  flex: 0 0 auto;
+  color: var(--accent-alpha-70);
+  justify-content: space-between;
+  transition: color 160ms ease;
 }
 
 .subscribe-widget__summary::-webkit-details-marker {
@@ -45,10 +51,20 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.subscribe-widget:hover .subscribe-widget__summary,
+.subscribe-widget:focus-within .subscribe-widget__summary {
+  color: var(--accent);
+}
+
 .subscribe-widget__panel {
   padding: 10px;
   max-height: calc(100vh - 120px);
   overflow: auto;
+}
+
+.subscribe-widget__summary-state {
+  font-size: 12px;
+  opacity: 0.72;
 }
 
 .subscribe-widget__form {
@@ -71,7 +87,7 @@
   height: 28px;
   padding: 0 8px;
   border-radius: 0;
-  border: 1px dashed var(--accent-alpha-70);
+  border: 1px dashed var(--border-color);
   background: transparent;
   color: var(--color);
   font-family: inherit;
@@ -90,7 +106,7 @@
   padding: 0 8px;
   margin: 0;
   border-radius: 0;
-  border: 1px dashed var(--accent-alpha-70);
+  border: 1px dashed var(--border-color);
   background: transparent;
   color: var(--color);
   cursor: pointer;
@@ -98,10 +114,12 @@
   font-size: 12px;
   line-height: 1;
   white-space: nowrap;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
 .subscribe-widget__submit:hover {
   background: var(--accent-alpha-20);
+  border-color: var(--accent-alpha-70);
 }
 
 .subscribe-widget__hint {
@@ -112,11 +130,6 @@
 }
 
 @media (max-width: 420px) {
-  .subscribe-widget__summary-links {
-    margin-left: 0;
-    width: 100%;
-  }
-
   .subscribe-widget__form {
     flex-direction: column;
     align-items: stretch;
@@ -133,12 +146,20 @@
   justify-content: center;
   height: 22px;
   padding: 0 6px;
-  border: 1px dashed var(--accent-alpha-70);
+  border: 1px dashed var(--border-color);
   text-decoration: none;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
 .subscribe-widget__link:hover {
   background: var(--accent-alpha-20);
+  border-color: var(--accent-alpha-70);
+}
+
+.subscribe-widget__links {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .subscribe-widget__frame {
@@ -171,5 +192,9 @@
     max-height: none;
     overflow: visible;
     margin: 12px auto 0;
+  }
+
+  .subscribe-widget__summary {
+    display: none;
   }
 }

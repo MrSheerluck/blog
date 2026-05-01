@@ -3,15 +3,58 @@
 .music-player {
   position: fixed;
   top: max(12px, env(safe-area-inset-top));
-  right: max(12px, env(safe-area-inset-right));
+  right: 0;
   z-index: 2000;
 
+  --overlay-peek-width: #{$overlay-tab-width};
   width: $overlay-widget-width;
   max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
-  padding: 10px 10px 8px;
-  border: 2px dashed var(--accent);
+  border: 1px dashed var(--border-color);
   border-radius: 0;
   background: var(--background);
+  overflow: hidden;
+  transform: translateX(calc(100% - var(--overlay-peek-width)));
+  transition: transform 180ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+.music-player[open] {
+  transform: translateX(0);
+}
+
+.music-player:hover,
+.music-player:focus-within,
+.music-player[open] {
+  border-color: var(--accent-alpha-70);
+}
+
+.music-player__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  color: var(--accent-alpha-70);
+}
+
+.music-player__summary::-webkit-details-marker {
+  display: none;
+}
+
+.music-player__summary-state {
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.music-player[open] .music-player__summary {
+  color: var(--accent);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.music-player__panel {
+  padding: 10px 10px 8px;
 }
 
 .music-player__row {
@@ -55,17 +98,19 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 0;
-  border: 1px dashed var(--accent-alpha-70);
+  border: 1px dashed var(--border-color);
   background: transparent;
   color: var(--color);
   cursor: pointer;
   font-family: inherit;
   line-height: 1;
   font-size: 12px;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
 .music-player__btn:hover {
   background: var(--accent-alpha-20);
+  border-color: var(--accent-alpha-70);
 }
 
 .music-player__row--progress {
@@ -151,8 +196,19 @@
 @media (max-width: $overlay-collapse-width) {
   .music-player {
     position: static;
+    right: auto;
     width: min(520px, calc(100vw - 24px));
     max-width: 100%;
     margin: 12px auto 0;
+    transform: none;
+  }
+
+  .music-player__summary {
+    display: none;
+  }
+
+  .music-player__panel {
+    display: block;
+    padding-top: 10px;
   }
 }

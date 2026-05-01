@@ -34,50 +34,56 @@
     {% endblock extra_head -%}
 </head>
 
-<body class="{% if config.extra.music_player_enabled | default(value=false) or config.extra.subscribe_widget_enabled | default(value=false) %}has-overlay-rail{% endif %}{% if config.extra.music_player_enabled | default(value=false) %} has-music-player{% endif %}{% if config.extra.subscribe_widget_enabled | default(value=false) %} has-subscribe-widget{% endif %}">
+<body class="">
 {%- if config.extra.music_player_enabled | default(value=false) %}
-<div class="music-player" role="region" aria-label="Music player">
-    <div class="music-player__row music-player__row--top">
-        <div class="music-player__controls">
-            <button class="music-player__btn" type="button" data-music-player-prev aria-label="Previous track">[&lt;&lt;]</button>
-            <button class="music-player__btn" type="button" data-music-player-play aria-label="Play/Pause">[play]</button>
-            <button class="music-player__btn" type="button" data-music-player-next aria-label="Next track">[&gt;&gt;]</button>
-            <span class="music-player__sep">|</span>
-            <button class="music-player__btn" type="button" data-music-player-vol-down aria-label="Volume down">[vol-]</button>
-            <button class="music-player__btn" type="button" data-music-player-vol-up aria-label="Volume up">[vol+]</button>
-            <span class="music-player__vol" data-music-player-volume>100%</span>
+<details class="music-player" data-overlay-collapsible role="region" aria-label="Music player">
+    <summary class="music-player__summary">
+        <span>[music]</span>
+        <span class="music-player__summary-state" data-music-player-summary-state>paused</span>
+    </summary>
+    <div class="music-player__panel">
+        <div class="music-player__row music-player__row--top">
+            <div class="music-player__controls">
+                <button class="music-player__btn" type="button" data-music-player-prev aria-label="Previous track">[&lt;&lt;]</button>
+                <button class="music-player__btn" type="button" data-music-player-play aria-label="Play/Pause">[play]</button>
+                <button class="music-player__btn" type="button" data-music-player-next aria-label="Next track">[&gt;&gt;]</button>
+                <span class="music-player__sep">|</span>
+                <button class="music-player__btn" type="button" data-music-player-vol-down aria-label="Volume down">[vol-]</button>
+                <button class="music-player__btn" type="button" data-music-player-vol-up aria-label="Volume up">[vol+]</button>
+                <span class="music-player__vol" data-music-player-volume>100%</span>
+            </div>
         </div>
-    </div>
 
-    <div class="music-player__row music-player__row--progress">
-        <span class="music-player__time" data-music-player-current>0:00</span>
-        <input class="music-player__seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek" data-music-player-seek />
-        <span class="music-player__time" data-music-player-duration>0:00</span>
-    </div>
+        <div class="music-player__row music-player__row--progress">
+            <span class="music-player__time" data-music-player-current>0:00</span>
+            <input class="music-player__seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek" data-music-player-seek />
+            <span class="music-player__time" data-music-player-duration>0:00</span>
+        </div>
 
-    <audio preload="none" data-music-player-audio></audio>
+        <audio preload="none" data-music-player-audio></audio>
 
-    <ul class="music-player__playlist" hidden data-music-player-playlist>
-    {%- if config.extra.music_player_tracks %}
-        {%- for track in config.extra.music_player_tracks %}
-        <li data-title="{{ track.title }}" data-mp3-url="{{ track.mp3_url }}" data-page-url="{{ track.page_url }}"{% if track.artist %} data-artist="{{ track.artist }}"{% endif %}></li>
-        {% endfor -%}
-    {% elif config.extra.music_player_mp3_url %}
-        <li data-title="Music For Programming" data-mp3-url="{{ config.extra.music_player_mp3_url }}" data-page-url="https://musicforprogramming.net/seventysix/"></li>
-    {% endif -%}
-    </ul>
+        <ul class="music-player__playlist" hidden data-music-player-playlist>
+        {%- if config.extra.music_player_tracks %}
+            {%- for track in config.extra.music_player_tracks %}
+            <li data-title="{{ track.title }}" data-mp3-url="{{ track.mp3_url }}" data-page-url="{{ track.page_url }}"{% if track.artist %} data-artist="{{ track.artist }}"{% endif %}></li>
+            {% endfor -%}
+        {% elif config.extra.music_player_mp3_url %}
+            <li data-title="Music For Programming" data-mp3-url="{{ config.extra.music_player_mp3_url }}" data-page-url="https://musicforprogramming.net/seventysix/"></li>
+        {% endif -%}
+        </ul>
 
-    {%- if config.extra.music_player_credit_html %}
-    <div class="music-player__credits">
-        <div class="music-player__credit music-player__credit--now" data-music-player-credit-now></div>
-        <div class="music-player__credit music-player__credit--static">{{ config.extra.music_player_credit_html | safe }}</div>
+        {%- if config.extra.music_player_credit_html %}
+        <div class="music-player__credits">
+            <div class="music-player__credit music-player__credit--now" data-music-player-credit-now></div>
+            <div class="music-player__credit music-player__credit--static">{{ config.extra.music_player_credit_html | safe }}</div>
+        </div>
+        {%- else %}
+        <div class="music-player__credits">
+            <div class="music-player__credit music-player__credit--now" data-music-player-credit-now></div>
+        </div>
+        {%- endif %}
     </div>
-    {%- else %}
-    <div class="music-player__credits">
-        <div class="music-player__credit music-player__credit--now" data-music-player-credit-now></div>
-    </div>
-    {%- endif %}
-</div>
+</details>
 <script>
 (() => {
   const player = document.querySelector(".music-player");
@@ -96,6 +102,7 @@
   const seek = player.querySelector("[data-music-player-seek]");
   const currentTimeEl = player.querySelector("[data-music-player-current]");
   const durationEl = player.querySelector("[data-music-player-duration]");
+  const summaryStateEl = player.querySelector("[data-music-player-summary-state]");
 
   if (!audio || !playlist) return;
 
@@ -180,6 +187,7 @@
   const setPlayingUI = () => {
     if (!playBtn) return;
     playBtn.textContent = audio.paused ? "[play]" : "[pause]";
+    if (summaryStateEl) summaryStateEl.textContent = audio.paused ? "paused" : "playing";
   };
 
   const updateDurationUI = () => {
@@ -361,13 +369,14 @@
 {%- if config.extra.subscribe_widget_enabled | default(value=false) and config.extra.subscribe_widget_iframe_url %}
 <details class="subscribe-widget" role="region" aria-label="Subscribe">
     <summary class="subscribe-widget__summary">
-        [subscribe]
-        <span class="subscribe-widget__summary-links">
-            <a class="subscribe-widget__link" data-no-pjax href="{{ get_url(path="rss.xml", trailing_slash=false) | safe }}">[rss]</a>
-            <a class="subscribe-widget__link" data-no-pjax href="{{ get_url(path="atom.xml", trailing_slash=false) | safe }}">[atom]</a>
-        </span>
+        <span>[subscribe]</span>
+        <span class="subscribe-widget__summary-state">open</span>
     </summary>
     <div class="subscribe-widget__panel">
+        <div class="subscribe-widget__links">
+            <a class="subscribe-widget__link" data-no-pjax href="{{ get_url(path="rss.xml", trailing_slash=false) | safe }}">[rss]</a>
+            <a class="subscribe-widget__link" data-no-pjax href="{{ get_url(path="atom.xml", trailing_slash=false) | safe }}">[atom]</a>
+        </div>
         {%- if config.extra.subscribe_widget_subscribe_url %}
         <form class="subscribe-widget__form" action="{{ config.extra.subscribe_widget_subscribe_url | safe }}" method="get" target="_blank">
             <label class="subscribe-widget__label" for="subscribe-email">email:</label>
@@ -393,6 +402,31 @@
     </div>
 </details>
 {% endif -%}
+<script>
+(() => {
+  const overlays = Array.from(document.querySelectorAll("[data-overlay-collapsible], .subscribe-widget"));
+  if (!overlays.length) return;
+
+  const collapseWidth = {{ 360 + 660 + 80 }};
+
+  const syncOverlayState = () => {
+    const shouldForceOpen = window.innerWidth <= collapseWidth;
+
+    for (const overlay of overlays) {
+      if (shouldForceOpen) {
+        overlay.setAttribute("open", "");
+      } else if (overlay.dataset.autoOpened === "true") {
+        overlay.removeAttribute("open");
+      }
+
+      overlay.dataset.autoOpened = shouldForceOpen ? "true" : "false";
+    }
+  };
+
+  syncOverlayState();
+  window.addEventListener("resize", syncOverlayState, { passive: true });
+})();
+</script>
 <div class="container">
     {% block header %}
     <header class="header">
