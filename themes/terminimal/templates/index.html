@@ -367,10 +367,10 @@
 {% endif -%}
 
 {%- if config.extra.subscribe_widget_enabled | default(value=false) and config.extra.subscribe_widget_iframe_url %}
-<details class="subscribe-widget" role="region" aria-label="Subscribe">
+<details class="subscribe-widget" data-overlay-collapsible role="region" aria-label="Subscribe">
     <summary class="subscribe-widget__summary">
         <span>[subscribe]</span>
-        <span class="subscribe-widget__summary-state">open</span>
+        <span class="subscribe-widget__summary-state">rss + email</span>
     </summary>
     <div class="subscribe-widget__panel">
         <div class="subscribe-widget__links">
@@ -404,27 +404,34 @@
 {% endif -%}
 <script>
 (() => {
-  const overlays = Array.from(document.querySelectorAll("[data-overlay-collapsible], .subscribe-widget"));
+  const overlays = Array.from(document.querySelectorAll("[data-overlay-collapsible]"));
   if (!overlays.length) return;
 
-  const collapseWidth = {{ 360 + 660 + 80 }};
-
   const syncOverlayState = () => {
-    const shouldForceOpen = window.innerWidth <= collapseWidth;
+    const openOverlay = overlays.find((overlay) => overlay.open) || null;
 
     for (const overlay of overlays) {
-      if (shouldForceOpen) {
-        overlay.setAttribute("open", "");
-      } else if (overlay.dataset.autoOpened === "true") {
-        overlay.removeAttribute("open");
-      }
-
-      overlay.dataset.autoOpened = shouldForceOpen ? "true" : "false";
+      overlay.dataset.peerOpen = openOverlay && openOverlay !== overlay ? "true" : "false";
     }
   };
 
+  for (const overlay of overlays) {
+    overlay.addEventListener("toggle", () => {
+      if (!overlay.open) return;
+
+      for (const other of overlays) {
+        if (other !== overlay) other.removeAttribute("open");
+      }
+
+      syncOverlayState();
+    });
+  }
+
+  for (const overlay of overlays) {
+    overlay.addEventListener("toggle", syncOverlayState);
+  }
+
   syncOverlayState();
-  window.addEventListener("resize", syncOverlayState, { passive: true });
 })();
 </script>
 <div class="container">
