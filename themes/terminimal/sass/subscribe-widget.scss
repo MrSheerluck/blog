@@ -7,7 +7,7 @@
   transform: translateY(-50%);
   z-index: 1500;
 
-  width: 360px;
+  width: $overlay-widget-width;
   max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
   margin: 0;
   padding: 0;
@@ -160,12 +160,16 @@
 
 @media (max-width: $overlay-collapse-width) {
   .subscribe-widget {
-    right: auto;
-    left: auto;
-    width: 520px;
-    max-width: calc(100vw - 24px);
+    position: static;
     top: auto;
-    bottom: max(12px, env(safe-area-inset-bottom));
+    right: auto;
+    bottom: auto;
+    left: auto;
     transform: none;
+    width: min(520px, calc(100vw - 24px));
+    max-width: 100%;
+    max-height: none;
+    overflow: visible;
+    margin: 12px auto 0;
   }
 }

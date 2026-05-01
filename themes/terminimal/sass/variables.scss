@@ -1,3 +1,6 @@
 $phone-max-width: 683px;
 $tablet-max-width: 899px;
-$overlay-collapse-width: 1328px;
+$overlay-widget-width: 360px;
+$overlay-rail-gap: 24px;
+$overlay-content-min-width: 660px;
+$overlay-collapse-width: $overlay-widget-width + $overlay-rail-gap + $overlay-content-min-width + 80px;

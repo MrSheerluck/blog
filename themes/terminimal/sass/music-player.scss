@@ -6,7 +6,7 @@
   right: max(12px, env(safe-area-inset-right));
   z-index: 2000;
 
-  width: 360px;
+  width: $overlay-widget-width;
   max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
   padding: 10px 10px 8px;
   border: 2px dashed var(--accent);
@@ -151,7 +151,8 @@
 @media (max-width: $overlay-collapse-width) {
   .music-player {
     position: static;
-    margin: 10px auto 0;
-    max-width: 95%;
+    width: min(520px, calc(100vw - 24px));
+    max-width: 100%;
+    margin: 12px auto 0;
   }
 }

@@ -236,6 +236,13 @@ ol ol {
   }
 }
 
+@media (min-width: $overlay-collapse-width + 1px) {
+  body.has-overlay-rail .container {
+    max-width: calc(864px + #{$overlay-widget-width} + #{$overlay-rail-gap});
+    padding-right: calc(40px + #{$overlay-widget-width} + #{$overlay-rail-gap});
+  }
+}
+
 .content {
   display: flex;
 }

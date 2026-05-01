@@ -34,7 +34,7 @@
     {% endblock extra_head -%}
 </head>
 
-<body class="">
+<body class="{% if config.extra.music_player_enabled | default(value=false) or config.extra.subscribe_widget_enabled | default(value=false) %}has-overlay-rail{% endif %}{% if config.extra.music_player_enabled | default(value=false) %} has-music-player{% endif %}{% if config.extra.subscribe_widget_enabled | default(value=false) %} has-subscribe-widget{% endif %}">
 {%- if config.extra.music_player_enabled | default(value=false) %}
 <div class="music-player" role="region" aria-label="Music player">
     <div class="music-player__row music-player__row--top">
