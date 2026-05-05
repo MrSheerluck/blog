@@ -11,7 +11,8 @@ series = ["learning-rust"]
 
 In this post, we are going to learn about error handling in Rust. Once we cover all the concepts, we will build a **TOML config parser with schema validation**. Every error must be handled properly using `Result`. Let's start.
 
-You can get the source code from **[here]([https://github.com/MrSheerluck/config-parser-in-rust](https://github.com/MrSheerluck/toml-config-parser-in-rust))**
+
+You can get the source code from **[here](https://github.com/MrSheerluck/toml-config-parser-in-rust)**
 
 ## Why `panic!` and `unwrap` Are Not Enough
 
