@@ -9,7 +9,6 @@ tags = ["rust", "project"]
 series = ["learning-rust"]
 +++
 
-
 In this post, we are going to learn about error handling in Rust. Once we cover all the concepts, we will build a **TOML config parser with schema validation**. Every error must be handled properly using `Result`. Let's start.
 
 You can get the source code from **[here]([https://github.com/MrSheerluck/config-parser-in-rust](https://github.com/MrSheerluck/toml-config-parser-in-rust))**
@@ -20,13 +19,13 @@ In the previous articles, we used `panic!` and `.expect()` and `.unwrap()` all o
 
 In the JSON parser, when the lexer hit an unexpected character, we did this:
 
-```rust
+```
 panic!("Unexpected character: {}", c as char);
 ```
 
 And when the parser encountered a token it didn't expect:
 
-```rust
+```
 panic!("Expected ':' in object");
 ```
 
@@ -104,7 +103,7 @@ println!("{}", y.unwrap()); // PANICS!
 
 We're trying to get away from `unwrap`, but you should still know what it does.
 
-**`.unwrap_or(default)`**: extract the value, or return a default if `None`:
+**`.unwrap_or(default)`**:  extract the value, or return a default if `None`:
 
 ```rust
 let x: Option<i32> = None;
@@ -319,7 +318,7 @@ Now, let's start working on our project.
 
 ## What is TOML?
 
-TOML stands for **Tom's Obvious Minimal Language**. It's a configuration file format that's designed to be easy for humans to read and write. If you've ever used Rust, you've already seen TOML. Every `Cargo.toml` file is a TOML file.
+TOML stands for **Tom's Obvious Minimal Language**. It's a configuration file format that's designed to be easy for humans to read and write. If you've ever used Rust, you've already seen TOML, every `Cargo.toml` file is a TOML file.
 
 Here's what a TOML file looks like:
 
@@ -346,7 +345,7 @@ We won't support arrays, inline tables, or array-of-tables. This keeps the scope
 
 ## Project Setup
 
-```bash
+```
 cargo new config_parser
 cd config_parser
 ```
@@ -425,9 +424,9 @@ enum ConfigError {
 }
 ```
 
-Let me explain the some important parts:
+Let me explain the key parts:
 
-- `#[derive(Debug, thiserror::Error)]`  this tells Rust to automatically implement the `Debug` trait (for `{:?}` formatting) and the `Error` trait. The `thiserror::Error` derive macro generates everything based on the `#[error("...")]` attributes.
+- `#[derive(Debug, thiserror::Error)]` - this tells Rust to automatically implement the `Debug` trait (for `{:?}` formatting) and the `Error` trait. The `thiserror::Error` derive macro generates everything based on the `#[error("...")]` attributes.
 - Each `#[error("...")]` attribute is the error message for that variant. The `{field}` placeholders are replaced with the field values, just like in `println!`.
 - The `Io(#[from] std::io::Error)` variant is special. The `#[from]` attribute tells thiserror to automatically implement `From<std::io::Error> for ConfigError`. This means when we call a function that returns `Result<_, std::io::Error>` (like `fs::read_to_string`), we can use `?` and the `io::Error` will be automatically converted into `ConfigError::Io`.
 
@@ -510,7 +509,32 @@ fn read_string(&mut self) -> Result<(String, usize, usize), ConfigError> {
                 self.advance();
                 return Ok((result, start_line, start_col));
             }
-            // ... escape sequences ...
+            Some(b'\\') => {
+                self.advance();
+                match self.current() {
+                    Some(b'"') => { result.push('"'); self.advance(); }
+                    Some(b'\\') => { result.push('\\'); self.advance(); }
+                    Some(b'n') => { result.push('\n'); self.advance(); }
+                    Some(b't') => { result.push('\t'); self.advance(); }
+                    Some(b'r') => { result.push('\r'); self.advance(); }
+                    _ => {
+                        let found = match self.current() {
+                            Some(b) => (b as char).to_string(),
+                            None => String::from("end of input"),
+                        };
+                        return Err(ConfigError::UnexpectedCharacter {
+                            line: self.line,
+                            col: self.col,
+                            expected: "valid escape sequence".to_string(),
+                            found,
+                        });
+                    }
+                }
+            }
+            Some(c) => {
+                result.push(c as char);
+                self.advance();
+            }
         }
     }
 }
@@ -522,7 +546,37 @@ In the JSON parser, unterminated strings caused `panic!("Unterminated string")`.
 
 ```rust
 fn read_number(&mut self) -> Result<(TokenKind, usize, usize), ConfigError> {
-    // ... accumulate digits ...
+    let start_line = self.line;
+    let start_col = self.col;
+    let mut s = String::new();
+    let mut has_dot = false;
+
+    if let Some(b'-') = self.current() {
+        s.push('-');
+        self.advance();
+    }
+
+    loop {
+        match self.current() {
+            Some(c @ b'0'..=b'9') => {
+                s.push(c as char);
+                self.advance();
+            }
+            Some(b'.') => {
+                if has_dot {
+                    return Err(ConfigError::InvalidNumber {
+                        line: start_line,
+                        col: start_col,
+                        detail: "multiple decimal points".to_string(),
+                    });
+                }
+                has_dot = true;
+                s.push('.');
+                self.advance();
+            }
+            _ => break,
+        }
+    }
 
     if has_dot {
         let value: f64 = match s.parse() {
@@ -614,9 +668,9 @@ struct Parser {
 
 The parser handles three kinds of top-level items:
 
-1. **Comments and newlines**: skip them
-2. **Table headers** like `[server]`: collect all following key-value pairs into a sub-table
-3. **Key-value pairs**: parse key, equal sign, value
+1. **Comments and newlines** - skip them
+2. **Table headers** like `[server]` - collect all following key-value pairs into a sub-table
+3. **Key-value pairs** - parse key, equal sign, value
 
 Every place the JSON parser had `panic!()`, we have `Err(ConfigError::...)`. Even better, every error includes the line and column from the token. When a key is followed by something other than `=`, the error says "expected = at line 5, column 12, found Integer" instead of crashing with no context.
 
@@ -639,8 +693,16 @@ fn parse_value(&mut self) -> Result<TomlValue, ConfigError> {
                 self.advance();
                 Ok(val)
             }
-            // ... Float, Boolean ...
-
+            TokenKind::Float(n) => {
+                let val = TomlValue::Float(*n);
+                self.advance();
+                Ok(val)
+            }
+            TokenKind::Boolean(b) => {
+                let val = TomlValue::Boolean(*b);
+                self.advance();
+                Ok(val)
+            }
             _ => Err(ConfigError::ExpectedToken {
                 line: t.line,
                 col: t.col,
@@ -658,7 +720,7 @@ fn parse_value(&mut self) -> Result<TomlValue, ConfigError> {
 }
 ```
 
-If we have a token that's a valid value type, we return it. If not, we return a specific error saying what we expected and what we found instead.
+Clean and straightforward. If we have a token that's a valid value type, we return it. If not, we return a specific error saying what we expected and what we found instead.
 
 ## Step 5: The Schema
 
@@ -680,15 +742,47 @@ struct FieldSchema {
     max: Option<i64>,
 }
 
+impl FieldType {
+    fn from_str(s: &str) -> Option<FieldType> {
+        match s {
+            "string" => Some(FieldType::String),
+            "integer" => Some(FieldType::Integer),
+            "float" => Some(FieldType::Float),
+            "boolean" => Some(FieldType::Boolean),
+            _ => None,
+        }
+    }
+
+    fn name(&self) -> &'static str {
+        match self {
+            FieldType::String => "string",
+            FieldType::Integer => "integer",
+            FieldType::Float => "float",
+            FieldType::Boolean => "boolean",
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+struct FieldSchema {
+    field_type: FieldType,
+    required: bool,
+    default: Option<TomlValue>,
+    min: Option<i64>,
+    max: Option<i64>,
+}
+
 type Schema = Vec<(String, FieldSchema)>;
 ```
 
-`FieldType`:  the expected type for a config key. 
-`FieldSchema`: the full validation spec for a single key. 
-`required`: if true, the key must be present (unless it has a default). 
-`default`: a value to use if the key is missing. 
-`min` and `max`: for integers, the valid range. 
-`Schema`: a list of key names and their validation rules.
+`FieldType` - the expected type for a config key. 
+`FieldSchema` - the full validation spec for a single key. 
+`required` - if true, the key must be present (unless it has a default). 
+`default` - a value to use if the key is missing. 
+`min` and `max` - for integers, the valid range. 
+`Schema` - a list of key names and their validation rules. 
+
+`FieldType::from_str` converts a string like `"integer"` into a `FieldType` variant (or `None` if the string isn't a valid type name). `FieldType::name` converts a variant back into a string for error messages.
 
 The schema TOML file looks like this:
 
@@ -704,7 +798,144 @@ max = 65535
 required = true
 ```
 
-When our parser processes this, `[server.host]` becomes a `TableHeader("server.host")`, and the key-value pairs inside it become entries in a sub-table. The `parse_schema` function walks this sub-table and extracts the validation rules.
+When our parser processes this, `[server.host]` becomes a `TableHeader("server.host")`, and the key-value pairs inside it become entries in a sub-table. The `parse_schema` function walks this sub-table and extracts the validation rules:
+
+```rust
+fn parse_schema(value: &TomlValue) -> Result<Schema, ConfigError> {
+    let mut schema = Vec::new();
+    let table = match value {
+        TomlValue::Table(pairs) => pairs,
+        _ => {
+            return Err(ConfigError::UnexpectedCharacter {
+                line: 0,
+                col: 0,
+                expected: "table".to_string(),
+                found: "non-table value".to_string(),
+            });
+        }
+    };
+
+    for (key, val) in table {
+        let inner = match val {
+            TomlValue::Table(pairs) => pairs,
+            _ => continue,
+        };
+
+        let mut field_type = FieldType::String;
+        let mut required = false;
+        let mut default_val: Option<TomlValue> = None;
+        let mut min_val: Option<i64> = None;
+        let mut max_val: Option<i64> = None;
+
+        for (field_name, field_val) in inner {
+            match field_name.as_str() {
+                "type" => {
+                    let type_str = match field_val {
+                        TomlValue::String(s) => s.clone(),
+                        _ => String::new(),
+                    };
+                    let ft = FieldType::from_str(&type_str);
+                    match ft {
+                        Some(t) => field_type = t,
+                        None => {
+                            return Err(ConfigError::SchemaViolation {
+                                line: 0,
+                                key: key.clone(),
+                                expected: "valid type (string, integer, float, boolean)".to_string(),
+                                found: type_str,
+                            });
+                        }
+                    }
+                }
+                "required" => {
+                    required = match field_val {
+                        TomlValue::Boolean(b) => *b,
+                        _ => false,
+                    };
+                }
+                "default" => {
+                    default_val = Some(field_val.clone());
+                }
+                "min" => {
+                    min_val = match field_val {
+                        TomlValue::Integer(n) => Some(*n),
+                        _ => None,
+                    };
+                }
+                "max" => {
+                    max_val = match field_val {
+                        TomlValue::Integer(n) => Some(*n),
+                        _ => None,
+                    };
+                }
+                _ => {}
+            }
+        }
+
+        schema.push((
+            key.clone(),
+            FieldSchema {
+                field_type,
+                required,
+                default: default_val,
+                min: min_val,
+                max: max_val,
+            },
+        ));
+    }
+
+    Ok(schema)
+}
+```
+
+This function takes the parsed schema `TomlValue` (which is a `Table` of sub-tables) and walks each entry. For each key like `server.port`, it reads the `type`, `required`, `default`, `min`, and `max` fields from the sub-table. If the `type` string isn't one of our known types, it returns a `SchemaViolation` error.
+
+The `flatten_table` helper is also needed, it converts the nested `TomlValue::Table` into a flat list of dotted keys like `server.host`, `server.port`, etc.:
+
+```rust
+fn flatten_table(table: &TomlValue, prefix: &str) -> Vec<(String, TomlValue)> {
+    let pairs = match table {
+        TomlValue::Table(pairs) => pairs,
+        _ => return vec![],
+    };
+
+    let mut result = Vec::new();
+    for (key, value) in pairs {
+        let full_key = if prefix.is_empty() {
+            key.clone()
+        } else {
+            format!("{}.{}", prefix, key)
+        };
+
+        match value {
+            TomlValue::Table(_) => {
+                let nested = flatten_table(value, &full_key);
+                for item in nested {
+                    result.push(item);
+                }
+            }
+            _ => {
+                result.push((full_key, value.clone()));
+            }
+        }
+    }
+    result
+}
+```
+
+And a small `toml_type_name` helper that maps a `TomlValue` variant to a human-readable type name, used in schema violation error messages:
+
+```rust
+fn toml_type_name(value: &TomlValue) -> &'static str {
+    match value {
+        TomlValue::String(_) => "string",
+        TomlValue::Integer(_) => "integer",
+        TomlValue::Float(_) => "float",
+        TomlValue::Boolean(_) => "boolean",
+        TomlValue::Table(_) => "table",
+    }
+}
+```
 
 ## Step 6: Schema Validation
 
@@ -736,12 +967,66 @@ fn validate(config: &TomlValue, schema: &Schema, source: &str) -> Result<(), Vec
                 }
             }
             Some(value) => {
-                // check type_matches, check min/max range...
+                let type_matches = match (&field.field_type, value) {
+                    (FieldType::String, TomlValue::String(_)) => true,
+                    (FieldType::Integer, TomlValue::Integer(_)) => true,
+                    (FieldType::Float, TomlValue::Float(_)) => true,
+                    (FieldType::Float, TomlValue::Integer(_)) => true,
+                    (FieldType::Boolean, TomlValue::Boolean(_)) => true,
+                    _ => false,
+                };
+
+                if !type_matches {
+                    let line = find_line_for_key(source, key);
+                    errors.push(ConfigError::SchemaViolation {
+                        line,
+                        key: key.clone(),
+                        expected: field.field_type.name().to_string(),
+                        found: toml_type_name(value).to_string(),
+                    });
+                }
+
+                if let (TomlValue::Integer(n), Some(min)) = (value, field.min) {
+                    if *n < min {
+                        errors.push(ConfigError::ValueOutOfRange {
+                            key: key.clone(),
+                            value: n.to_string(),
+                            min,
+                            max: field.max.unwrap_or(0),
+                        });
+                    }
+                }
+
+                if let (TomlValue::Integer(n), Some(max)) = (value, field.max) {
+                    if *n > max {
+                        errors.push(ConfigError::ValueOutOfRange {
+                            key: key.clone(),
+                            value: n.to_string(),
+                            min: field.min.unwrap_or(0),
+                            max,
+                        });
+                    }
+                }
             }
         }
     }
 
-    // check for unknown keys...
+    for (key, _) in &flat_config {
+        let mut is_known = false;
+        for (k, _) in schema {
+            if k == key {
+                is_known = true;
+                break;
+            }
+        }
+        if !is_known {
+            let line = find_line_for_key(source, key);
+            errors.push(ConfigError::UnknownKey {
+                key: key.clone(),
+                line,
+            });
+        }
+    }
 
     if errors.is_empty() {
         Ok(())
@@ -751,9 +1036,41 @@ fn validate(config: &TomlValue, schema: &Schema, source: &str) -> Result<(), Vec
 }
 ```
 
-`validate` returns `Result<(), Vec<ConfigError>>`, not `Result<(), ConfigError>`. It collects **all** errors, not just the first one. This is important for a config validator, you want to see everything that's wrong, not fix one error, re-run, fix another, re-run, etc.
+`validate` returns `Result<(), Vec<ConfigError>>`, not `Result<(), ConfigError>`. It collects **all** errors, not just the first one. This is important for a config validator — you want to see everything that's wrong, not fix one error, re-run, fix another, re-run, etc.
 
 The `flatten_table` helper converts the nested `TomlValue::Table` into a flat list of dotted keys like `server.host`, `server.port`, etc. This makes it easy to match against the schema keys.
+
+The `find_line_for_key` helper searches the original TOML source text for a key and returns its line number. It strips the section prefix from dotted keys (turning `server.host` into just `host`) and scans for lines matching `key =`:
+
+```rust
+fn find_line_for_key(source: &str, target_key: &str) -> usize {
+    let short_key = if target_key.contains('.') {
+        let mut parts = target_key.rsplit('.');
+        match parts.next() {
+            Some(k) => k,
+            None => target_key,
+        }
+    } else {
+        target_key
+    };
+
+    for (i, line) in source.lines().enumerate() {
+        let trimmed = line.trim();
+        if trimmed.starts_with('#') || trimmed.starts_with('[') || trimmed.is_empty() {
+            continue;
+        }
+        if let Some(eq_pos) = trimmed.find('=') {
+            let key_part = trimmed[..eq_pos].trim();
+            if key_part == short_key {
+                return i + 1;
+            }
+        }
+    }
+    0
+}
+```
+
+It skips comments, section headers, and empty lines, then looks for lines where the part before `=` matches the key. If it can't find the key, it returns `0` (which `format_error` treats as "no line information available").
 
 ## Step 7: Displaying Errors
 
@@ -791,7 +1108,7 @@ fn format_error(err: &ConfigError, source: &str) -> String {
 
 This function takes an error and the original source text, finds the offending line, and formats it like:
 
-```bash
+```
 Error: schema violation at line 3: key 'server.host' expected type string, found integer
    |
  3 | host = 1234
@@ -824,7 +1141,16 @@ fn run(config_path: &str, schema_path: &str) -> Result<(), Vec<ConfigError>> {
         Err(e) => return Err(vec![e]),
     };
 
-    // ... same pattern for schema ...
+    let mut schema_lexer = Lexer::new(&schema_source);
+    let schema_tokens = match schema_lexer.tokenize() {
+        Ok(tokens) => tokens,
+        Err(e) => return Err(vec![e]),
+    };
+    let mut schema_parser = Parser::new(schema_tokens);
+    let schema_value = match schema_parser.parse() {
+        Ok(v) => v,
+        Err(e) => return Err(vec![e]),
+    };
 
     let schema = match parse_schema(&schema_value) {
         Ok(s) => s,
@@ -844,13 +1170,42 @@ fn run(config_path: &str, schema_path: &str) -> Result<(), Vec<ConfigError>> {
 }
 ```
 
-Look at `run()`: it's a pipeline of operations, each of which can fail. Each `match` on a `Result` handles the error case explicitly. For cases where we want to convert a single error into a `Vec` of errors, we wrap it with `vec![e]`.
+This is the beauty of proper error handling. Look at `run()`: it's a pipeline of operations, each of which can fail. Each `match` on a `Result` handles the error case explicitly. For cases where we want to convert a single error into a `Vec` of errors, we wrap it with `vec![e]`.
 
 Notice we use `match` here instead of `?`. That's because `run` returns `Result<(), Vec<ConfigError>>`, but most of the inner calls return `Result<_, ConfigError>` (a single error, not a Vec). The `?` operator only works when the error types match, so we explicitly match and wrap single errors into a Vec where needed.
 
 The `ConfigError::from(e)` on the `fs::read_to_string` error lines works because we defined `Io(#[from] std::io::Error)` in our error enum. The `#[from]` attribute generated a `From<std::io::Error> for ConfigError` implementation, so `ConfigError::from(e)` converts an `io::Error` into our `ConfigError::Io` variant.
 
-In `main()`, we match on the result. If it's `Ok(())`, we're done. If it's `Err(errors)`, we print each error with its source line and exit with code 1.
+The `main` function reads the file paths from command-line arguments (or defaults to the example files), calls `run`, and handles any errors:
+
+```rust
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+
+    let (config_path, schema_path) = if args.len() >= 3 {
+        (args[1].clone(), args[2].clone())
+    } else {
+        (String::from("examples/valid_config.toml"), String::from("examples/schema.toml"))
+    };
+
+    match run(&config_path, &schema_path) {
+        Ok(()) => {}
+        Err(errors) => {
+            let source = match fs::read_to_string(&config_path) {
+                Ok(s) => s,
+                Err(_) => String::new(),
+            };
+            for err in &errors {
+                eprintln!("{}", format_error(err, &source));
+                eprintln!();
+            }
+            std::process::exit(1);
+        }
+    }
+}
+```
+
+If `run` returns `Ok(())`, we're done. If it returns `Err(errors)`, we load the source text (so we can point to specific lines), format each error with `format_error`, print them to stderr, and exit with code 1.
 
 ### Running with a Valid Config
 
@@ -876,7 +1231,7 @@ cargo run -- examples/valid_config.toml examples/schema.toml
 
 Output:
 
-```
+```bash
 Config is valid!
 
 Parsed config:
@@ -911,7 +1266,7 @@ cargo run -- examples/invalid_config.toml examples/schema.toml
 
 Output:
 
-```bash
+```
 Error: schema violation at line 3: key 'server.host' expected type string, found integer
    |
  3 | host = 1234
@@ -927,10 +1282,11 @@ Error: schema violation at line 5: key 'server.debug' expected type boolean, fou
 Error: key 'database.max_connections' has value 200 which is outside range 1 to 100
 ```
 
-All four errors are reported at once. Every error tells you exactly what's wrong and where.
+All four errors are reported at once. No panicking, no crashing, no vague messages. Every error tells you exactly what's wrong and where.
 
 ## Conclusion
 
 In this post, we replaced every `panic!` and `unwrap` with proper `Result` based error handling. We defined a custom `ConfigError` enum with rich error variants carrying line numbers and context. We used `thiserror` to avoid writing boilerplate code. We used the `?` operator to propagate errors effortlessly. And we built a validator that collects **all** errors and displays them with source lines, not just the first one.
+
 
 In the next article, we'll learn about generics, traits, and lifetimes and build a **Generic LRU Cache**. See you soon.
