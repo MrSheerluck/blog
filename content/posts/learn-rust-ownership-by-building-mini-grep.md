@@ -405,6 +405,59 @@ Inside the loop, we are matching the regex with that line, then checking the `in
 
 `line.to_string()` converts the borrowed `&str` slice into an owned `String`. This is the copy that we take so we don't need to worry about the slice outliving `contents`. Finally, we are just returning the `results`
 
+### Calling the Search Function
+
+Now we have all the pieces. We have walked the directory, read the file content, and we have our `search` function. Now we just need to call it and handle the output based on the flags.
+
+```rust
+let matches = search(&contents, &regex, invert);
+```
+
+We are passing `&contents` and `&regex` as borrows. The `search` function only needs to read them, not own them. `invert` is a `bool` which implements `Copy`, so it's just copied over directly.
+
+`matches` is now a `Vec<(usize, String)>` holding every line that matched (or didn't match if `-v` was passed).
+
+#### Handling `-l` (files only)
+
+```rust
+if files_only {
+    if !matches.is_empty() {
+        println!("{}", file_path.display());
+    }
+    continue;
+}
+```
+
+If the user passed `-l`, we only care about whether the file had any matches at all, not what those lines are. `.is_empty()` checks if the vector has zero elements. If it does have matches, we print the file path and move on with `continue` to the next file.
+
+`file_path.display()` converts the `Path` into something printable. `Path` doesn't implement `Display` directly but `.display()` returns a wrapper that does.
+
+#### Handling `-c` (count only)
+
+```rust
+if count_only {
+    println!("{}: {}", file_path.display(), matches.len());
+    continue;
+}
+```
+
+If the user passed `-c`, we don't print the actual lines either. We just print the file path and the number of matches. `.len()` on a `Vec` returns the number of elements as a `usize`.
+
+#### The Default Case
+
+```rust
+for i in 0..matches.len() {
+    let line_num = matches[i].0;
+    let line = &matches[i].1;
+    println!("{}:{}: {}", file_path.display(), line_num, line);
+}
+```
+
+If no output flag was passed, we print every matching line with its filename and line number. `matches[i].0` accesses the first element of the tuple (the line number) and `matches[i].1` accesses the second (the line text).
+
+`let line = &matches[i].1` is a borrow again. We just need to read the string to print it, no reason to take ownership or clone it.
+
+The output format `filename:line_number: line` is the standard grep format that most editors understand. If you run this in a terminal that supports it, you can click those results and jump directly to the file and line.
 
 ## Run The Project
 ```shell
