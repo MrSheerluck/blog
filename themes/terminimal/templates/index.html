@@ -35,6 +35,7 @@
 </head>
 
 <body class="">
+<div data-overlay-anchor hidden></div>
 {%- if config.extra.music_player_enabled | default(value=false) %}
 <details class="music-player" data-overlay-collapsible role="region" aria-label="Music player">
     <summary class="music-player__summary">
@@ -319,6 +320,7 @@
 
       if (pushState) history.pushState({}, "", url.href);
 
+      if (typeof window.__mountOverlays === "function") window.__mountOverlays();
       if (typeof window.__katexRender === "function") window.__katexRender();
 
       if (url.hash) {
@@ -406,8 +408,52 @@
 (() => {
   const overlays = Array.from(document.querySelectorAll("[data-overlay-collapsible]"));
   if (!overlays.length) return;
+  const mobileQuery = window.matchMedia("(max-width: 1099px)");
+  const anchor = document.querySelector("[data-overlay-anchor]");
+  const subscribeOverlay = document.querySelector(".subscribe-widget");
+  const musicOverlay = document.querySelector(".music-player");
+
+  const findMobileSubscribeHost = () =>
+    document.querySelector("[data-mobile-subscribe-host]") ||
+    document.querySelector(".container .content");
+
+  const mountOverlays = () => {
+    if (!anchor) return;
+
+    if (mobileQuery.matches) {
+      const host = findMobileSubscribeHost();
+      if (host && subscribeOverlay && subscribeOverlay.parentElement !== host) {
+        host.appendChild(subscribeOverlay);
+      }
+
+      if (musicOverlay && musicOverlay.parentElement !== anchor.parentElement) {
+        anchor.after(musicOverlay);
+      }
+      return;
+    }
+
+    let insertionPoint = anchor;
+    for (const overlay of overlays) {
+      if (overlay.parentElement !== anchor.parentElement || overlay.previousElementSibling !== insertionPoint) {
+        insertionPoint.after(overlay);
+      }
+      insertionPoint = overlay;
+    }
+  };
 
   const syncOverlayState = () => {
+    if (mobileQuery.matches) {
+      for (const overlay of overlays) {
+        if (overlay === subscribeOverlay) {
+          overlay.dataset.peerOpen = "false";
+          continue;
+        }
+
+        overlay.removeAttribute("open");
+        overlay.dataset.peerOpen = "false";
+      }
+      return;
+    }
     const openOverlay = overlays.find((overlay) => overlay.open) || null;
 
     for (const overlay of overlays) {
@@ -430,6 +476,15 @@
   for (const overlay of overlays) {
     overlay.addEventListener("toggle", syncOverlayState);
   }
+
+  if (typeof mobileQuery.addEventListener === "function") {
+    mobileQuery.addEventListener("change", mountOverlays);
+  } else if (typeof mobileQuery.addListener === "function") {
+    mobileQuery.addListener(mountOverlays);
+  }
+
+  window.__mountOverlays = mountOverlays;
+  window.addEventListener("DOMContentLoaded", mountOverlays, { once: true });
 
   syncOverlayState();
 })();

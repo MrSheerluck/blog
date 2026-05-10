@@ -182,29 +182,33 @@
 
 @media (max-width: $overlay-collapse-width) {
   .subscribe-widget {
+    position: static;
     top: auto;
-    bottom: max(12px, env(safe-area-inset-bottom));
-    left: 50%;
     right: auto;
-    width: min(520px, calc(100vw - 24px));
-    max-width: calc(100vw - 24px);
-    max-height: calc(100vh - 24px);
+    bottom: auto;
+    left: auto;
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
     overflow: hidden;
     margin: 0;
-    transform: translateX(-50%) translateY(calc(100% - var(--overlay-mobile-peek-height)));
+    transform: none;
+  }
+
+  [data-mobile-subscribe-host] {
+    margin-top: 32px;
   }
 
   .subscribe-widget[open] {
-    z-index: 2100;
-    transform: translateX(-50%) translateY(0);
+    z-index: auto;
+    transform: none;
   }
 
   .subscribe-widget[data-peer-open="true"] {
-    transform: translateX(-50%) translateY(calc(100% + 16px));
-    pointer-events: none;
+    pointer-events: auto;
   }
 
   .subscribe-widget__panel {
-    max-height: min(45vh, 320px);
+    max-height: none;
   }
 }

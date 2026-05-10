@@ -196,28 +196,6 @@
 
 @media (max-width: $overlay-collapse-width) {
   .music-player {
-    top: auto;
-    bottom: calc(max(12px, env(safe-area-inset-bottom)) + #{$overlay-mobile-peek-height} + 8px);
-    left: 50%;
-    right: auto;
-    width: min(520px, calc(100vw - 24px));
-    max-width: calc(100vw - 24px);
-    margin: 0;
-    transform: translateX(-50%) translateY(calc(100% - var(--overlay-mobile-peek-height)));
-  }
-
-  .music-player[open] {
-    z-index: 2100;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  .music-player[data-peer-open="true"] {
-    transform: translateX(-50%) translateY(calc(100% + 16px));
-    pointer-events: none;
-  }
-
-  .music-player__panel {
-    max-height: min(45vh, 320px);
-    overflow: auto;
+    display: none;
   }
 }
