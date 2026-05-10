@@ -118,11 +118,6 @@
   transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
-.subscribe-widget__submit:disabled {
-  cursor: wait;
-  opacity: 0.7;
-}
-
 .subscribe-widget__submit:hover {
   background: var(--accent-alpha-20);
   border-color: var(--accent-alpha-70);
@@ -133,26 +128,6 @@
   font-size: 12px;
   opacity: 0.85;
   overflow-wrap: anywhere;
-}
-
-.subscribe-widget__status {
-  min-height: 18px;
-  margin-top: 8px;
-  font-size: 12px;
-  opacity: 0.92;
-  overflow-wrap: anywhere;
-}
-
-.subscribe-widget__status[data-state="success"] {
-  color: var(--accent);
-}
-
-.subscribe-widget__status[data-state="error"] {
-  color: #ff8a8a;
-}
-
-.subscribe-widget__status[data-state="pending"] {
-  opacity: 0.72;
 }
 
 @media (max-width: 420px) {

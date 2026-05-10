@@ -53,22 +53,6 @@ zola serve
 
 Then open the local URL shown in your terminal.
 
-## Newsletter subscribers with Cloudflare D1
-
-The subscribe widget now posts to `/api/subscribe`, which is implemented as a Cloudflare Pages Function in [functions/api/subscribe.js](/Users/introvertedbot/mrsheerluck/blog/functions/api/subscribe.js). Subscriber emails are stored in a D1 table created by [migrations/0001_create_subscribers.sql](/Users/introvertedbot/mrsheerluck/blog/migrations/0001_create_subscribers.sql).
-
-Before deploying:
-
-1. Create a D1 database: `wrangler d1 create mrsheerluck-blog`
-2. Copy the returned database ID into [wrangler.toml](/Users/introvertedbot/mrsheerluck/blog/wrangler.toml)
-3. Apply the migration: `wrangler d1 execute mrsheerluck-blog --remote --file migrations/0001_create_subscribers.sql`
-
-To review new subscribers before adding them to Substack manually:
-
-```bash
-wrangler d1 execute mrsheerluck-blog --remote --command "SELECT email, created_at FROM subscribers ORDER BY created_at DESC;"
-```
-
 ## Auto OG images for posts
 
 Text-only OpenGraph/Twitter card images are auto-generated for posts in `content/posts/`:

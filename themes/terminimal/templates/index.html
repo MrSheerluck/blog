@@ -368,7 +368,7 @@
 {% endif -%}
 {% endif -%}
 
-{%- if config.extra.subscribe_widget_enabled | default(value=false) %}
+{%- if config.extra.subscribe_widget_enabled | default(value=false) and config.extra.subscribe_widget_iframe_url %}
 <details class="subscribe-widget" data-overlay-collapsible role="region" aria-label="Subscribe">
     <summary class="subscribe-widget__summary">
         <span>[subscribe]</span>
@@ -379,25 +379,28 @@
             <a class="subscribe-widget__link" data-no-pjax href="{{ get_url(path="rss.xml", trailing_slash=false) | safe }}">[rss]</a>
             <a class="subscribe-widget__link" data-no-pjax href="{{ get_url(path="atom.xml", trailing_slash=false) | safe }}">[atom]</a>
         </div>
-        {%- if config.extra.subscribe_widget_endpoint %}
-        <form
-            class="subscribe-widget__form"
-            action="{{ config.extra.subscribe_widget_endpoint | safe }}"
-            method="post"
-            data-subscribe-form
-            data-success-message="{{ config.extra.subscribe_widget_success_message | default(value="Thanks for subscribing.") }}">
+        {%- if config.extra.subscribe_widget_subscribe_url %}
+        <form class="subscribe-widget__form" action="{{ config.extra.subscribe_widget_subscribe_url | safe }}" method="get" target="_blank">
             <label class="subscribe-widget__label" for="subscribe-email">email:</label>
             <input class="subscribe-widget__input" id="subscribe-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@domain.com" required>
             <button class="subscribe-widget__submit" type="submit">[subscribe]</button>
         </form>
-        <div class="subscribe-widget__hint" data-subscribe-hint>
-            Weekly emails, no popups, no extra steps.
+        <div class="subscribe-widget__hint">
+            Opens Substack to confirm.
+            <a href="{{ config.extra.subscribe_widget_subscribe_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>[open]</a>
         </div>
-        <div class="subscribe-widget__status" data-subscribe-status aria-live="polite"></div>
+        {%- else %}
+        <iframe
+            src="{{ config.extra.subscribe_widget_iframe_url | safe }}"
+            title="Subscribe"
+            class="subscribe-widget__frame"
+            frameborder="0"
+            scrolling="no">
+        </iframe>
+        {% endif -%}
         <div class="subscribe-widget__note">
-            New subscribers are added here first, then moved into the email list before the next send.
+            Powered by <a href="https://substack.com/" target="_blank" rel="noopener noreferrer">Substack</a>.
         </div>
-        {%- endif %}
     </div>
 </details>
 {% endif -%}
@@ -484,60 +487,6 @@
   window.addEventListener("DOMContentLoaded", mountOverlays, { once: true });
 
   syncOverlayState();
-})();
-
-(() => {
-  const form = document.querySelector("[data-subscribe-form]");
-  if (!form) return;
-
-  const status = document.querySelector("[data-subscribe-status]");
-  const hint = document.querySelector("[data-subscribe-hint]");
-  const submitButton = form.querySelector(".subscribe-widget__submit");
-  const emailInput = form.querySelector(".subscribe-widget__input");
-  const defaultSuccessMessage = form.dataset.successMessage || "Thanks for subscribing.";
-
-  const setStatus = (message, type) => {
-    if (!status) return;
-    status.textContent = message;
-    status.dataset.state = type || "";
-  };
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const email = emailInput instanceof HTMLInputElement ? emailInput.value.trim() : "";
-    if (!email) {
-      setStatus("Please enter a valid email address.", "error");
-      return;
-    }
-
-    setStatus("Saving...", "pending");
-    if (hint) hint.hidden = true;
-    if (submitButton) submitButton.disabled = true;
-
-    try {
-      const response = await fetch(form.action, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) {
-        throw new Error(data?.message || "Something went wrong while subscribing.");
-      }
-
-      setStatus(data.message || defaultSuccessMessage, "success");
-      form.reset();
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Something went wrong while subscribing.", "error");
-      if (hint) hint.hidden = false;
-    } finally {
-      if (submitButton) submitButton.disabled = false;
-    }
-  });
 })();
 </script>
 <div class="container">

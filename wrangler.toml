@@ -1,7 +1,0 @@
-name = "blog-emails"
-compatibility_date = "2026-05-10"
-
-[[d1_databases]]
-binding = "BLOG_DB"
-database_name = "blog-emails"
-database_id = "3e9a463d-0b23-46e7-990e-b378db97a702"
