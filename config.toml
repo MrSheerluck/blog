@@ -53,4 +53,6 @@ menu_items = [
     { name = "tags", url = "$BASE_URL/tags" },
     { name = "archive", url = "$BASE_URL/archive" },
     { name = "about", url = "$BASE_URL/about" },
+    { name = "rss", url = "$BASE_URL/rss.xml" },
+    { name = "subscribe", url = "https://mrsheerluck.substack.com/subscribe", newtab = true },
 ]
