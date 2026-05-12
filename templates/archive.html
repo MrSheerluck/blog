@@ -12,5 +12,6 @@
         {% set ordered_posts = posts_section.pages | sort(attribute="date") | reverse %}
 
         {{ post_macros::list_posts(pages=ordered_posts) }}
+        <div data-mobile-subscribe-host></div>
     </div>
 {% endblock content %}

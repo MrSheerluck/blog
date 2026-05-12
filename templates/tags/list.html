@@ -1,18 +1,14 @@
-{% extends "index.html" %}
-
-{%- block title -%}
-{{ title_macros::title(page_title="Series", main_title=config.title) }}
-{%- endblock -%}
+{% extends "terminimal/templates/tags/list.html" %}
 
 {% block content %}
     <div class="post">
-        <h1 class="post-title">all series</h1>
+        <h1 class="post-title">all tags</h1>
 
         <ul>
             {% for term in terms %}
             <li class="tag-list">
                 <a href="{{ term.permalink | safe }}">
-                    {{ term.name }} ({{ term.pages | length }} part{{ term.pages | length | pluralize }})
+                    {{ term.name }} ({{ term.pages | length }} post{{ term.pages | length | pluralize }})
                 </a>
             </li>
             {% endfor %}
