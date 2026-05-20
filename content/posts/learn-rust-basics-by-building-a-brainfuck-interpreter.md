@@ -99,7 +99,7 @@ This creates a variable named `x` and binds the value 5 to it.
 ### Variables are Immutable by Default
 This is one of Rust's core design decisions. Once you bind a value to a variable, you cannot change it unless you explicitly say you want to.
 ```rust
-let x =5;
+let x = 5;
 x = 6; // ERROR: cannot assign twice to immutable variable
 ```
 
