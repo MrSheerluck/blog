@@ -142,6 +142,7 @@ Closures capture variables from their environment in three ways, matching the th
 | `&T`         | Immutable reference | `Fn`          |
 | `&mut T`     | Mutable reference   | `FnMut`       |
 | `T`          | Ownership (move)    | `FnOnce`      |
+
 Rust infers the capture mode automatically based on what the closure does with the captured variable.
 
 ```rust
