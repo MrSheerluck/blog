@@ -400,8 +400,8 @@ Every other character in a Brainfuck program is a comment, these gets simply ign
 
 ### How Loop Works
 `[` and `]` together form a loop. Let me explain:
-- When you hit `[:` check the current cell. If its `0`, skip everything until the matching `]`. If its non zero, enter the loop body.
-- When you hit `]:` check the current cell. If its non-zero, jump back to the matching `[`. If its 0, exit the loop.
+- When you hit `[`: check the current cell. If its `0`, skip everything until the matching `]`. If its non zero, enter the loop body.
+- When you hit `]`: check the current cell. If its non-zero, jump back to the matching `[`. If its 0, exit the loop.
 This is basically a `while (cell != 0) {...}` loop.
 
 ## What We Need to Build
