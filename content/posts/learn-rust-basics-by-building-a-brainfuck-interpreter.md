@@ -175,8 +175,8 @@ One thing to note about tuples is that they have a fixed length. Once they are d
 But you can access elements from tuple, to do that you can use the **dot notation** with the index:
 ```rust
 let x = tup.0; // 500
-let y = tup.1 // 6.4
-let x = tup.2 // true
+let y = tup.1; // 6.4
+let z = tup.2; // true
 ```
 
 You can also destructure a tuple. Destructuring means unpacking the tuple elements in individual variables:
