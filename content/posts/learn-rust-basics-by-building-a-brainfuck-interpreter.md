@@ -345,7 +345,7 @@ match x {
 ## Vectors (Brief Introduction)
 Arrays have a fixed size known at compile time but sometimes you need a collection that can grow. This is where you can use a `Vec<T>`:
 ```rust
-let mut v: Vector<char> = Vec::new();
+let mut v: Vec<char> = Vec::new();
 v.push('a');
 v.push('b');
 println!("{}", v.len()); // 2
