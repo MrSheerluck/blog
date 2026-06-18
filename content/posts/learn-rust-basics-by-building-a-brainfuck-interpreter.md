@@ -434,7 +434,7 @@ Now, let me explain what we just did:
 - `let program = "..."` this is a brainfuck program that prints "Hello World!". It's just a `&str`(string literal). Our interpreter will read through it character by character.
 - `let mut tape = [0u8; 30000]` this is our memory tape. This creates an array of 30,000 elements, each of them initialized to `0`, and each of them is of type `u8`(values 0-255). We need `mut` because instructions `+` and `-` will modify the cells.
 - `let mut dp: usize = 0` dp stands for **data pointer**. It's the index into tape that points to the current cell. It starts at 0. Its `usize` because array indices in Rust must be `usize`.
-- `let mut pc: usize = 0` pc stands for **program counter**. Its the index into program pointing at the current instruction. It starts at 0.
+- `let mut pc: usize = 0` pc stands for **program counter**. It's the index into program pointing at the current instruction. It starts at 0.
 
 ### Precomputing Bracket Matches
 Before we run the program, we'll precompute where every `[` matches with its `]` and vice versa. This way, when we need to jump, we just do a lookup instead of scanning through the program every time.
