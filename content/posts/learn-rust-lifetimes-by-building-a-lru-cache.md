@@ -28,7 +28,7 @@ Most of the time, lifetimes are invisible. The compiler can figure them out on i
 Let's start with a simple example that compiles:
 ```rust
 fn main() {
-	let x = 42;
+    let x = 42;
     let r = &x;
     println!("{}", r);
 }

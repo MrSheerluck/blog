@@ -99,7 +99,7 @@ This creates a variable named `x` and binds the value 5 to it.
 ### Variables are Immutable by Default
 This is one of Rust's core design decisions. Once you bind a value to a variable, you cannot change it unless you explicitly say you want to.
 ```rust
-let x =5;
+let x = 5;
 x = 6; // ERROR: cannot assign twice to immutable variable
 ```
 
@@ -175,8 +175,8 @@ One thing to note about tuples is that they have a fixed length. Once they are d
 But you can access elements from tuple, to do that you can use the **dot notation** with the index:
 ```rust
 let x = tup.0; // 500
-let y = tup.1 // 6.4
-let x = tup.2 // true
+let y = tup.1; // 6.4
+let z = tup.2; // true
 ```
 
 You can also destructure a tuple. Destructuring means unpacking the tuple elements in individual variables:
@@ -345,7 +345,7 @@ match x {
 ## Vectors (Brief Introduction)
 Arrays have a fixed size known at compile time but sometimes you need a collection that can grow. This is where you can use a `Vec<T>`:
 ```rust
-let mut v: Vector<char> = Vec::new();
+let mut v: Vec<char> = Vec::new();
 v.push('a');
 v.push('b');
 println!("{}", v.len()); // 2
@@ -400,8 +400,8 @@ Every other character in a Brainfuck program is a comment, these gets simply ign
 
 ### How Loop Works
 `[` and `]` together form a loop. Let me explain:
-- When you hit `[:` check the current cell. If its `0`, skip everything until the matching `]`. If its non zero, enter the loop body.
-- When you hit `]:` check the current cell. If its non-zero, jump back to the matching `[`. If its 0, exit the loop.
+- When you hit `[`: check the current cell. If its `0`, skip everything until the matching `]`. If its non zero, enter the loop body.
+- When you hit `]`: check the current cell. If its non-zero, jump back to the matching `[`. If its 0, exit the loop.
 This is basically a `while (cell != 0) {...}` loop.
 
 ## What We Need to Build
@@ -528,7 +528,7 @@ Now, let me explain this:
 - `b'>' => dp += 1` moves the data pointer right, just incrementing the index
 - `b'<' => dp -= 1` moves the data pointer left, just decrementing the index
 - `b'+' => tape[dp].wrapping_add(1)` this increments the current cell. We use `.wrapping_add(1)` instead of `tape[dp] += 1` because our cells are `u8`(0-255). If the value is 255 and you add 1, a normal += would panic in debug mode due to integer overflow. The `.wrapping_add` instead wraps around to 0. This is standard brainfuck behaviour.
-- `b'-' =? tape[dp].wrapping_sub(1)` this decrements the current cell. Same idea as add operation.
+- `b'-' => tape[dp].wrapping_sub(1)` this decrements the current cell. Same idea as add operation.
 - `b'.' => print!("{}", tape[dp] as char)` this prints the current cell as an ASCII character. `tape[dp] as char` is a type cast from `u8` to `char` type. For example, the value `72` becomes `H`. `print!`(without `ln`) prints without creating a newline.
 - `b','` we leave it as an empty block as we are not taking input dynamically.
 - `b'['` if the current cell is `0`, then jump to the matching `]` by setting `pc = bracket_map[pc]`. The `pc += 1` at the bottom of the loop then moves us past the `]`.
