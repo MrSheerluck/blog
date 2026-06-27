@@ -640,7 +640,7 @@ rustup target add wasm32-unknown-unknown
 
 Then install the Bevy CLI:
 ```bash
-cargo install bevy_cli
+cargo install --git https://github.com/TheBevyFlock/bevy_cli --locked bevy_cli
 ```
 
 Now build the web release:
