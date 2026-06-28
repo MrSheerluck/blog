@@ -1,5 +1,5 @@
 +++
-title = "Learn the Basics of Bevy 0.9 by Building and Deploying Pong to Itch.io"
+title = "Learn the Basics of Bevy 0.19 by Building and Deploying Pong to Itch.io"
 description = "Build Pong from scratch using the Bevy game engine in Rust. Learn ECS, the game loop, collision detection, player input, and scoring. Then deploy a playable web version to Itch.io."
 date = 2026-06-28
 transparent = true
@@ -20,7 +20,7 @@ The only prerequisite is that you know Rust (or can learn it on the go). I also 
 
 In this post, we build **Pong**, the classic arcade game where two players bounce a ball past each other's paddles and publish it on [Itch.io](https://itch.io). If you know Rust but have never built a game, this is the perfect place to start.
 
-> **This is a rewrite of the original article** in this series, updated for **Bevy 0.9** and rewritten in an **incremental style**. Every section ends with `cargo run` , you'll see progress on screen after each step.
+> **This is a rewrite of the original article** in this series, updated for **Bevy 0.19** and rewritten in an **incremental style**. Every section ends with `cargo run` , you'll see progress on screen after each step.
 
 We'll learn: what a game loop is, how ECS (Entity-Component-System) works, how to detect collisions, how to handle keyboard input, and how to display text on screen.
 
@@ -64,10 +64,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = "0.9"
+bevy = "0.19"
 ```
 
-The `[dependencies]` section tells Cargo what external libraries to download and compile. `bevy = "0.9"` pulls in the Bevy engine at version 0.9.
+The `[dependencies]` section tells Cargo what external libraries to download and compile. `bevy = "0.19"` pulls in the Bevy engine at version 0.19.
 
 Run:
 
@@ -587,7 +587,7 @@ Now add the score display to `setup()`, right after the camera spawn:
 
 `TextFont { font_size: FontSize::Px(40.0), ..default() }` controls the font style. We set the size to 40 pixels and use the default font (Fira Mono, bundled with Bevy).
 
-> **Bevy 0.9 note:** `TextFont::font_size` now uses `FontSize::Px(40.0)` instead of a bare `40.0`. This is one of the few breaking changes from 0.18.
+> **Bevy 0.19 note:** `TextFont::font_size` now uses `FontSize::Px(40.0)` instead of a bare `40.0`. This is one of the few breaking changes from 0.18.
 
 `Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - 50.0, 0.0)` positions the text near the top of the screen. Our window is 600 pixels tall, so y = 300 is the top edge. We place it at y = 300 - 50 = 250, centered horizontally.
 
