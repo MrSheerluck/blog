@@ -1,45 +1,13 @@
-{% macro links() %}
-    {%- if config.extra.support_github_sponsors_url or config.extra.support_kofi_url %}
-        <span class="support-links">
-            {%- if config.extra.support_github_sponsors_url %}
-                <a class="support-link support-link--github" href="{{ config.extra.support_github_sponsors_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>[github sponsors]</a>
-            {% endif -%}
-            {%- if config.extra.support_kofi_url %}
-                <a class="support-link support-link--kofi" href="{{ config.extra.support_kofi_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>[ko-fi tip]</a>
-            {% endif -%}
-        </span>
-    {% endif -%}
-{% endmacro links %}
-
 {% macro block(placement="post") %}
-    {%- if config.extra.support_github_sponsors_url or config.extra.support_kofi_url %}
+    {%- if config.extra.support_github_sponsors_url %}
         <aside class="support-box support-box--{{ placement }}" aria-label="Support this blog">
             <blockquote class="support-box__quote">
                 <p>
-                    If my writing helped you, you can support it with $1+ via
-                    {%- if config.extra.support_kofi_url %}
-                        <a class="support-link support-link--kofi" href="{{ config.extra.support_kofi_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>[Ko-fi]</a>
-                    {%- else %}
-                        [Ko-fi]
-                    {%- endif %},
-                    or a monthly pledge via
-                    {%- if config.extra.support_github_sponsors_url %}
-                        <a class="support-link support-link--github" href="{{ config.extra.support_github_sponsors_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>[GitHub Sponsors]</a>
-                    {%- else %}
-                        [GitHub Sponsors]
-                    {%- endif %}.
+                    If my writing helped you, you can support it via
+                    <a class="support-link support-link--github" href="{{ config.extra.support_github_sponsors_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>[GitHub Sponsors]</a>.
                     It helps me keep writing about Rust, backend, and gamedev.
                 </p>
             </blockquote>
         </aside>
     {% endif -%}
 {% endmacro block %}
-
-{% macro footer() %}
-    {%- if config.extra.support_github_sponsors_url or config.extra.support_kofi_url %}
-        <div class="footer-support">
-            <span>support:</span>
-            {{ support_macros::links() }}
-        </div>
-    {% endif -%}
-{% endmacro footer %}

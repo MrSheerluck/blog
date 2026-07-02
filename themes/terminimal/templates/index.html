@@ -2,7 +2,6 @@
 {% import "macros/head.html" as head_macros -%}
 {% import "macros/menu.html" as menu_macros -%}
 {% import "macros/post.html" as post_macros -%}
-{% import "macros/support.html" as support_macros -%}
 {% import "macros/title.html" as title_macros -%}
 
 <!DOCTYPE html>
@@ -407,19 +406,10 @@
     </div>
 </details>
 {% endif -%}
-{%- if config.extra.support_widget_enabled | default(value=false) and (config.extra.support_github_sponsors_url or config.extra.support_kofi_url) %}
-<div class="support-banners" role="complementary" aria-label="Support links">
-    {%- if config.extra.support_github_sponsors_url %}
-    <a class="support-banner support-banner--github" href="{{ config.extra.support_github_sponsors_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>
-        sponsor on github
-    </a>
-    {% endif -%}
-    {%- if config.extra.support_kofi_url %}
-    <a class="support-banner support-banner--coffee" href="{{ config.extra.support_kofi_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax>
-        <svg class="nav-pixel-heart" width="12" height="11" viewBox="0 0 12 11"><rect x="2" y="0" width="3" height="1" fill="currentColor"/><rect x="7" y="0" width="3" height="1" fill="currentColor"/><rect x="1" y="1" width="10" height="1" fill="currentColor"/><rect x="0" y="2" width="12" height="1" fill="currentColor"/><rect x="0" y="3" width="12" height="1" fill="currentColor"/><rect x="0" y="4" width="12" height="1" fill="currentColor"/><rect x="1" y="5" width="10" height="1" fill="currentColor"/><rect x="2" y="6" width="8" height="1" fill="currentColor"/><rect x="3" y="7" width="6" height="1" fill="currentColor"/><rect x="4" y="8" width="4" height="1" fill="currentColor"/><rect x="5" y="9" width="2" height="1" fill="currentColor"/></svg>tip
-    </a>
-    {% endif -%}
-</div>
+{%- if config.extra.support_widget_enabled | default(value=false) and config.extra.support_github_sponsors_url %}
+<a class="support-widget" href="{{ config.extra.support_github_sponsors_url | safe }}" target="_blank" rel="noopener noreferrer" data-no-pjax role="complementary" aria-label="Sponsor on GitHub">
+    <span>sponsor on github</span>
+</a>
 {% endif -%}
 <script>
 (() => {
@@ -603,7 +593,6 @@
                     </span>
                 </div>
             {% endif -%}
-            {{ support_macros::footer() }}
         </div>
     </footer>
     {% endblock footer %}

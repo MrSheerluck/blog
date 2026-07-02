@@ -48,7 +48,6 @@ subscribe_widget_iframe_url = "https://mrsheerluck.substack.com/embed"
 subscribe_widget_subscribe_url = "https://mrsheerluck.substack.com/subscribe"
 
 support_github_sponsors_url = "https://github.com/sponsors/MrSheerluck"
-support_kofi_url = "https://ko-fi.com/mrsheerluck"
 
 menu_items = [
     { name = "home", url = "$BASE_URL" },
@@ -56,7 +55,6 @@ menu_items = [
     { name = "series", url = "$BASE_URL/series" },
     { name = "archive", url = "$BASE_URL/archive" },
     { name = '<span class="nav-nounderline">sponsor on github</span>', url = "https://github.com/sponsors/MrSheerluck", newtab = true },
-    { name = '<svg class="nav-pixel-heart" width="12" height="11" viewBox="0 0 12 11"><rect x="2" y="0" width="3" height="1" fill="currentColor"/><rect x="7" y="0" width="3" height="1" fill="currentColor"/><rect x="1" y="1" width="10" height="1" fill="currentColor"/><rect x="0" y="2" width="12" height="1" fill="currentColor"/><rect x="0" y="3" width="12" height="1" fill="currentColor"/><rect x="0" y="4" width="12" height="1" fill="currentColor"/><rect x="1" y="5" width="10" height="1" fill="currentColor"/><rect x="2" y="6" width="8" height="1" fill="currentColor"/><rect x="3" y="7" width="6" height="1" fill="currentColor"/><rect x="4" y="8" width="4" height="1" fill="currentColor"/><rect x="5" y="9" width="2" height="1" fill="currentColor"/></svg>tip', url = "https://ko-fi.com/mrsheerluck", newtab = true },
     { name = "rss", url = "$BASE_URL/rss.xml" },
     { name = "subscribe", url = "https://mrsheerluck.substack.com/subscribe", newtab = true },
 ]

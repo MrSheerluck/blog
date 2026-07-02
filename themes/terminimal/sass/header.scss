@@ -12,14 +12,6 @@
   z-index: 99;
 }
 
-.nav-pixel-heart {
-  display: inline;
-  vertical-align: middle;
-  margin-right: 3px;
-  margin-bottom: 1px;
-}
-
-.menu__inner a:has(.nav-pixel-heart),
 .menu__inner a:has(.nav-nounderline) {
   text-decoration: none;
   border-bottom: 1px dotted var(--accent);
@@ -27,7 +19,6 @@
   transition: background-color 160ms ease;
 }
 
-.menu__inner a:has(.nav-pixel-heart):hover,
 .menu__inner a:has(.nav-nounderline):hover {
   background: var(--accent-alpha-10);
 }

@@ -1,43 +1,35 @@
 @import "variables";
 
-.support-banners {
+.support-widget {
   position: fixed;
-  top: calc(50% + 44px);
+  top: 50%;
   right: 0;
-  z-index: 1390;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.support-banner {
+  z-index: 1490;
   display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 8px 14px;
+  gap: 10px;
+  width: $overlay-widget-width;
+  max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  padding: 10px;
   border: 1px dashed var(--border-color);
   background: var(--background);
-  text-decoration: none;
   color: var(--accent-alpha-70);
-  font-size: 13px;
-  white-space: nowrap;
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+  text-decoration: none;
+  user-select: none;
+  transform: translateY(calc(-50% - 55px)) translateX(calc(100% - var(--overlay-peek-width)));
+  transition: transform 180ms ease, border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+
+  --overlay-peek-width: 185px;
 }
 
-.support-banner:hover,
-.support-banner:focus {
+.support-widget:hover,
+.support-widget:focus {
   border-color: var(--accent-alpha-70);
   color: var(--accent);
-  background: var(--accent-alpha-10);
-}
-
-.support-banner .nav-pixel-heart {
-  margin-right: 0;
-  margin-bottom: 0;
 }
 
 @media (max-width: $overlay-collapse-width) {
-  .support-banners {
+  .support-widget {
     display: none;
   }
 }

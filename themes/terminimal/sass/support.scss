@@ -35,36 +35,7 @@
   }
 }
 
-.support-links {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  align-items: baseline;
-}
-
 .support-link {
   color: var(--accent);
   white-space: nowrap;
-}
-
-.footer-support {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 8px;
-  justify-content: center;
-  font-size: 0.9rem;
-  color: var(--light-color-secondary);
-
-  .support-links {
-    gap: 0 8px;
-  }
-}
-
-@media (max-width: $phone-max-width) {
-  .support-links,
-  .footer-support {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
 }
