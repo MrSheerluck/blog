@@ -54,10 +54,9 @@ menu_items = [
     { name = "home", url = "$BASE_URL" },
     { name = "posts", url = "$BASE_URL/posts" },
     { name = "series", url = "$BASE_URL/series" },
-    { name = "tags", url = "$BASE_URL/tags" },
     { name = "archive", url = "$BASE_URL/archive" },
-    { name = "about", url = "$BASE_URL/about" },
-    { name = "support", url = "$BASE_URL/support" },
+    { name = '<span class="nav-nounderline">sponsor on github</span>', url = "https://github.com/sponsors/MrSheerluck", newtab = true },
+    { name = '<svg class="nav-pixel-heart" width="12" height="11" viewBox="0 0 12 11"><rect x="2" y="0" width="3" height="1" fill="currentColor"/><rect x="7" y="0" width="3" height="1" fill="currentColor"/><rect x="1" y="1" width="10" height="1" fill="currentColor"/><rect x="0" y="2" width="12" height="1" fill="currentColor"/><rect x="0" y="3" width="12" height="1" fill="currentColor"/><rect x="0" y="4" width="12" height="1" fill="currentColor"/><rect x="1" y="5" width="10" height="1" fill="currentColor"/><rect x="2" y="6" width="8" height="1" fill="currentColor"/><rect x="3" y="7" width="6" height="1" fill="currentColor"/><rect x="4" y="8" width="4" height="1" fill="currentColor"/><rect x="5" y="9" width="2" height="1" fill="currentColor"/></svg>tip', url = "https://ko-fi.com/mrsheerluck", newtab = true },
     { name = "rss", url = "$BASE_URL/rss.xml" },
     { name = "subscribe", url = "https://mrsheerluck.substack.com/subscribe", newtab = true },
 ]
