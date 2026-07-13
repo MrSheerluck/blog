@@ -98,7 +98,7 @@ The `...user` part means "fill in all remaining fields from `user`". Fields you 
 A struct definition only describes data but to give a struct behaviour that means functions that operate on that data, you write an `impl` block:
 ```rust
 impl User {
-	// methods and assocuated functions go here
+	// methods and associated functions go here
 }
 ```
 `impl` stands for "implementation". Everything inside an `impl User` block belongs to the `User` type. You can have multiple `impl` blocks for the same type and Rust will them as one, though conventionally you group everything into one block.
@@ -149,7 +149,7 @@ let mut user = User{
 user.have_birthday();
 println!("{}", user.age); // 31
 
-user.decativate();
+user.deactivate();
 println!("{}", user.active); // false
 ```
 
@@ -253,7 +253,7 @@ Variants can also carry named fields, like a struct:
 ```rust
 enum Shape {
 	Circle{ radius: f64 },
-	Rectangle{ width: 64, height: f64 },
+	Rectangle{ width: f64, height: f64 },
 	Triangle{ a: f64, b: f64, c:f64 },
 }
 
@@ -277,7 +277,7 @@ enum Message {
 The size of `Message` value in memory is the size of the largest variant (`Write(String)`) is the biggest here since `String` is 24 bytes on 64-bit machines plus the tag. Every `Message` value occupies the same amount of space, regardless of which variant it actually is. If it's `Quit`, most of those bytes are unused but they are still there, reserved.
 
 ### Enums with Mixed Variant Shapes
-Nothing forces all variants to have the same kind of data, you can feely mix:
+Nothing forces all variants to have the same kind of data, you can freely mix:
 ```rust
 enum Event {
 	KeyPress(char),
@@ -330,7 +330,7 @@ enum Expr {
 ```
 This won't compile because the compiler needs to know the size of `Expr` at compile time. But `Expr::Add` contains two `Expr` values, each of which might be `Add` themselves which contain more `Expr` values. The could go on till infinity.
 
-The fix is `Box<T>`. A `Box<T>` is a heap allocated values basically its a pointer and a pointer always has a fixed, known size (8 bytes on 64-bit).So instead of storing the `Expr` directly inside `Add`, you store a pointer to it on the heap:
+The fix is `Box<T>`. A `Box<T>` is a heap allocated value; basically, its a pointer and a pointer always has a fixed, known size (8 bytes on 64-bit). So instead of storing the `Expr` directly inside `Add`, you store a pointer to it on the heap:
 ```rust
 enum Expr {
 	Number(f64),
@@ -380,7 +380,7 @@ println!("{}", description); // three
 `_` is the wildcard. It matches anything and binds nothing. Every `match` on a type with more possibilities than your explicit arms must include a catch-all or the compiler will complain.
 
 ### Matching on Enum Variants With Data
-When a variant carries data, the pattern names bindings to extract that data:
+When a variant carries data, the pattern binds names to extract that data:
 ```rust
 enum Shape {
 	Circle(f64),
@@ -585,7 +585,7 @@ if let Message::Write(text) = msg {
     println!("{}", text);
 }
 ```
-Read this as: "if `msg` matches the pattern `Message::Write(text)`, bind the inner value to `text` and execute the block." If `msg` is `Message::Quit` or `Message::Move { .. }`, the block is skipped entirely
+Read this as: "if `msg` matches the pattern `Message::Write(text)`, bind the inner value to `text` and execute the block." If `msg` is `Message::Quit` or `Message::Move { .. }`, the block is skipped entirely.
 
 The binding `text` only exists inside the `if let` block. Outside it, `text` doesn't exist.
 
@@ -1271,7 +1271,7 @@ impl Parser {
                 self.advance();
                 JsonValue::Str(value)
             }
-            Token::RightBrace   => panic!("Unexpected '}'"),
+            Token::RightBrace   => panic!("Unexpected '}}'"),
             Token::RightBracket => panic!("Unexpected ']'"),
             Token::Colon        => panic!("Unexpected ':'"),
             Token::Comma        => panic!("Unexpected ','"),
