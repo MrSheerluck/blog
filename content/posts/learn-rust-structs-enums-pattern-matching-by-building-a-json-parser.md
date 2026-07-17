@@ -45,7 +45,7 @@ let user = User{
 	active: true,
 };
 ```
-This is called a **struct literal**. You provide values for every field by name. The order you write the fields doesn't matter, Rust matches them by bame and not by position. But remember that you must provide all the fields. If you skip any field then it'll show a compile error.
+This is called a **struct literal**. You provide values for every field by name. The order you write the fields doesn't matter, Rust matches them by name and not by position. But remember that you must provide all the fields. If you skip any field then it'll show a compile error.
 
 ### Accessing Fields
 You access fields with dot notation:
