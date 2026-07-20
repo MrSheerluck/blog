@@ -5,6 +5,9 @@ description = "A quick intro to supply chain attack and axios case study"
 
 [taxonomies]
 tags = ["npm", "security", "networking"]
+
+[extra]
+hidden = true
 +++
 
 ![Axios supply chain issue screenshot](/images/axios-issue.webp)

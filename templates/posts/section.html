@@ -25,6 +25,9 @@
             {%- if page.draft %}
                 {% continue %}
             {% endif -%}
+            {%- if page.extra.hidden %}
+                {% continue %}
+            {% endif -%}
 
             <li class="entry-list__item">
                 <a class="entry-list__link" href="{{ page.permalink | safe }}">

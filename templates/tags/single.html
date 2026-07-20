@@ -1,14 +1,35 @@
 {% extends "terminimal/templates/tags/single.html" %}
 
 {% block content %}
+    {% set_global visible_count = 0 %}
+    {% for p in term.pages %}
+        {% if not p.extra.hidden %}
+            {% set_global visible_count = visible_count + 1 %}
+        {% endif %}
+    {% endfor %}
     <div class="post list-page">
         <header class="list-page__header">
-            <p>{{ term.pages | length }} post{{ term.pages | length | pluralize }}</p>
+            <p>{{ visible_count }} post{{ visible_count | pluralize }}</p>
             <h1 class="post-title">#{{ term.name }}</h1>
             <a class="list-page__back" href="{{ config.base_url | safe }}/tags/">Show all tags</a>
         </header>
 
-        {{ post_macros::list_posts(pages=term.pages) }}
+        <ol class="entry-list">
+        {% for page in term.pages %}
+            {% if not page.extra.hidden %}
+            <li class="entry-list__item">
+                <a class="entry-list__link" href="{{ page.permalink | safe }}">
+                    <span class="entry-list__date">
+                        {%- if page.date %}{{ page.date | date(format="%Y-%m-%d") }}{% endif -%}
+                    </span>
+                    <span class="entry-list__title">{{ page.title }}</span>
+                </a>
+                {{ post_macros::tags(page=page, short=true) }}
+            </li>
+            {% endif %}
+        {% endfor %}
+        </ol>
+
         <div data-mobile-subscribe-host></div>
     </div>
 {% endblock content %}

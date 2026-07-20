@@ -9,12 +9,20 @@
 
         <ul class="term-grid">
             {% for term in terms %}
+            {% set_global visible_count = 0 %}
+            {% for p in term.pages %}
+                {% if not p.extra.hidden %}
+                    {% set_global visible_count = visible_count + 1 %}
+                {% endif %}
+            {% endfor %}
+            {% if visible_count > 0 %}
             <li class="tag-list">
                 <a href="{{ term.permalink | safe }}">
                     <span>{{ term.name }}</span>
-                    <small>{{ term.pages | length }} post{{ term.pages | length | pluralize }}</small>
+                    <small>{{ visible_count }} post{{ visible_count | pluralize }}</small>
                 </a>
             </li>
+            {% endif %}
             {% endfor %}
         </ul>
 

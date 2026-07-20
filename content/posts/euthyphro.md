@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["philosophy", "plato", "socrates"]
 series = ["plato-the-complete-works"]
+
+[extra]
+hidden = true
 +++
 
 

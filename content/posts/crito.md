@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["philosophy", "plato", "socrates"]
 series = ["plato-the-complete-works"]
+
+[extra]
+hidden = true
 +++
 The trial is over. Socrates has been convicted and sentenced to death. But he is not dead yet.
 

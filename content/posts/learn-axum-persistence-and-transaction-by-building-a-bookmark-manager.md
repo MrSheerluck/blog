@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["rust", "backend", "axum"]
 series = ["backend-engineering-with-axum"]
+
+[extra]
+hidden = true
 +++
 
 

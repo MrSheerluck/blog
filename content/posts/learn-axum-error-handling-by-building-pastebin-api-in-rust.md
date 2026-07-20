@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["rust", "backend", "axum"]
 series = ["backend-engineering-with-axum"]
+
+[extra]
+hidden = true
 +++
 
 In Part 1, we built a URL shortener and learned the Axum request lifecycle: `Router`, handlers, `State<T>`, `Path<T>`, and `IntoResponse`. But we left two things unfinished. Our error handling was `.unwrap()` on every lock acquisition, and our response for a missing URL was an ad-hoc `(StatusCode, &str)` tuple dropped directly into the handler. 

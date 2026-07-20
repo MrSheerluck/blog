@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["bevy", "gamedev", "rust"]
 series = ["learning-bevy-by-building-projects"]
+
+[extra]
+hidden = true
 +++
 
 In this post, we are going to build **Breakout**, the classic arcade game where you control a paddle, bounce a ball, and destroy a grid of bricks. If you have been following the series from Pong and Snake, you already know the ECS basics, queries, resources, timers, and game states. Now we put it all together into a complete game with particles, lives, and a proper game over loop.

@@ -6,6 +6,9 @@ transparent = true
 
 [taxonomies]
 tags = ["ai", "anthropic", "security"]
+
+[extra]
+hidden = true
 +++
 
 # WTF is Claude Mythos

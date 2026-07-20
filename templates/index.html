@@ -27,13 +27,15 @@
             <ol class="entry-list entry-list--titles-only home-recent-list">
                 {% set_global shown = 0 %}
                 {% for listed_page in recent_posts %}
-                    {% if shown < 7 %}
-                        {% set_global shown = shown + 1 %}
-                        <li class="entry-list__item">
-                            <a class="entry-list__link" href="{{ listed_page.permalink | safe }}">
-                                <span class="entry-list__title">{{ listed_page.title }}</span>
-                            </a>
-                        </li>
+                    {% if not listed_page.extra.hidden %}
+                        {% if shown < 7 %}
+                            {% set_global shown = shown + 1 %}
+                            <li class="entry-list__item">
+                                <a class="entry-list__link" href="{{ listed_page.permalink | safe }}">
+                                    <span class="entry-list__title">{{ listed_page.title }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
             </ol>

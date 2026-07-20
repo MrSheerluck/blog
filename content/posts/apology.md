@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["philosophy", "plato", "socrates"]
 series = ["plato-the-complete-works"]
+
+[extra]
+hidden = true
 +++
 
 The Apology is not an apology. The Greek word *apologia* means defense speech, and that is exactly what this is. Socrates does not apologize for anything. He stands in front of a jury of 501 Athenians, faces a death sentence, and spends the entire time telling them they are wrong.
