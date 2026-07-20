@@ -14,8 +14,11 @@ a.button {
   padding: 8px 18px;
   margin-bottom: 5px;
   text-align: center;
-  border-radius: 8px;
-  border: 1px solid transparent;
+  border-radius: 0;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-size: .84rem;
   appearance: none;
   cursor: pointer;
   outline: none;
@@ -68,6 +71,8 @@ a.read-more:active {
   padding: 0;
   margin: 20px 0;
   max-width: 100%;
+  border: 0;
+  color: var(--signal);
 }
 
 .code-toolbar {

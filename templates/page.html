@@ -7,14 +7,14 @@
 {%- endblock -%}
 
 {% block content %}
-    <div class="post">
+    <article class="post post--article">
         {{ post_macros::header(page=page) }}
         {{ series_macros::inline(page=page) }}
         {{ post_macros::content(page=page, summary=false, show_only_description=false) }}
         {{ support_macros::block(placement="post") }}
         <div data-mobile-subscribe-host></div>
         {{ post_macros::earlier_later(page=page) }}
-    </div>
+    </article>
 {% endblock content %}
 
 {% block extra_body %}

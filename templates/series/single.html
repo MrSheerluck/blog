@@ -6,22 +6,19 @@
 {%- endblock -%}
 
 {% block content %}
-    <div class="post">
-        <h1 class="post-title">
-            series: {{ term.name }}
-            ({{ term.pages | length }} part{{ term.pages | length | pluralize }})
-        </h1>
+    <div class="post list-page">
+        <header class="list-page__header">
+            <p>{{ term.pages | length }} part{{ term.pages | length | pluralize }}</p>
+            <h1 class="post-title">{{ term.name }}</h1>
+            <a class="list-page__back" href="{{ config.base_url | safe }}/series/">Show all series</a>
+        </header>
 
-        <a href="{{ config.base_url | safe }}/series/">
-            Show all series
-        </a>
-
-        <ol>
+        <ol class="entry-list">
             {% for page in term.pages | sort(attribute="date") %}
-            <li class="post-list">
-                <a href="{{ page.permalink | safe }}">
-                    <span class="post-date">{{ page.date | date(format="%Y-%m-%d") }}</span>
-                    :: <span class="post-list-title">{{ page.title }}</span>
+            <li class="entry-list__item">
+                <a class="entry-list__link" href="{{ page.permalink | safe }}">
+                    <span class="entry-list__date">{{ page.date | date(format="%Y-%m-%d") }}</span>
+                    <span class="entry-list__title">{{ page.title }}</span>
                 </a>
                 {{ post_macros::tags(page=page, short=true) }}
             </li>

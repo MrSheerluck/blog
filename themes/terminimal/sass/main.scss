@@ -1,5 +1,49 @@
 @import "variables";
 
+:root {
+  --background: #f6f7f8;
+  --color: #1d2329;
+  --paper: #ffffff;
+  --paper-deep: #ffffff;
+  --ink-muted: #6b747c;
+  --ink-soft: #45515c;
+  --accent: #1d2329;
+  --accent-alpha-70: rgba(29, 35, 41, .7);
+  --accent-alpha-20: rgba(29, 35, 41, .1);
+  --accent-alpha-10: rgba(29, 35, 41, .06);
+  --border-color: #dfe4e8;
+  --rule: #edf0f2;
+  --code-surface: #f8fafb;
+  --control-surface: #f8fafb;
+  --control-surface-hover: #ffffff;
+  --blueprint: #2b6f8a;
+  --signal: #c24a2e;
+  --shadow: 0 16px 40px rgba(22, 28, 35, .06);
+  --paper-shadow: 0 1px 2px rgba(22, 28, 35, .04), 0 18px 45px rgba(22, 28, 35, .07);
+}
+
+:root[data-theme="dark"] {
+  --background: #11161c;
+  --color: #e9edf1;
+  --paper: #182029;
+  --paper-deep: #182029;
+  --ink-muted: #9aa7b3;
+  --ink-soft: #c4ccd4;
+  --accent: #f4f7fa;
+  --accent-alpha-70: rgba(244, 247, 250, .72);
+  --accent-alpha-20: rgba(244, 247, 250, .12);
+  --accent-alpha-10: rgba(244, 247, 250, .07);
+  --border-color: #2b3540;
+  --rule: #222b35;
+  --code-surface: #101820;
+  --control-surface: #121a22;
+  --control-surface-hover: #1f2a35;
+  --blueprint: #79b8cf;
+  --signal: #ff8a66;
+  --shadow: 0 18px 50px rgba(0, 0, 0, .28);
+  --paper-shadow: 0 1px 2px rgba(0, 0, 0, .18), 0 22px 60px rgba(0, 0, 0, .32);
+}
+
 html {
   box-sizing: border-box;
 }
@@ -13,10 +57,11 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
-  font-size: 1rem;
-  line-height: 1.54;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-size: 1.05rem;
+  line-height: 1.7;
   background-color: var(--background);
+  background-image: none;
   color: var(--color);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -29,22 +74,22 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  line-height: 1.3;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: 0;
 }
 
 h1 {
-  font-size: 1.4rem;
+  font-size: clamp(2.1rem, 4vw, 3.75rem);
 }
 
 h2 {
-  font-size: 1.3rem;
+  font-size: 1.8rem;
 }
 
 h3 {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
 }
 
 h4, h5, h6 {
@@ -54,6 +99,8 @@ h4, h5, h6 {
 
 a {
   color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .16em;
 }
 
 img,
@@ -132,8 +179,10 @@ pre {
   padding: 20px;
   font-size: .95rem;
   overflow: auto;
-  border-top: 1px solid rgba(255, 255, 255, .1);
-  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  background: var(--code-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: none;
 
   @media (max-width: $phone-max-width) {
     white-space: pre-wrap;
@@ -148,22 +197,20 @@ pre {
 }
 
 blockquote {
-  border-top: 1px solid var(--accent);
-  border-bottom: 1px solid var(--accent);
-  margin: 40px 0;
-  padding: 25px;
+  position: relative;
+  border-left: 3px solid var(--signal);
+  border-top: 0;
+  border-bottom: 0;
+  margin: 34px 0;
+  padding: 2px 0 2px 22px;
+  color: var(--ink-soft);
 
   @media (max-width: $phone-max-width) {
     padding-right: 0;
   }
 
   &:before {
-    content: '”';
-    font-family: Georgia, serif;
-    font-size: 3.875rem;
-    position: absolute;
-    left: -40px;
-    top: -20px;
+    content: none;
   }
 
   p:first-of-type {
@@ -179,11 +226,7 @@ blockquote {
   }
 
   p:before {
-    content: '>';
-    display: block;
-    position: absolute;
-    left: -25px;
-    color: var(--accent);
+    content: none;
   }
 }
 
@@ -195,7 +238,7 @@ table {
 }
 
 table, th, td {
-  border: 1px dashed var(--accent);
+  border: 1px solid var(--border-color);
   padding: 10px;
 }
 
@@ -223,8 +266,8 @@ ol ol {
 .container {
   display: flex;
   flex-direction: column;
-  padding: 40px;
-  max-width: 864px;
+  padding: 32px;
+  max-width: 1080px;
   min-height: 100vh;
   margin: 0 auto;
 
@@ -238,7 +281,28 @@ ol ol {
 }
 
 .content {
-  display: flex;
+  display: block;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  position: relative;
+
+  &:before,
+  &:after {
+    display: none;
+  }
+}
+
+.content:has(.post--article),
+.content:has(.posts--section) {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+
+  &:before,
+  &:after {
+    display: none;
+  }
 }
 
 hr {

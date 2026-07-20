@@ -5,8 +5,11 @@
 {%- endblock -%}
 
 {% block content %}
-    <div class="post">
-        <h1 class="post-title">{{ page.title }}</h1>
+    <div class="post list-page">
+        <header class="list-page__header">
+            <p>Browse by date</p>
+            <h1 class="post-title">{{ page.title }}</h1>
+        </header>
 
         {% set posts_section = get_section(path="posts/_index.md") %}
         {% set ordered_posts = posts_section.pages | sort(attribute="date") | reverse %}

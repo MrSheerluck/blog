@@ -65,29 +65,35 @@
 
 
 {% macro header(page) %}
-    <h1 class="post-title"><a href="{{ page.permalink | safe }}">{{ page.title }}</a></h1>
-    <div class="post-meta-inline">
-        {{ post_macros::date(page=page) }}
-    </div>
+    <div class="post-heading">
+        <div class="post-meta-inline">
+            {{ post_macros::date(page=page) }}
+        </div>
 
-    {{ post_macros::tags(page=page) }}
+        <h1 class="post-title"><a href="{{ page.permalink | safe }}">{{ page.title }}</a></h1>
+
+        {{ post_macros::tags(page=page) }}
+    </div>
 {% endmacro header %}
 
 
 {% macro list_posts(pages) %}
-    <ul>
+    <ol class="entry-list">
     {%- for page in pages %}
         {%- if page.draft %}
             {% continue %}
         {% endif -%}
-        <li class="post-list">
-            <a href="{{ page.permalink | safe }}">
-                <span class="post-date">{{ page.date }}</span>
-                :: <span class="post-list-title">{{ page.title }}</span></a>
+        <li class="entry-list__item">
+            <a class="entry-list__link" href="{{ page.permalink | safe }}">
+                <span class="entry-list__date">
+                    {%- if page.date %}{{ page.date | date(format="%Y-%m-%d") }}{% endif -%}
+                </span>
+                <span class="entry-list__title">{{ page.title }}</span>
+            </a>
             {{ post_macros::tags(page=page, short=true) }}
         </li>
     {% endfor -%}
-    </ul>
+    </ol>
 {% endmacro list_posts %}
 
 

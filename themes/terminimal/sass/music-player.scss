@@ -10,9 +10,10 @@
   --overlay-mobile-peek-height: #{$overlay-mobile-peek-height};
   width: $overlay-widget-width;
   max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
-  border: 1px dashed var(--border-color);
-  border-radius: 0;
-  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 12px 0 0 12px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
   overflow: hidden;
   transform: translateX(calc(100% - var(--overlay-peek-width)));
   transition: transform 180ms ease, border-color 160ms ease, background-color 160ms ease;
@@ -37,7 +38,7 @@
   cursor: pointer;
   list-style: none;
   user-select: none;
-  color: var(--accent-alpha-70);
+  color: var(--ink-muted);
 }
 
 .music-player__summary::-webkit-details-marker {
@@ -98,9 +99,9 @@
   min-width: 0;
   height: 22px;
   padding: 0 6px;
-  border-radius: 0;
-  border: 1px dashed var(--border-color);
-  background: transparent;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--control-surface);
   color: var(--color);
   cursor: pointer;
   font-family: inherit;
@@ -136,20 +137,14 @@
 .music-player__seek::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--accent-alpha-20),
-    var(--accent-alpha-20) 10px,
-    transparent 10px,
-    transparent 16px
-  );
+  background: var(--accent-alpha-20);
 }
 
 .music-player__seek::-webkit-slider-thumb {
   appearance: none;
   width: 12px;
   height: 10px;
-  border-radius: 0;
+  border-radius: 999px;
   margin-top: -3px;
   background: var(--accent);
   border: 1px solid var(--background);
@@ -158,19 +153,13 @@
 .music-player__seek::-moz-range-track {
   height: 4px;
   border-radius: 999px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--accent-alpha-20),
-    var(--accent-alpha-20) 10px,
-    transparent 10px,
-    transparent 16px
-  );
+  background: var(--accent-alpha-20);
 }
 
 .music-player__seek::-moz-range-thumb {
   width: 12px;
   height: 10px;
-  border-radius: 0;
+  border-radius: 999px;
   background: var(--accent);
   border: 1px solid var(--background);
 }

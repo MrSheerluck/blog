@@ -507,6 +507,7 @@
 <div class="container">
     {% block header %}
     <header class="header">
+        <div class="header__kicker">Engineering notes and essays</div>
         <div class="header__inner">
             <div class="header__logo">
                 {%- if config.extra.logo_home_link %}
@@ -526,6 +527,10 @@
                     </div>
                 </a>
             </div>
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" aria-live="polite">
+                <span class="theme-toggle__icon" aria-hidden="true"></span>
+                <span class="theme-toggle__text" data-theme-toggle-text>Theme</span>
+            </button>
         </div>
 
         {% block header_menu %}
@@ -537,6 +542,19 @@
     <div class="content">
         {% block content %}
         <div class="posts">
+            <section class="site-intro" aria-labelledby="site-intro-title">
+                <div class="site-intro__copy">
+                    <p class="site-intro__eyebrow">Personal notes on engineering, systems, and software</p>
+                    <h1 id="site-intro-title">{{ config.title }}</h1>
+                    <p>{{ config.description }}</p>
+                </div>
+            </section>
+
+            <div class="section-heading">
+                <span>Latest entries</span>
+            </div>
+
+            <div class="post-index">
             {%- if paginator %}
                 {%- set show_pages = paginator.pages -%}
             {% else %}
@@ -544,12 +562,16 @@
             {% endif -%}
 
             {%- for page in show_pages %}
-                <div class="post on-list">
-                    {{ post_macros::header(page=page) }}
+                <article class="post on-list">
+                    <div class="post-index__folio">{{ loop.index }}</div>
+                    <div class="post-index__body">
+                        {{ post_macros::header(page=page) }}
 
-                    {{ post_macros::content(page=page, summary=true, show_only_description=page.extra.show_only_description | default(value=false)) }}
-                </div>
+                        {{ post_macros::content(page=page, summary=true, show_only_description=page.extra.show_only_description | default(value=false)) }}
+                    </div>
+                </article>
             {% endfor -%}
+            </div>
             <div class="pagination">
                 <div class="pagination__buttons">
                 {%- if paginator.previous %}
@@ -599,6 +621,50 @@
 
 </div>
 {%- block extra_body %}
+<script>
+(() => {
+  const storageKey = "mrsheerluck-theme";
+  const root = document.documentElement;
+  const getTheme = () => root.dataset.theme === "dark" ? "dark" : "light";
+  const labelFor = (theme) => theme === "dark" ? "Dark" : "Light";
+
+  const syncThemeButtons = () => {
+    const theme = getTheme();
+    for (const button of document.querySelectorAll("[data-theme-toggle]")) {
+      button.setAttribute("aria-pressed", String(theme === "dark"));
+      const text = button.querySelector("[data-theme-toggle-text]");
+      if (text) text.textContent = labelFor(theme);
+    }
+  };
+
+  const setTheme = (theme) => {
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
+    try {
+      localStorage.setItem(storageKey, theme);
+    } catch (_) {}
+    syncThemeButtons();
+  };
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-theme-toggle]");
+    if (!button) return;
+    setTheme(getTheme() === "dark" ? "light" : "dark");
+  });
+
+  document.addEventListener("DOMContentLoaded", syncThemeButtons, { once: true });
+  window.addEventListener("pageshow", syncThemeButtons);
+
+  const previousMount = window.__mountOverlays;
+  window.__syncThemeToggle = syncThemeButtons;
+  window.__mountOverlays = (...args) => {
+    if (typeof previousMount === "function") previousMount(...args);
+    syncThemeButtons();
+  };
+
+  syncThemeButtons();
+})();
+</script>
 <script>
 window.__videoImgConvert = function() {
   var imgs = document.querySelectorAll('.post-content img[src$=".mp4"], .post-content img[src$=".webm"], .post-content img[src$=".mov"]');

@@ -4,7 +4,7 @@
   position: absolute;
   background: var(--background);
   box-shadow: var(--shadow);
-  color: white;
+  color: var(--color);
   border: 2px solid;
   margin: 0;
   padding: 10px;
@@ -14,8 +14,8 @@
 
 .menu__inner a:has(.nav-nounderline) {
   text-decoration: none;
-  border-bottom: 1px dotted var(--accent);
-  padding: 2px 6px;
+  border: 0;
+  padding: 0;
   transition: background-color 160ms ease;
 }
 
@@ -27,11 +27,28 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  padding: 0 0 26px;
+  margin-bottom: 34px;
+  border-bottom: 1px solid var(--border-color);
+
+  &:before {
+    content: none;
+  }
+
+  &__kicker {
+    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-size: .74rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+  }
 
   &__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 18px;
   }
 
   &__logo {
@@ -40,14 +57,7 @@
     min-width: 0;
 
     &:after {
-      content: '';
-      background: repeating-linear-gradient(90deg, var(--accent), var(--accent) 2px, transparent 0, transparent 16px);
-      display: block;
-      flex: 1 1 auto;
-      min-width: 0;
-      height: 1.2em;
-      margin-left: 16px;
-      align-self: center;
+      content: none;
     }
 
     a {
@@ -57,7 +67,10 @@
   }
 
   .menu {
-    margin: 20px 0;
+    margin: 20px 0 0;
+    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-size: .86rem;
+    text-transform: lowercase;
 
     &__inner {
       display: flex;
@@ -68,12 +81,12 @@
 
       li {
         &.active {
-          color: var(--accent-alpha-70);
+          color: var(--signal);
         }
 
         &:not(:last-of-type) {
-          margin-right: 20px;
-          margin-bottom: 10px;
+          margin-right: 18px;
+          margin-bottom: 8px;
           flex: 0 0 auto;
         }
       }
@@ -108,4 +121,39 @@
       }
     }
   }
+}
+
+.theme-toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  margin: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-muted);
+  box-shadow: var(--shadow);
+  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-size: .76rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color);
+    border-color: var(--signal);
+    transform: translateY(-1px);
+  }
+}
+
+.theme-toggle__icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: linear-gradient(90deg, currentColor 0 50%, transparent 50%);
 }
