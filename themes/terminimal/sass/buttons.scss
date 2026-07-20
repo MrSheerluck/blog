@@ -11,24 +11,29 @@ a.button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 18px;
+  padding: 6px 14px;
   margin-bottom: 5px;
   text-align: center;
-  border-radius: 0;
   border: 1px solid var(--border-color);
   background: transparent;
   font-family: var(--font-mono);
-  font-size: .84rem;
+  font-variant-ligatures: none;
+  font-size: .78rem;
   appearance: none;
   cursor: pointer;
   outline: none;
+  color: var(--ink-soft);
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
 
-  /* variants */
+  &:hover {
+    border-color: var(--phosphor);
+    color: var(--phosphor);
+  }
 
   &.outline {
     background: transparent;
     box-shadow: none;
-    padding: 8px 18px;
+    padding: 6px 14px;
 
     :hover {
       transform: none;
@@ -37,10 +42,10 @@ a.button {
   }
 
   &.primary {
-    box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
+    box-shadow: none;
 
     &:hover {
-      box-shadow: 0 2px 6px rgba(50, 50, 93, .21), 0 1px 3px rgba(0, 0, 0, .08);
+      box-shadow: none;
     }
   }
 
@@ -49,16 +54,13 @@ a.button {
     font-size: 1rem;
   }
 
-
-  /* sizes */
-
   &.small {
-    font-size: .8rem;
+    font-size: .72rem;
   }
 
   &.wide {
     min-width: 200px;
-    padding: 14px 24px;
+    padding: 12px 20px;
   }
 }
 
@@ -69,26 +71,34 @@ a.read-more:active {
   background: none;
   box-shadow: none;
   padding: 0;
-  margin: 20px 0;
+  margin: 16px 0;
   max-width: 100%;
   border: 0;
-  color: var(--signal);
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  color: var(--phosphor);
+  text-decoration: none;
+
+  &::before {
+    content: "> ";
+  }
 }
 
 .code-toolbar {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 
   .toolbar-item a {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 3px 8px;
+    padding: 2px 8px;
     margin-bottom: 5px;
     text-align: center;
-    font-size: 13px;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 12px;
     font-weight: 500;
-    border-radius: 8px;
     border: 1px solid transparent;
     appearance: none;
     cursor: pointer;

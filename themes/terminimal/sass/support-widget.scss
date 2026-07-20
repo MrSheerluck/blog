@@ -7,32 +7,30 @@
   z-index: 1490;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: $overlay-widget-width;
   max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
-  padding: 11px 12px;
-  border: 1px solid var(--signal);
-  border-radius: 12px 0 0 12px;
-  background: var(--signal);
-  box-shadow: 0 12px 28px rgba(194, 74, 46, .28);
-  color: var(--background);
+  padding: 10px 12px;
+  border: 1px solid var(--phosphor);
+  border-left-width: 3px;
+  background: var(--surface);
+  color: var(--phosphor);
   font-family: var(--font-mono);
-  font-size: .78rem;
-  font-weight: 700;
+  font-size: .74rem;
+  font-variant-ligatures: none;
+  font-weight: 500;
   text-decoration: none;
   user-select: none;
   transform: translateY(calc(-50% - 55px)) translateX(calc(100% - var(--overlay-peek-width)));
-  transition: transform 180ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+  transition: background-color 120ms ease, color 120ms ease, transform 180ms ease;
 
-  --overlay-peek-width: 190px;
+  --overlay-peek-width: 170px;
 }
 
 .support-widget:hover,
 .support-widget:focus {
-  background: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 16px 34px rgba(194, 74, 46, .34);
-  color: var(--background);
+  background: var(--phosphor);
+  color: var(--bg);
 }
 
 @media (max-width: $overlay-collapse-width) {

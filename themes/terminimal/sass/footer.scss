@@ -1,18 +1,19 @@
 @import "variables";
 
 .footer {
-  padding: 22px 0 40px;
+  padding: 24px 0 32px;
   flex-grow: 0;
   opacity: 1;
-  font-family: var(--font-mono);
   color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
 
   &__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin: 0;
-    width: 760px;
+    width: 100%;
     max-width: 100%;
 
     @media (max-width: $tablet-max-width) {
@@ -21,15 +22,20 @@
   }
 
   a {
-    color: inherit;
+    color: var(--phosphor);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      background: none;
+    }
   }
 
   .copyright {
     display: flex;
     flex-direction: row;
     align-items: center;
-    font-size: .78rem;
-    color: var(--light-color-secondary);
+    font-size: .7rem;
 
     &--user {
       margin: auto;
@@ -37,7 +43,7 @@
     }
 
     & > *:first-child:not(:only-child) {
-      margin-right: 10px;
+      margin-right: 8px;
 
        @media (max-width: $tablet-max-width) {
         border: none;
@@ -48,7 +54,7 @@
 
     @media (max-width: $tablet-max-width) {
       flex-direction: column;
-      margin-top: 10px;
+      margin-top: 8px;
     }
   }
 
@@ -60,7 +66,7 @@
 
   .copyright-theme {
     @media (max-width: $tablet-max-width) {
-      font-size: 0.75rem;
+      font-size: .68rem;
     }
   }
 }

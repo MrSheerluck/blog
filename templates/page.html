@@ -7,6 +7,29 @@
 {%- endblock -%}
 
 {% block content %}
+    {%- if page.toc | length >= 2 %}
+    <div class="toc">
+        <div class="toc__bars">
+            {%- for h in page.toc %}
+            <span class="toc__bar" title="{{ h.title }}"></span>
+            {%- for sub in h.children %}
+            <span class="toc__bar" title="{{ sub.title }}"></span>
+            {%- endfor %}
+            {%- endfor %}
+        </div>
+        <div class="toc__panel">
+            <div class="toc__panel-inner">
+                {%- for h in page.toc %}
+                <a class="toc__item" href="#{{ h.id }}">{{ h.title }}</a>
+                {%- for sub in h.children %}
+                <a class="toc__item toc__item--sub" href="#{{ sub.id }}">{{ sub.title }}</a>
+                {%- endfor %}
+                {%- endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif -%}
+
     <article class="post post--article">
         {{ post_macros::header(page=page) }}
         {{ series_macros::inline(page=page) }}
@@ -19,5 +42,49 @@
 
 {% block extra_body %}
 {{ super() }}
-<script src="{{ get_url(path='js/toc.js') | safe }}"></script>
+<script>
+(() => {
+  function init() {
+    const toc = document.querySelector('.toc');
+    if (!toc) return;
+    const bars = toc.querySelectorAll('.toc__bar');
+    const items = toc.querySelectorAll('.toc__item');
+    const headings = Array.from(document.querySelectorAll('.post-content h2, .post-content h3'));
+    if (!headings.length || headings.length !== bars.length) return;
+
+    items.forEach((item, i) => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        headings[i]?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    bars.forEach((bar, i) => {
+      bar.addEventListener('click', () => {
+        headings[i]?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    let pending = false;
+    const update = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        let active = 0;
+        headings.forEach((h, i) => {
+          if (h.getBoundingClientRect().top <= 150) active = i;
+        });
+        bars.forEach((b, i) => b.classList.toggle('toc__bar--active', i === active));
+        items.forEach((item, i) => item.classList.toggle('toc__item--active', i === active));
+      });
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
+  window.__initToc = init;
+  init();
+})();
+</script>
 {% endblock extra_body %}

@@ -3,33 +3,36 @@
 .support-box {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: 14px;
   align-items: center;
-  margin: 38px 0 24px;
-  padding: 18px 20px;
-  border: 1px solid var(--signal);
-  border-left-width: 5px;
-  background: var(--accent-alpha-10);
+  margin: 24px 0 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
   color: var(--color);
 
   @media (max-width: $phone-max-width) {
     grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 16px;
+    gap: 10px;
+    padding: 12px 14px;
   }
 
   &__copy {
     display: grid;
-    gap: 5px;
+    gap: 2px;
   }
 
   &__label {
     margin: 0;
-    color: var(--signal);
+    color: var(--phosphor);
     font-family: var(--font-mono);
-    font-size: .72rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-size: .68rem;
+    font-weight: 500;
+    font-variant-ligatures: none;
+
+    &::before {
+      content: "✦ ";
+    }
   }
 
   p {
@@ -38,12 +41,12 @@
   }
 
   &--home {
-    margin-top: 28px;
-    margin-bottom: 34px;
+    margin-top: 20px;
+    margin-bottom: 24px;
   }
 
   &--page {
-    margin-top: 32px;
+    margin-top: 20px;
   }
 }
 
@@ -51,26 +54,22 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 38px;
+  min-height: 32px;
   padding: 0 14px;
-  border: 1px solid var(--signal);
-  border-radius: 999px;
-  background: var(--signal);
-  color: var(--background);
+  border: 1px solid var(--phosphor);
+  background: transparent;
+  color: var(--phosphor);
   font-family: var(--font-mono);
-  font-size: .78rem;
-  font-weight: 700;
+  font-size: .75rem;
+  font-variant-ligatures: none;
+  font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: 0 8px 18px rgba(194, 74, 46, .2);
-  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
 .support-link:hover,
 .support-link:focus {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--background);
-  box-shadow: 0 10px 24px rgba(194, 74, 46, .28);
-  transform: translateY(-1px);
+  background: var(--phosphor);
+  color: var(--bg);
 }
