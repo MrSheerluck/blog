@@ -5,22 +5,29 @@
 {%- endblock -%}
 
 {% block content %}
-    <div class="post list-page">
-        <header class="list-page__header">
-            <p>Learning paths</p>
-            <h1 class="post-title">All series</h1>
+    <div class="post list-page list-page--series">
+        <header class="list-page__header series-hero">
+            <div>
+                <h1 class="post-title">All series</h1>
+            </div>
+            <span class="series-hero__count">{{ terms | length }} collection{{ terms | length | pluralize }}</span>
         </header>
 
-        <ul class="term-grid">
+        <ol class="series-grid">
             {% for term in terms %}
-            <li class="tag-list">
-                <a href="{{ term.permalink | safe }}">
-                    <span>{{ term.name }}</span>
-                    <small>{{ term.pages | length }} part{{ term.pages | length | pluralize }}</small>
+            {% set series_name = term.name | replace(from="-", to=" ") %}
+            <li class="series-card">
+                <a class="series-card__link" href="{{ term.permalink | safe }}">
+                    <span class="series-card__index">{{ loop.index }}</span>
+                    <span class="series-card__body">
+                        <span class="series-card__title">{{ series_name }}</span>
+                        <span class="series-card__meta">{{ term.pages | length }} part{{ term.pages | length | pluralize }}</span>
+                    </span>
+                    <span class="series-card__arrow" aria-hidden="true">→</span>
                 </a>
             </li>
             {% endfor %}
-        </ul>
+        </ol>
 
         <div data-mobile-subscribe-host></div>
     </div>

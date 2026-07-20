@@ -17,7 +17,7 @@ a.button {
   border-radius: 0;
   border: 1px solid var(--border-color);
   background: transparent;
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-size: .84rem;
   appearance: none;
   cursor: pointer;

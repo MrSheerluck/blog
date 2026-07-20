@@ -17,7 +17,7 @@
   }
 
   %meta {
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .78rem;
     margin-bottom: 10px;
     color: var(--ink-muted);
@@ -58,7 +58,7 @@
 
   %tags {
     margin-bottom: 20px;
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .78rem;
     color: var(--blueprint);
     opacity: 1;
@@ -199,7 +199,7 @@
 
 .post-index__folio {
   display: none;
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   color: var(--ink-muted);
   font-size: .8rem;
   padding-top: 8px;
@@ -246,7 +246,7 @@
 
   p {
     margin: 0 0 10px;
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .78rem;
     color: var(--ink-muted);
     text-transform: uppercase;
@@ -279,7 +279,7 @@
 
   &:before {
     content: counter(posts-index, decimal-leading-zero);
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     color: var(--ink-muted);
     font-size: .78rem;
     padding-top: .25rem;
@@ -310,7 +310,7 @@
 }
 
 .posts-index__date {
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-size: .78rem;
   color: var(--ink-muted);
 }
@@ -356,7 +356,7 @@
 
 .manual-hero__eyebrow,
 .manual-section-title {
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-size: .78rem;
   color: var(--ink-muted);
   text-transform: uppercase;
@@ -421,7 +421,7 @@
   border: 1px solid var(--accent);
   border-radius: 50%;
   background: var(--paper);
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-size: .72rem;
   color: var(--color);
 }
@@ -476,7 +476,7 @@
 
   &:before {
     content: counter(recent-entry, decimal-leading-zero);
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     color: var(--ink-muted);
     font-size: .78rem;
     padding-top: 3px;
@@ -485,7 +485,7 @@
   .post-date {
     color: var(--ink-muted);
     text-decoration: none;
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .78rem;
   }
 
@@ -525,10 +525,10 @@
 .posts--home,
 .posts--section,
 .post--article {
-  background: var(--paper);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: var(--paper-shadow);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .site-intro {
@@ -562,7 +562,7 @@
 
 .site-intro__eyebrow,
 .section-heading {
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-size: .78rem;
   color: var(--ink-muted);
   text-transform: uppercase;
@@ -609,7 +609,7 @@
 .post--article {
   width: min(100%, 820px);
   min-height: 0;
-  background: var(--paper);
+  background: transparent;
   padding: 64px 72px 78px;
   position: relative;
 
@@ -618,7 +618,6 @@
   }
 
   @media (max-width: $phone-max-width) {
-    border-radius: 12px;
     padding: 34px 22px 44px;
   }
 
@@ -654,7 +653,6 @@
   }
 
   @media (max-width: $phone-max-width) {
-    border-radius: 12px;
     padding: 28px 22px 34px;
   }
 }
@@ -775,10 +773,10 @@
 .list-page {
   width: min(100%, 980px);
   margin: 0 auto;
-  background: var(--paper);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: var(--paper-shadow);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   padding: 48px 56px 56px;
 
   @media (max-width: $tablet-max-width) {
@@ -786,7 +784,6 @@
   }
 
   @media (max-width: $phone-max-width) {
-    border-radius: 12px;
     padding: 28px 20px 34px;
   }
 }
@@ -799,7 +796,7 @@
 
   p {
     margin: 0 0 10px;
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .76rem;
     color: var(--ink-muted);
     text-transform: uppercase;
@@ -818,7 +815,7 @@
   display: inline-flex;
   margin-top: 14px;
   color: var(--ink-muted);
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-size: .8rem;
 }
 
@@ -847,7 +844,7 @@
   &:before {
     content: counter(entry-list, decimal-leading-zero);
     color: #9aa3aa;
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .76rem;
     padding-top: .28rem;
   }
@@ -878,9 +875,19 @@
   }
 }
 
+.entry-list--titles-only {
+  .entry-list__link {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .entry-list__item {
+    align-items: baseline;
+  }
+}
+
 .entry-list__date {
   color: var(--ink-muted);
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-size: .78rem;
   white-space: nowrap;
 }
@@ -953,7 +960,225 @@
   small {
     flex: 0 0 auto;
     color: var(--ink-muted);
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .72rem;
   }
+}
+
+.list-page--series {
+  padding: 0;
+  overflow: hidden;
+
+  .post-title {
+    text-transform: capitalize;
+  }
+}
+
+.series-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  margin: 0;
+  padding: 48px 56px 30px;
+  background: transparent;
+
+  @media (max-width: $tablet-max-width) {
+    padding: 36px 30px 26px;
+  }
+
+  @media (max-width: $phone-max-width) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px 20px 24px;
+  }
+}
+
+.series-hero--single {
+  align-items: flex-start;
+}
+
+.series-hero__count,
+.series-card__meta,
+.series-step__number {
+  font-family: var(--font-mono);
+  font-size: .74rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+}
+
+.series-hero__count {
+  flex: 0 0 auto;
+  margin-bottom: .45rem;
+  padding: 7px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--paper);
+}
+
+.series-grid {
+  display: grid;
+  gap: 0;
+  counter-reset: series-list;
+  margin: 0;
+  padding: 10px 56px 56px;
+
+  @media (max-width: $tablet-max-width) {
+    padding: 8px 30px 42px;
+  }
+
+  @media (max-width: $phone-max-width) {
+    padding: 4px 20px 34px;
+  }
+}
+
+.series-card {
+  counter-increment: series-list;
+  list-style: none;
+  border-bottom: 1px solid var(--border-color);
+
+  &:before {
+    content: none !important;
+  }
+}
+
+.series-card__link {
+  display: grid;
+  grid-template-columns: 4.25rem minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: baseline;
+  padding: 22px 0;
+  text-decoration: none;
+  transition: color 160ms ease;
+
+  @media (max-width: $phone-max-width) {
+    grid-template-columns: 1fr auto;
+    gap: 8px 16px;
+    padding: 20px 0;
+  }
+
+  &:hover,
+  &:focus {
+    .series-card__title {
+      color: var(--signal);
+    }
+
+    .series-card__arrow {
+      color: var(--signal);
+      transform: translateX(3px);
+    }
+  }
+}
+
+.series-card__index {
+  display: block;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  padding-top: .18rem;
+
+  &:before {
+    content: counter(series-list, decimal-leading-zero);
+  }
+
+  @media (max-width: $phone-max-width) {
+    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+}
+
+.series-card__body,
+.series-step__copy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.series-card__title {
+  color: var(--color);
+  font-size: clamp(1.14rem, 2vw, 1.42rem);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  text-transform: capitalize;
+  transition: color 160ms ease;
+}
+
+.series-card__arrow {
+  color: var(--ink-muted);
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: color 160ms ease, transform 160ms ease;
+
+  @media (max-width: $phone-max-width) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+.series-sequence {
+  counter-reset: series-step;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 10px 56px 56px;
+
+  @media (max-width: $tablet-max-width) {
+    padding: 8px 30px 42px;
+  }
+
+  @media (max-width: $phone-max-width) {
+    padding: 4px 20px 34px;
+  }
+}
+
+.series-step {
+  counter-increment: series-step;
+  list-style: none;
+  border-bottom: 1px solid var(--border-color);
+
+  &:before {
+    content: none !important;
+  }
+}
+
+.series-step__link {
+  display: grid;
+  grid-template-columns: 6.8rem minmax(0, 1fr);
+  gap: 22px;
+  padding: 20px 0;
+  text-decoration: none;
+
+  @media (max-width: $phone-max-width) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 18px 0;
+  }
+
+  &:hover,
+  &:focus {
+    .series-step__title {
+      color: var(--signal);
+    }
+  }
+}
+
+.series-step__number {
+  padding-top: .28rem;
+}
+
+.series-step__title {
+  color: var(--color);
+  font-size: clamp(1.08rem, 2vw, 1.34rem);
+  font-weight: 600;
+  line-height: 1.32;
+  overflow-wrap: anywhere;
+  transition: color 160ms ease;
+}
+
+.series-step__description {
+  color: var(--ink-soft);
+  font-size: .98rem;
+  line-height: 1.55;
 }

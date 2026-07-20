@@ -10,24 +10,29 @@
   gap: 10px;
   width: $overlay-widget-width;
   max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
-  padding: 10px;
-  border: 1px solid var(--border-color);
+  padding: 11px 12px;
+  border: 1px solid var(--signal);
   border-radius: 12px 0 0 12px;
-  background: var(--paper);
-  box-shadow: var(--shadow);
-  color: var(--ink-muted);
+  background: var(--signal);
+  box-shadow: 0 12px 28px rgba(194, 74, 46, .28);
+  color: var(--background);
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  font-weight: 700;
   text-decoration: none;
   user-select: none;
   transform: translateY(calc(-50% - 55px)) translateX(calc(100% - var(--overlay-peek-width)));
-  transition: transform 180ms ease, border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+  transition: transform 180ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
 
-  --overlay-peek-width: 185px;
+  --overlay-peek-width: 190px;
 }
 
 .support-widget:hover,
 .support-widget:focus {
-  border-color: var(--accent-alpha-70);
-  color: var(--accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 16px 34px rgba(194, 74, 46, .34);
+  color: var(--background);
 }
 
 @media (max-width: $overlay-collapse-width) {

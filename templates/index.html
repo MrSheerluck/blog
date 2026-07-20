@@ -12,13 +12,7 @@
         {% set recent_posts = posts_section.pages | sort(attribute="date") | reverse %}
 
         <div class="posts posts--home">
-            <section class="site-intro" aria-labelledby="site-intro-title">
-                <div class="site-intro__copy">
-                    <p class="site-intro__eyebrow">Personal notes on engineering, systems, and software</p>
-                    <h1 id="site-intro-title">{{ config.extra.logo_text | default(value=config.title) }}</h1>
-                    <p>{{ config.description }}</p>
-                </div>
-            </section>
+
 
             <article class="post post--welcome">
                 {{ post_macros::header(page=welcome_page) }}
@@ -30,17 +24,15 @@
                 <span>Recent posts</span>
             </div>
 
-            <ol class="entry-list home-recent-list">
+            <ol class="entry-list entry-list--titles-only home-recent-list">
                 {% set_global shown = 0 %}
                 {% for listed_page in recent_posts %}
                     {% if shown < 7 %}
                         {% set_global shown = shown + 1 %}
                         <li class="entry-list__item">
                             <a class="entry-list__link" href="{{ listed_page.permalink | safe }}">
-                                <span class="entry-list__date">{{ listed_page.date | date(format="%Y-%m-%d") }}</span>
                                 <span class="entry-list__title">{{ listed_page.title }}</span>
                             </a>
-                            {{ post_macros::tags(page=listed_page, short=true) }}
                         </li>
                     {% endif %}
                 {% endfor %}

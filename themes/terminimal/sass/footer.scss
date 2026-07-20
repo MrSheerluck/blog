@@ -4,7 +4,7 @@
   padding: 22px 0 40px;
   flex-grow: 0;
   opacity: 1;
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   color: var(--ink-muted);
 
   &__inner {

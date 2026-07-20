@@ -13,14 +13,26 @@
 }
 
 .menu__inner a:has(.nav-nounderline) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--signal);
+  border-radius: 999px;
+  background: var(--signal);
+  color: var(--background);
+  box-shadow: 0 8px 20px rgba(194, 74, 46, .2);
   text-decoration: none;
-  border: 0;
-  padding: 0;
-  transition: background-color 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.menu__inner a:has(.nav-nounderline):hover {
-  background: var(--accent-alpha-10);
+.menu__inner a:has(.nav-nounderline):hover,
+.menu__inner a:has(.nav-nounderline):focus {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--background);
+  box-shadow: 0 10px 24px rgba(194, 74, 46, .28);
+  transform: translateY(-1px);
 }
 
 .header {
@@ -36,7 +48,7 @@
   }
 
   &__kicker {
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .74rem;
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -68,7 +80,7 @@
 
   .menu {
     margin: 20px 0 0;
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     font-size: .86rem;
     text-transform: lowercase;
 
@@ -136,7 +148,7 @@
   background: var(--paper);
   color: var(--ink-muted);
   box-shadow: var(--shadow);
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-size: .76rem;
   line-height: 1;
   cursor: pointer;

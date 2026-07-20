@@ -1,10 +1,13 @@
 @import "variables";
 
 :root {
+  --font-heading: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: Literata, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --background: #f6f7f8;
   --color: #1d2329;
-  --paper: #ffffff;
-  --paper-deep: #ffffff;
+  --paper: var(--background);
+  --paper-deep: var(--background);
   --ink-muted: #6b747c;
   --ink-soft: #45515c;
   --accent: #1d2329;
@@ -18,6 +21,7 @@
   --control-surface-hover: #ffffff;
   --blueprint: #2b6f8a;
   --signal: #c24a2e;
+  --grid-dot: rgba(29, 35, 41, .16);
   --shadow: 0 16px 40px rgba(22, 28, 35, .06);
   --paper-shadow: 0 1px 2px rgba(22, 28, 35, .04), 0 18px 45px rgba(22, 28, 35, .07);
 }
@@ -25,8 +29,8 @@
 :root[data-theme="dark"] {
   --background: #11161c;
   --color: #e9edf1;
-  --paper: #182029;
-  --paper-deep: #182029;
+  --paper: var(--background);
+  --paper-deep: var(--background);
   --ink-muted: #9aa7b3;
   --ink-soft: #c4ccd4;
   --accent: #f4f7fa;
@@ -40,6 +44,7 @@
   --control-surface-hover: #1f2a35;
   --blueprint: #79b8cf;
   --signal: #ff8a66;
+  --grid-dot: rgba(233, 237, 241, .13);
   --shadow: 0 18px 50px rgba(0, 0, 0, .28);
   --paper-shadow: 0 1px 2px rgba(0, 0, 0, .18), 0 22px 60px rgba(0, 0, 0, .32);
 }
@@ -57,11 +62,13 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-family: var(--font-body);
   font-size: 1.05rem;
   line-height: 1.7;
   background-color: var(--background);
-  background-image: none;
+  background-image: radial-gradient(circle, var(--grid-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: 0 0;
   color: var(--color);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -74,7 +81,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-family: var(--font-heading);
   font-weight: 600;
   line-height: 1.16;
   letter-spacing: 0;
@@ -166,7 +173,7 @@ figure {
 }
 
 code {
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   font-feature-settings: normal;
   background: var(--accent-alpha-20);
   padding: 1px 6px;
@@ -175,7 +182,7 @@ code {
 }
 
 pre {
-  font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+  font-family: var(--font-mono);
   padding: 20px;
   font-size: .95rem;
   overflow: auto;

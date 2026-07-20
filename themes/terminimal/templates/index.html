@@ -39,7 +39,7 @@
 {%- if config.extra.music_player_enabled | default(value=false) %}
 <details class="music-player" data-overlay-collapsible role="region" aria-label="Music player">
     <summary class="music-player__summary">
-        <span>[music]</span>
+        <span class="music-player__summary-label">music</span>
         <span class="music-player__summary-state" data-music-player-summary-state>paused</span>
     </summary>
     <div class="music-player__panel">
@@ -373,7 +373,7 @@
 {%- if config.extra.subscribe_widget_enabled | default(value=false) and config.extra.subscribe_widget_iframe_url %}
 <details class="subscribe-widget" data-overlay-collapsible role="region" aria-label="Subscribe">
     <summary class="subscribe-widget__summary">
-        <span>[subscribe]</span>
+        <span class="subscribe-widget__summary-label">subscribe</span>
         <span class="subscribe-widget__summary-state">rss + email</span>
     </summary>
     <div class="subscribe-widget__panel">
@@ -544,9 +544,7 @@
         <div class="posts">
             <section class="site-intro" aria-labelledby="site-intro-title">
                 <div class="site-intro__copy">
-                    <p class="site-intro__eyebrow">Personal notes on engineering, systems, and software</p>
                     <h1 id="site-intro-title">{{ config.title }}</h1>
-                    <p>{{ config.description }}</p>
                 </div>
             </section>
 

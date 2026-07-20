@@ -117,7 +117,7 @@
     display: block;
     padding: 5px 0;
     font-size: 0.82rem;
-    font-family: Hack, DejaVu Sans Mono, Monaco, Consolas, Ubuntu Mono, monospace;
+    font-family: var(--font-mono);
     color: var(--accent-alpha-70);
     text-decoration: none;
     transition: color 0.1s;
