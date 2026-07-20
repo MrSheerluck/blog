@@ -172,7 +172,7 @@ hello world
 hello rust
 ```
 
-It went through three lines and found two that contained the word "hello", and printed those. The third line didn't match so it was ignored. Now, lets try with a flag:
+It went through three lines and found two that contained the word "hello", and printed those. The second line didn't match so it was ignored. Now, lets try with a flag:
 ```shell
 echo -e "hello world\ngoodbye world\nhello rust" | grep -v "hello"
 ```
