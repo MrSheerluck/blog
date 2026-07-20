@@ -5,6 +5,9 @@ description = "A quick intro to this Zola + Terminimal setup."
 
 [taxonomies]
 tags = ["zola", "terminimal", "setup"]
+
+[extra]
+hidden = true
 +++
 
 Hi,

@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["rust", "project", "parser"]
 series = ["learning-rust"]
+
+[extra]
+hidden = true
 +++
 
 

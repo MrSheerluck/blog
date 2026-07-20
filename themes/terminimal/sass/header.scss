@@ -1,37 +1,57 @@
 @import "variables";
 
-@mixin menu {
-  position: absolute;
-  background: var(--background);
-  box-shadow: var(--shadow);
-  color: white;
-  border: 2px solid;
-  margin: 0;
-  padding: 10px;
-  list-style: none;
-  z-index: 99;
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 .menu__inner a:has(.nav-nounderline) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--phosphor);
+  background: transparent;
+  color: var(--phosphor);
   text-decoration: none;
-  border-bottom: 1px dotted var(--accent);
-  padding: 2px 6px;
-  transition: background-color 160ms ease;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  font-variant-ligatures: none;
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
-.menu__inner a:has(.nav-nounderline):hover {
-  background: var(--accent-alpha-10);
+.menu__inner a:has(.nav-nounderline):hover,
+.menu__inner a:has(.nav-nounderline):focus {
+  background: var(--phosphor);
+  color: var(--bg);
 }
 
 .header {
   display: flex;
   flex-direction: column;
   position: relative;
+  padding: 0 0 22px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+
+  &__kicker {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+    font-variant-ligatures: none;
+
+    &::before {
+      content: "~/ ";
+      color: var(--phosphor);
+    }
+  }
 
   &__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
   }
 
   &__logo {
@@ -40,24 +60,21 @@
     min-width: 0;
 
     &:after {
-      content: '';
-      background: repeating-linear-gradient(90deg, var(--accent), var(--accent) 2px, transparent 0, transparent 16px);
-      display: block;
-      flex: 1 1 auto;
-      min-width: 0;
-      height: 1.2em;
-      margin-left: 16px;
-      align-self: center;
+      content: none;
     }
 
     a {
       flex: 0 0 auto;
       max-width: 100%;
+      text-decoration: none;
     }
   }
 
   .menu {
-    margin: 20px 0;
+    margin: 14px 0 0;
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    font-variant-ligatures: none;
 
     &__inner {
       display: flex;
@@ -67,14 +84,26 @@
       padding: 0;
 
       li {
+        transition: color 120ms ease;
+
         &.active {
-          color: var(--accent-alpha-70);
+          color: var(--phosphor);
         }
 
         &:not(:last-of-type) {
-          margin-right: 20px;
-          margin-bottom: 10px;
+          margin-right: 10px;
+          margin-bottom: 4px;
           flex: 0 0 auto;
+        }
+      }
+
+      a {
+        text-decoration: none;
+        color: var(--ink-soft);
+
+        &:hover {
+          color: var(--phosphor);
+          background: none;
         }
       }
     }
@@ -86,18 +115,30 @@
       margin: 0;
 
       &:not(:only-child) {
-        margin-left: 20px;
+        margin-left: 18px;
       }
 
       &-more {
-        @include menu;
+        position: absolute;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        color: var(--color);
+        border: 1px solid var(--border-color);
+        margin: 0;
+        padding: 8px;
+        list-style: none;
+        z-index: 99;
         top: 35px;
         left: 0;
 
         &-trigger {
-          color: var(--accent);
+          color: var(--ink-muted);
           user-select: none;
           cursor: pointer;
+
+          &:hover {
+            color: var(--phosphor);
+          }
         }
 
         li {
@@ -108,4 +149,40 @@
       }
     }
   }
+}
+
+.theme-toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  margin: 0;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--color);
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  font-variant-ligatures: none;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
+
+  &::before {
+    content: "> ";
+    color: var(--phosphor);
+    animation: blink 2s step-end infinite;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--phosphor);
+    border-color: var(--phosphor);
+    background: var(--surface-hover);
+  }
+}
+
+.theme-toggle__icon {
+  display: none;
 }

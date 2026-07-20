@@ -6,19 +6,20 @@
   right: 0;
   z-index: 1500;
 
-  --overlay-peek-width: 132px;
+  --overlay-peek-width: 126px;
   --overlay-mobile-peek-height: #{$overlay-mobile-peek-height};
   width: $overlay-widget-width;
   max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
   margin: 0;
   padding: 0;
-  border: 1px dashed var(--border-color);
-  border-radius: 0;
-  background: var(--background);
+  border: 1px solid var(--phosphor);
+  border-left-width: 3px;
+  background: var(--surface);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .5);
   max-height: calc(100vh - 24px);
   overflow: hidden;
   transform: translateY(-50%) translateX(calc(100% - var(--overlay-peek-width)));
-  transition: transform 180ms ease, border-color 160ms ease, background-color 160ms ease;
+  transition: transform 180ms ease;
 }
 
 .subscribe-widget[open] {
@@ -28,20 +29,30 @@
 .subscribe-widget:hover,
 .subscribe-widget:focus-within,
 .subscribe-widget[open] {
-  border-color: var(--accent-alpha-70);
+  border-color: var(--phosphor);
 }
 
 .subscribe-widget__summary {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   list-style: none;
   user-select: none;
-  padding: 10px;
-  color: var(--accent-alpha-70);
-  justify-content: space-between;
-  transition: color 160ms ease;
+  min-height: 34px;
+  padding: 0 12px;
+  background: var(--phosphor);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-weight: 500;
+  font-size: .76rem;
+  transition: opacity 120ms ease;
+
+  &::before {
+    content: "✦ ";
+    font-size: .7rem;
+  }
 }
 
 .subscribe-widget__summary::-webkit-details-marker {
@@ -49,85 +60,104 @@
 }
 
 .subscribe-widget[open] .subscribe-widget__summary {
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--phosphor);
+  opacity: .9;
 }
 
 .subscribe-widget:hover .subscribe-widget__summary,
 .subscribe-widget:focus-within .subscribe-widget__summary {
-  color: var(--accent);
+  opacity: .85;
+}
+
+.subscribe-widget__summary-label {
+  white-space: nowrap;
 }
 
 .subscribe-widget__panel {
-  padding: 10px;
+  padding: 12px;
   max-height: calc(100vh - 120px);
   overflow: auto;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  font-variant-ligatures: none;
+  color: var(--color);
 }
 
 .subscribe-widget__summary-state {
-  font-size: 12px;
-  opacity: 0.72;
+  display: none;
+  font-size: 11px;
+  opacity: .7;
+}
+
+.subscribe-widget[open] .subscribe-widget__summary-state {
+  display: inline;
 }
 
 .subscribe-widget__form {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .subscribe-widget__label {
   flex: 0 0 auto;
-  font-size: 12px;
-  opacity: 0.85;
+  font-size: 11px;
   user-select: none;
+  color: var(--color);
 }
 
 .subscribe-widget__input {
   flex: 1 1 180px;
   width: 100%;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 0;
-  border: 1px dashed var(--border-color);
-  background: transparent;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg);
   color: var(--color);
-  font-family: inherit;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-size: 11px;
   outline: none;
   min-width: 0;
-}
 
-.subscribe-widget__input:focus {
-  border-color: var(--accent);
+  &:focus {
+    border-color: var(--phosphor);
+  }
 }
 
 .subscribe-widget__submit {
   flex: 0 0 auto;
-  height: 28px;
-  padding: 0 8px;
+  height: 26px;
+  padding: 0 10px;
   margin: 0;
-  border-radius: 0;
-  border: 1px dashed var(--border-color);
+  border: 1px solid var(--phosphor);
   background: transparent;
-  color: var(--color);
+  color: var(--phosphor);
   cursor: pointer;
-  font-family: inherit;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-size: 11px;
   line-height: 1;
   white-space: nowrap;
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
-}
+  transition: background-color 120ms ease, color 120ms ease;
 
-.subscribe-widget__submit:hover {
-  background: var(--accent-alpha-20);
-  border-color: var(--accent-alpha-70);
+  &:hover {
+    background: var(--phosphor);
+    color: var(--bg);
+  }
 }
 
 .subscribe-widget__hint {
-  margin-top: 8px;
-  font-size: 12px;
-  opacity: 0.85;
+  margin-top: 6px;
+  font-size: 11px;
+  opacity: 1;
   overflow-wrap: anywhere;
+  color: var(--ink-muted);
+
+  a {
+    color: var(--phosphor);
+  }
 }
 
 @media (max-width: 420px) {
@@ -135,7 +165,6 @@
     flex-direction: column;
     align-items: stretch;
   }
-
   .subscribe-widget__submit {
     width: 100%;
   }
@@ -146,21 +175,26 @@
   align-items: center;
   justify-content: center;
   height: 22px;
-  padding: 0 6px;
-  border: 1px dashed var(--border-color);
+  padding: 0 8px;
+  border: 1px solid var(--border-color);
   text-decoration: none;
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
-}
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  font-variant-ligatures: none;
+  color: var(--ink-soft);
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
 
-.subscribe-widget__link:hover {
-  background: var(--accent-alpha-20);
-  border-color: var(--accent-alpha-70);
+  &:hover {
+    background: var(--phosphor);
+    border-color: var(--phosphor);
+    color: var(--bg);
+  }
 }
 
 .subscribe-widget__links {
   display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .subscribe-widget__frame {
@@ -169,15 +203,18 @@
   max-width: 100% !important;
   height: 150px;
   border: 0;
-  border-radius: 0 !important;
   box-shadow: 0 0 #0000;
 }
 
 .subscribe-widget__note {
-  margin-top: 8px;
-  font-size: 12px;
-  opacity: 0.85;
+  margin-top: 6px;
+  font-size: 11px;
   overflow-wrap: anywhere;
+  color: var(--ink-muted);
+
+  a {
+    color: var(--phosphor);
+  }
 }
 
 @media (max-width: $overlay-collapse-width) {
@@ -193,10 +230,11 @@
     overflow: hidden;
     margin: 0;
     transform: none;
+    border-left-width: 3px;
   }
 
   [data-mobile-subscribe-host] {
-    margin-top: 32px;
+    margin-top: 28px;
   }
 
   .subscribe-widget[open] {

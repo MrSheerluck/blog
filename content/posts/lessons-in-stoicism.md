@@ -6,6 +6,9 @@ transparent = true
 
 [taxonomies]
 tags = ["philosophy", "stoicism"]
+
+[extra]
+hidden = true
 +++
 
 John Sellars is a philosophy lecturer at Royal Holloway and one of the people behind Modern Stoicism, the group that runs Stoic Week. This book is short, around 100 pages, and it does one thing. It walks you through the core ideas of the three major Roman Stoics, Seneca, Epictetus, and Marcus Aurelius, and explains what they were actually saying without making it boring.

@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["maths", "vectors", "linear-algebra", "ml"]
 series = ["linear-algebra-series"]
+
+[extra]
+hidden = true
 +++
 
 

@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["bevy", "gamedev", "rust"]
 series = ["learning-bevy-by-building-projects"]
+
+[extra]
+hidden = true
 +++
 
 

@@ -6,25 +6,39 @@
 {%- endblock -%}
 
 {% block content %}
-    <div class="post">
-        <h1 class="post-title">
-            series: {{ term.name }}
-            ({{ term.pages | length }} part{{ term.pages | length | pluralize }})
-        </h1>
+    {% set_global visible_count = 0 %}
+    {% for p in term.pages %}
+        {% if not p.extra.hidden %}
+            {% set_global visible_count = visible_count + 1 %}
+        {% endif %}
+    {% endfor %}
+    {% set series_name = term.name | replace(from="-", to=" ") %}
+    <div class="post list-page list-page--series">
+        <header class="list-page__header series-hero series-hero--single">
+            <div>
+                <p>{{ visible_count }} part{{ visible_count | pluralize }}</p>
+                <h1 class="post-title">{{ series_name }}</h1>
+            </div>
+            <a class="list-page__back" href="{{ config.base_url | safe }}/series/">All series</a>
+        </header>
 
-        <a href="{{ config.base_url | safe }}/series/">
-            Show all series
-        </a>
-
-        <ol>
+        <ol class="series-sequence">
+            {% set_global part_num = 0 %}
             {% for page in term.pages | sort(attribute="date") %}
-            <li class="post-list">
-                <a href="{{ page.permalink | safe }}">
-                    <span class="post-date">{{ page.date | date(format="%Y-%m-%d") }}</span>
-                    :: <span class="post-list-title">{{ page.title }}</span>
+            {% if not page.extra.hidden %}
+            {% set_global part_num = part_num + 1 %}
+            <li class="series-step">
+                <a class="series-step__link" href="{{ page.permalink | safe }}">
+                    <span class="series-step__number">Part {{ part_num }}</span>
+                    <span class="series-step__copy">
+                        <span class="series-step__title">{{ page.title }}</span>
+                        {% if page.description %}
+                            <span class="series-step__description">{{ page.description }}</span>
+                        {% endif %}
+                    </span>
                 </a>
-                {{ post_macros::tags(page=page, short=true) }}
             </li>
+            {% endif %}
             {% endfor %}
         </ol>
 

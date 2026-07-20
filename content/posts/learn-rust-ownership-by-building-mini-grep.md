@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["rust", "project"]
 series = ["learning-rust"]
+
+[extra]
+hidden = true
 +++
 
 In this post, we are going to learn about the problem Rust is solving, Rust's ownership, borrowing concept and build a mini grep clone in Rust. I'm really excited for the project and I hope you are too. I won't go too deep in theory, just practical and we will build our knowledge of these concepts over time with more articles. Let's start.

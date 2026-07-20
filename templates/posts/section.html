@@ -6,37 +6,15 @@
 
 {% block extra_head %}
     {{ super() }}
-    <style>
-        /* Make the all-posts (/posts) listing very compact */
-        .posts .post.on-list {
-            margin: 8px auto;
-            padding: 8px 0;
-        }
-
-        .posts .post.on-list .post-title {
-            font-size: 0.95rem;
-            line-height: 1.15;
-            margin: 0 0 4px;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        .posts .post.on-list .post-meta-inline,
-        .posts .post.on-list .post-date,
-        .posts .post.on-list .post-tags-inline {
-            font-size: 0.65rem;
-            line-height: 1.1;
-            margin-bottom: 0;
-        }
-
-        .posts .post.on-list .post-tags-inline {
-            opacity: 0.45;
-        }
-    </style>
 {% endblock extra_head %}
 
 {% block content %}
-    <div class="posts">
+    <div class="posts posts--section">
+        <header class="posts-index-header">
+            <h1>{{ section.title | default(value="Posts") }}</h1>
+        </header>
+
+        <ol class="entry-list entry-list--posts entry-list--titles-only">
         {%- if paginator %}
             {%- set show_pages = paginator.pages -%}
         {% else %}
@@ -47,11 +25,17 @@
             {%- if page.draft %}
                 {% continue %}
             {% endif -%}
+            {%- if page.extra.hidden %}
+                {% continue %}
+            {% endif -%}
 
-            <div class="post on-list">
-                {{ post_macros::header(page=page) }}
-            </div>
+            <li class="entry-list__item">
+                <a class="entry-list__link" href="{{ page.permalink | safe }}">
+                    <span class="entry-list__title">{{ page.title }}</span>
+                </a>
+            </li>
         {% endfor -%}
+        </ol>
 
         <div data-mobile-subscribe-host></div>
 

@@ -7,6 +7,9 @@ transparent = true
 [taxonomies]
 tags = ["rust", "project"]
 series = ["learning-rust"]
+
+[extra]
+hidden = true
 +++
 
 In this post, we are going to learn about error handling in Rust. Once we cover all the concepts, we will build a **TOML config parser with schema validation**. Every error must be handled properly using `Result`. Let's start.
