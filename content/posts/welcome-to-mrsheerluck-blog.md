@@ -18,6 +18,8 @@ Thank you so much for subscribing to my newsletter. I write mostly on whatever I
 
 My point is this is my digital garden, and I am thanking you for being a part of this journey.
 
+> I'm in the process of rewriting my Rust series and hence took down all the articles of Rust series. If you still want to read those articles, you can read from [here](https://github.com/MrSheerluck/blog/tree/main/content/posts)
+
 If you have any feedback or want to request any topic, please feel free to reach out.
 
 - X: [@sheerluck_io](https://x.com/sheerluck_io)
