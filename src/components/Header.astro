@@ -75,6 +75,17 @@ const showSections = sections.length >= 2;
     <div class="flex items-center gap-2">
       {config.search !== false && <SearchTrigger />}
       <LinkButton
+        href="https://mrsheerluck.substack.com/subscribe"
+        variant="minimal"
+        size="sm"
+        target="_blank"
+        rel="noopener"
+        class="text-[#3b82f6] hover:text-[#60a5fa]"
+      >
+        <Icon name="ph:envelope" class="w-4 h-4" />
+        <span class="ml-1.5 hidden sm:inline">Subscribe</span>
+      </LinkButton>
+      <LinkButton
         href="https://github.com/sponsors/MrSheerluck"
         variant="minimal"
         size="sm"

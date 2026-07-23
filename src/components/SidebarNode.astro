@@ -4,6 +4,8 @@ export interface TreeNode {
   slug?: string;
   title?: string;
   date?: Date;
+  series?: string[];
+  badge?: { text: string };
   children: TreeNode[];
 }
 
@@ -15,9 +17,14 @@ const { node, depth, currentPath } = Astro.props;
 {
   node.children.length > 0 ? (
     <details class="group" data-nb-sidebar-group open>
-      <summary class="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer font-medium text-foreground hover:bg-accent rounded-md mx-1 select-none" style={`padding-left: ${0.75 + depth * 0.75}rem`}>
-        <svg class="w-3 h-3 shrink-0 text-muted-foreground transition-transform duration-150 group-open:rotate-90" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
-        <span class="truncate text-xs uppercase tracking-wider">{node.name}</span>
+      <summary class="flex items-center justify-between gap-1.5 px-3 py-1.5 cursor-pointer font-medium text-foreground hover:bg-accent rounded-md mx-1 select-none" style={`padding-left: ${0.75 + depth * 0.75}rem`}>
+        <span class="flex items-center gap-1.5 truncate">
+          <svg class="w-3 h-3 shrink-0 text-muted-foreground transition-transform duration-150 group-open:rotate-90" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
+          <span class="truncate text-xs uppercase tracking-wider">{node.name}</span>
+        </span>
+        {node.badge && (
+          <span class="shrink-0 rounded-sm bg-info-muted px-1.5 py-0.5 text-[10px] font-medium text-info-foreground uppercase">{node.badge.text}</span>
+        )}
       </summary>
       <div class="mt-0.5">
         {node.children.map((child) => (
