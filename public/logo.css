@@ -1,0 +1,1 @@
+.logo{display:flex;align-items:center;text-decoration:none;background:rgba(0,0,0,0);color:var(--phosphor);padding:0;font-family:var(--font-mono);font-variant-ligatures:none;font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:500;line-height:1}.logo::before{content:"> ";color:var(--ink-muted);animation:blink 2s step-end infinite}

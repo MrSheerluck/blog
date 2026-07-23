@@ -1,0 +1,63 @@
+---
+import misc_lessons_in_stoicism from "../content/docs/posts/misc/lessons-in-stoicism.mdx";
+import misc_welcome_to_mrsheerluck_blog from "../content/docs/posts/misc/welcome-to-mrsheerluck-blog.mdx";
+import misc_wtf_is_a_supply_chain_attack from "../content/docs/posts/misc/wtf-is-a-supply-chain-attack.mdx";
+import misc_wtf_is_claude_mythos from "../content/docs/posts/misc/wtf-is-claude-mythos.mdx";
+import rust_learn_error_hanlding_in_rust from "../content/docs/posts/rust/learn-error-hanlding-in-rust.mdx";
+import rust_learn_generics_traits_in_rust_by_building_blackjack_card_game_engine from "../content/docs/posts/rust/learn-generics-traits-in-rust-by-building-blackjack-card-game-engine.mdx";
+import rust_learn_hashmap_iterators_by_building_a_git_object_store_reader from "../content/docs/posts/rust/learn-hashmap-iterators-by-building-a-git-object-store-reader.mdx";
+import rust_learn_rust_async_await_by_building_an_http_server from "../content/docs/posts/rust/learn-rust-async-await-by-building-an-http-server.mdx";
+import rust_learn_rust_basics_by_building_a_brainfuck_interpreter from "../content/docs/posts/rust/learn-rust-basics-by-building-a-brainfuck-interpreter.mdx";
+import rust_learn_rust_closures_by_building_a_tiny_linter from "../content/docs/posts/rust/learn-rust-closures-by-building-a-tiny-linter.mdx";
+import rust_learn_rust_concurrency_by_building_a_thread_pool from "../content/docs/posts/rust/learn-rust-concurrency-by-building-a-thread-pool.mdx";
+import rust_learn_rust_lifetimes_by_building_a_lru_cache from "../content/docs/posts/rust/learn-rust-lifetimes-by-building-a-lru-cache.mdx";
+import rust_learn_rust_ownership_by_building_mini_grep from "../content/docs/posts/rust/learn-rust-ownership-by-building-mini-grep.mdx";
+import rust_learn_rust_smart_pointers_and_interior_mutability_by_building_git_commit_graph_viewer from "../content/docs/posts/rust/learn-rust-smart-pointers-and-interior-mutability-by-building-git-commit-graph-viewer.mdx";
+import rust_learn_rust_structs_enums_pattern_matching_by_building_a_json_parser from "../content/docs/posts/rust/learn-rust-structs-enums-pattern-matching-by-building-a-json-parser.mdx";
+import rust_learn_sql_and_sqlx_by_building_a_book_library_cli_in_rust from "../content/docs/posts/rust/learn-sql-and-sqlx-by-building-a-book-library-cli-in-rust.mdx";
+import math_linear_algebra_scalars_explained from "../content/docs/posts/math/linear-algebra/scalars-explained.mdx";
+import axum_learn_axum_basics_and_routing_by_building_a_url_shortener from "../content/docs/posts/axum/learn-axum-basics-and-routing-by-building-a-url-shortener.mdx";
+import axum_learn_axum_error_handling_by_building_pastebin_api_in_rust from "../content/docs/posts/axum/learn-axum-error-handling-by-building-pastebin-api-in-rust.mdx";
+import axum_learn_axum_persistence_and_transaction_by_building_a_bookmark_manager from "../content/docs/posts/axum/learn-axum-persistence-and-transaction-by-building-a-bookmark-manager.mdx";
+import gamedev_bevy_build_breakout_in_bevy_step_by_step from "../content/docs/posts/gamedev/bevy/build-breakout-in-bevy-step-by-step.mdx";
+import gamedev_bevy_learn_bevy_states_timers_by_building_snake from "../content/docs/posts/gamedev/bevy/learn-bevy-states-timers-by-building-snake.mdx";
+import gamedev_bevy_learn_the_basics_of_bevy_by_building_and_deploying_pong_to_itch_io from "../content/docs/posts/gamedev/bevy/learn-the-basics-of-bevy-by-building-and-deploying-pong-to-itch-io.mdx";
+import philosophy_plato_apology from "../content/docs/posts/philosophy/plato/apology.mdx";
+import philosophy_plato_crito from "../content/docs/posts/philosophy/plato/crito.mdx";
+import philosophy_plato_euthyphro from "../content/docs/posts/philosophy/plato/euthyphro.mdx";
+
+const fileToComponent = {
+  "misc/lessons-in-stoicism.mdx": misc_lessons_in_stoicism,
+  "misc/welcome-to-mrsheerluck-blog.mdx": misc_welcome_to_mrsheerluck_blog,
+  "misc/wtf-is-a-supply-chain-attack.mdx": misc_wtf_is_a_supply_chain_attack,
+  "misc/wtf-is-claude-mythos.mdx": misc_wtf_is_claude_mythos,
+  "rust/learn-error-hanlding-in-rust.mdx": rust_learn_error_hanlding_in_rust,
+  "rust/learn-generics-traits-in-rust-by-building-blackjack-card-game-engine.mdx": rust_learn_generics_traits_in_rust_by_building_blackjack_card_game_engine,
+  "rust/learn-hashmap-iterators-by-building-a-git-object-store-reader.mdx": rust_learn_hashmap_iterators_by_building_a_git_object_store_reader,
+  "rust/learn-rust-async-await-by-building-an-http-server.mdx": rust_learn_rust_async_await_by_building_an_http_server,
+  "rust/learn-rust-basics-by-building-a-brainfuck-interpreter.mdx": rust_learn_rust_basics_by_building_a_brainfuck_interpreter,
+  "rust/learn-rust-closures-by-building-a-tiny-linter.mdx": rust_learn_rust_closures_by_building_a_tiny_linter,
+  "rust/learn-rust-concurrency-by-building-a-thread-pool.mdx": rust_learn_rust_concurrency_by_building_a_thread_pool,
+  "rust/learn-rust-lifetimes-by-building-a-lru-cache.mdx": rust_learn_rust_lifetimes_by_building_a_lru_cache,
+  "rust/learn-rust-ownership-by-building-mini-grep.mdx": rust_learn_rust_ownership_by_building_mini_grep,
+  "rust/learn-rust-smart-pointers-and-interior-mutability-by-building-git-commit-graph-viewer.mdx": rust_learn_rust_smart_pointers_and_interior_mutability_by_building_git_commit_graph_viewer,
+  "rust/learn-rust-structs-enums-pattern-matching-by-building-a-json-parser.mdx": rust_learn_rust_structs_enums_pattern_matching_by_building_a_json_parser,
+  "rust/learn-sql-and-sqlx-by-building-a-book-library-cli-in-rust.mdx": rust_learn_sql_and_sqlx_by_building_a_book_library_cli_in_rust,
+  "math/linear-algebra/scalars-explained.mdx": math_linear_algebra_scalars_explained,
+  "axum/learn-axum-basics-and-routing-by-building-a-url-shortener.mdx": axum_learn_axum_basics_and_routing_by_building_a_url_shortener,
+  "axum/learn-axum-error-handling-by-building-pastebin-api-in-rust.mdx": axum_learn_axum_error_handling_by_building_pastebin_api_in_rust,
+  "axum/learn-axum-persistence-and-transaction-by-building-a-bookmark-manager.mdx": axum_learn_axum_persistence_and_transaction_by_building_a_bookmark_manager,
+  "gamedev/bevy/build-breakout-in-bevy-step-by-step.mdx": gamedev_bevy_build_breakout_in_bevy_step_by_step,
+  "gamedev/bevy/learn-bevy-states-timers-by-building-snake.mdx": gamedev_bevy_learn_bevy_states_timers_by_building_snake,
+  "gamedev/bevy/learn-the-basics-of-bevy-by-building-and-deploying-pong-to-itch-io.mdx": gamedev_bevy_learn_the_basics_of_bevy_by_building_and_deploying_pong_to_itch_io,
+  "philosophy/plato/apology.mdx": philosophy_plato_apology,
+  "philosophy/plato/crito.mdx": philosophy_plato_crito,
+  "philosophy/plato/euthyphro.mdx": philosophy_plato_euthyphro,
+} as Record<string, unknown>;
+
+type Props = { filePath: string };
+const { filePath } = Astro.props;
+const Component = fileToComponent[filePath];
+---
+
+{Component ? <Component /> : <p>Not found: {filePath}</p>}
