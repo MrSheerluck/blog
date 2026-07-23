@@ -1,24 +1,33 @@
 import { getCollection } from "astro:content";
-import { OGImageRoute } from "astro-og-canvas";
-import { ogCardConfig } from "./_og-card-config";
+import { renderOg, type OgParams } from "./_render-og";
 
 const entries = await getCollection("docs", (entry) => !entry.data.draft);
 
-const pages = Object.fromEntries(
-  entries.map((entry) => [
-    entry.id,
-    {
+export async function getStaticPaths() {
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: {
       title: entry.data.title,
       description: entry.data.description ?? "",
+      date: entry.data.date,
     },
-  ]),
-);
+  }));
+}
 
-export const { getStaticPaths, GET } = await OGImageRoute({
-  pages,
-  getImageOptions: (_path, page) => ({
-    title: page.title,
-    description: page.description,
-    ...ogCardConfig,
-  }),
-});
+export async function GET({ props }: { props: OgParams }) {
+  const body = await renderOg({
+    url: "blog.sheerluck.dev",
+    ...props,
+    date: props.date
+      ? new Date(props.date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : undefined,
+  });
+
+  return new Response(body, {
+    headers: { "Content-Type": "image/png" },
+  });
+}

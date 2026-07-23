@@ -4,8 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate:bg": "node scripts/generate-grid-bg.mjs",
-    "prebuild": "npm run generate:bg",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -14,7 +12,7 @@
     "lint:docs:fix": "nimbus-docs lint --fix",
     "prepreview:cf": "astro build",
     "preview:cf": "wrangler dev",
-    "predeploy": "npm run generate:bg && astro check && astro build",
+    "predeploy": "astro check && astro build",
     "deploy": "wrangler deploy"
   },
   "dependencies": {
@@ -25,7 +23,6 @@
     "@iconify-json/ph": "^1.2.0",
     "astro": "^7.0.0",
     "astro-icon": "^1.1.0",
-    "astro-og-canvas": "^0.13.0",
     "canvaskit-wasm": "^0.41.1",
     "clsx": "^2.1.1",
     "geist": "^1.7.2",

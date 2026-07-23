@@ -1,14 +1,13 @@
-import { generateOpenGraphImage } from "astro-og-canvas";
 import { config } from "virtual:nimbus/config";
-import { ogCardConfig } from "./og/_og-card-config";
+import { renderOg } from "./og/_render-og";
 
 export const prerender = true;
 
 export async function GET() {
-  const body = await generateOpenGraphImage({
+  const body = await renderOg({
+    url: "blog.sheerluck.dev",
     title: config.title,
     description: config.description,
-    ...ogCardConfig,
   });
 
   return new Response(body, {
