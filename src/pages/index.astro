@@ -1,0 +1,58 @@
+---
+import DocsLayout from "../layouts/DocsLayout.astro";
+import { getSidebar, getPrevNext, getBreadcrumbs, getEditUrl, getLastUpdated, getTOC } from "@cloudflare/nimbus-docs";
+import { config } from "virtual:nimbus/config";
+import { getEntry } from "astro:content";
+import SeriesSidebar from "../components/SeriesSidebar.astro";
+
+const entry = await getEntry("docs", "index");
+if (!entry) throw new Error("Index entry not found");
+
+const { Content } = await import("../content/docs/index.mdx");
+
+const title = entry.data.title;
+const description = entry.data.description;
+const currentSlug = "/";
+
+const isCustom = entry.data.mode === "custom";
+const sidebarOn = !isCustom && config.features?.sidebar !== false && entry.data.sidebar !== false;
+
+const sidebar = sidebarOn
+  ? await getSidebar(currentSlug, { collection: entry.collection })
+  : false;
+const prevNext = await getPrevNext(currentSlug, {
+  sidebarTree: sidebar === false ? [] : sidebar,
+  overrides: { prev: entry.data.prev, next: entry.data.next },
+});
+const breadcrumbs = await getBreadcrumbs(currentSlug, { collection: entry.collection });
+const editUrl = await getEditUrl(entry);
+const lastUpdated = entry.data.lastUpdated ?? await getLastUpdated(entry);
+const markdownPath = `/index.md`;
+const markdownUrl = Astro.site ? new URL(markdownPath, Astro.site).href : markdownPath;
+const socialImage = entry.data.socialImage ?? `/og/index.png`;
+---
+
+<DocsLayout
+  title={title}
+  description={description}
+  sidebar={sidebar}
+  headings={false}
+  breadcrumbs={breadcrumbs}
+  prevNext={prevNext}
+  mode={entry.data.mode}
+  banner={entry.data.banner}
+  head={entry.data.head}
+  searchable={entry.data.searchable}
+  noindex={entry.data.noindex}
+  markdownUrl={markdownUrl}
+  socialImage={socialImage}
+  lastUpdated={lastUpdated}
+  editUrl={editUrl}
+  draft={entry.data.draft}
+  audience={entry.data.audience}
+  collection={entry.collection}
+  entryId={entry.id}
+>
+  <SeriesSidebar slot="sidebar" />
+  <Content />
+</DocsLayout>

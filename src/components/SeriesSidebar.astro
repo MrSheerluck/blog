@@ -1,0 +1,93 @@
+---
+import { getCollection } from "astro:content";
+import { getSlug } from "../slug-map";
+import SidebarNode, { type TreeNode } from "./SidebarNode.astro";
+import archivedSeries from "../archived-series.json";
+
+const archivedSet = new Set(archivedSeries);
+
+const docs = await getCollection("docs");
+const posts = docs.filter((e) => e.id.startsWith("posts/") && e.data.date);
+
+function buildTree(posts: typeof docs): TreeNode {
+  const root: TreeNode = { name: "posts", children: [] };
+
+  for (const e of posts) {
+    const fileRel = e.id.replace(/^posts\//, "") + ".mdx";
+    const mappedSlug = getSlug(fileRel);
+    if (!mappedSlug) continue;
+
+    // @ts-expect-error
+    const sidebar: Record<string, unknown> | undefined = e.data.sidebar;
+    if (sidebar?.hidden === true) continue;
+
+    // @ts-expect-error
+    const series: string[] | undefined = e.data.series;
+
+    const parts = fileRel.split("/");
+    let current = root;
+    for (let i = 0; i < parts.length - 1; i++) {
+      let child = current.children.find((c) => c.name === parts[i]);
+      if (!child) {
+        child = { name: parts[i], series: [], children: [] };
+        current.children.push(child);
+      }
+      current = child;
+    }
+    const postSeries = series?.[0];
+    current.children.push({
+      name: parts[parts.length - 1].replace(/\.mdx$/, ""),
+      slug: mappedSlug,
+      title: e.data.title,
+      date: e.data.date,
+      series: postSeries ? [postSeries] : [],
+      children: [],
+    });
+  }
+
+  function applyBadges(n: TreeNode) {
+    for (const c of n.children) {
+      applyBadges(c);
+      if (c.series) {
+        if (n.series) n.series.push(...c.series);
+        else (n as any).series = [...c.series];
+      }
+    }
+    if (n.children.length > 0 && n.series && n.series.length > 0) {
+      const allArchived = n.series.every((s) => archivedSet.has(s));
+      if (allArchived) n.badge = { text: "Archived" };
+    }
+  }
+  applyBadges(root);
+
+  function sortNodes(n: TreeNode) {
+    n.children.sort((a, b) => {
+      if (a.children.length > 0 && b.children.length === 0) return -1;
+      if (a.children.length === 0 && b.children.length > 0) return 1;
+      if (a.children.length === 0 && a.date && b.date) return a.date.getTime() - b.date.getTime();
+      return a.name.localeCompare(b.name);
+    });
+    for (const c of n.children) sortNodes(c);
+  }
+  sortNodes(root);
+  return root;
+}
+
+const root = buildTree(posts);
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<nav class="space-y-1 text-sm" data-nb-sidebar>
+  <div class="px-1 py-1">
+    <a
+      href="/"
+      class={`block rounded-md px-2 py-1.5 font-medium transition-colors ${currentPath === "/" ? "bg-selected text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
+    >
+      Home
+    </a>
+  </div>
+
+  {root.children.map((node) => (
+    <SidebarNode node={node} depth={0} currentPath={currentPath} />
+  ))}
+</nav>

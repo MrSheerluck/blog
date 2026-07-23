@@ -1,0 +1,906 @@
+---
+title: Learn Axum Error handling by Building a Pastebin API
+description: "In this post, we are going to build a Pastebin API with proper error handling"
+date: 2026-07-08
+series: ["backend-engineering-with-axum"]
+---
+
+In Part 1, we built a URL shortener and learned the Axum request lifecycle: `Router`, handlers, `State<T>`, `Path<T>`, and `IntoResponse`. But we left two things unfinished. Our error handling was `.unwrap()` on every lock acquisition, and our response for a missing URL was an ad-hoc `(StatusCode, &str)` tuple dropped directly into the handler. 
+
+![Axum Error Handling](/images/axum-error-handling.png)
+
+In this post, we are going to build a **Pastebin API with proper error handling**. We will learn the `Json<T>` extractor in depth, the `Query` extractor for optional parameters, request validation, and most importantly how to build a single `AppError` enum that converts every possible failure into the right HTTP status code. Along the way, we will see why Axum deliberately has no hidden error-handling behavior, and why that is a feature, not a missing feature.
+
+Let's start, I can't wait.
+
+Get the source code from [here](https://github.com/MrSheerluck/pastebin-api-in-axum)
+
+## The Problem with Ad-Hoc Error Handling
+
+In Part 1, when a short code was not found, we wrote:
+
+```rust
+match urls.get(&code) {
+    Some(long_url) => Redirect::to(long_url).into_response(),
+    None => (
+        StatusCode::NOT_FOUND,
+        "404 Not Found: No URL for this code",
+    )
+        .into_response(),
+}
+```
+
+This works for one handler. Now imagine a real application with twenty handlers. Every handler that does a lookup has its own 404 logic. Every handler that deals with validation has its own 400 logic. The status codes and error messages are scattered across the codebase, and there is no single place to change how errors are formatted.
+
+The alternative that some frameworks choose is "hidden behavior": the framework catches your errors, guesses which HTTP status code to return, and sends a response for you. A missing database row becomes a 404. A failed deserialization becomes a 400. This sounds convenient, until it guesses wrong and your API returns a 500 for something that should be a 400, or worse, a 200 for something that should be a 500.
+
+In Axum, you define your own error type. You implement `IntoResponse` on it exactly once. You decide every status code. The framework does not make application-specific decisions for you. This is what we are going to build.
+
+## The Json Extractor - Deeper Than You Think
+
+In Part 1, we used `Json<ShortenRequest>` without much explanation. Now let's understand what it actually does.
+
+`Json<T>` implements `FromRequest` for any `T: DeserializeOwned`. When a handler declares `Json(payload): Json<SomeType>`, Axum does three things:
+
+1. **Buffers the entire request body.** The request body arrives as a stream of bytes from the client. `Json` first reads the entire stream into memory before attempting deserialization. This is why a handler can have at most one body extractor: once the body has been consumed, there is nothing left for another body extractor to read.
+
+2. **Checks the Content-Type header.** If the request is not sent with a JSON media type (such as `application/json` or `application/*+json`), Axum rejects it with a `415 Unsupported Media Type`. This happens before deserialization, so the client gets a clear signal that it sent the wrong content type.
+
+3. **Deserializes the JSON.** If the body contains valid JSON but it cannot be deserialized into your type (for example, because a required field is missing, a field has the wrong type, or `#[serde(deny_unknown_fields)]` rejects an unknown field), Axum rejects the request with an appropriate deserialization error, typically `422 Unprocessable Entity`. Invalid JSON syntax is rejected earlier with `400 Bad Request`.
+
+All three steps happen before your handler runs. If any step fails, the handler is never called. The request is rejected with the appropriate status code automatically. Your handler only runs when the body is present, correctly typed as JSON, and valid against your struct.
+
+This is the first half of Axum's explicit error-handling model. The framework handles malformed requests such as unsupported content types, invalid JSON syntax, and deserialization failures, so you do not have to. But semantic errors like empty content, invalid values, expired resources are yours to handle. The line is drawn at `serde` deserialization. Everything beyond that is your responsibility.
+
+## The Query Extractor
+
+Some parameters are not part of the request body. They are part of the URL itself. Axum provides `Query<T>` for this:
+
+```rust
+use axum::extract::Query;
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct ListParams {
+    language: Option<String>,
+    page: Option<u32>,
+}
+
+async fn list_pastes(Query(params): Query<ListParams>) -> impl IntoResponse {
+    // params.language is Some("rust") or None
+    // params.page is Some(1) or None
+    todo!()
+}
+```
+
+A request to `GET /pastes?language=rust&page=2` deserializes into `ListParams { language: Some("rust".into()), page: Some(2) }`. A request to `GET /pastes` with no query string gives `ListParams { language: None, page: None }`.
+
+Unlike `Json`, which deserializes a JSON request body, `Query` uses the `serde_urlencoded` crate together with Serde to deserialize URL query parameters into your type. The same `serde` infrastructure handles both. The difference is where the data comes from: `Json` reads the request body, `Query` reads the URL query string.
+
+> **When to use Query vs Json:** `Query` is most commonly used with `GET` requests (and sometimes `DELETE`). `Json` is most commonly used with `POST`, `PUT`, and `PATCH` requests. This is a widely followed REST convention rather than a rule enforced by HTTP, and some APIs legitimately use query parameters on other methods as well.
+
+## Request Validation - Semantic Checks
+
+Deserialization checks structure. Validation checks meaning. `serde` can tell you that `content` is missing, but it cannot tell you that `content` is an empty string. It can tell you that `expires_in_seconds` is an integer, but it cannot tell you that `-5` is nonsensical for an expiry duration.
+
+In this project, we perform validation in the handler immediately after deserialization and before any business logic. Here is the pattern:
+
+```rust
+fn validate_create_request(req: &CreatePasteRequest) -> Result<(), AppError> {
+    if req.content.trim().is_empty() {
+        return Err(AppError::ValidationError("content must not be empty".into()));
+    }
+    if req.content.len() > MAX_CONTENT_LENGTH {
+        return Err(AppError::ValidationError(
+            format!("content exceeds maximum length of {} bytes", MAX_CONTENT_LENGTH)
+        ));
+    }
+    if let Some(ref lang) = req.language {
+        if !SUPPORTED_LANGUAGES.contains(&lang.as_str()) {
+            return Err(AppError::ValidationError(
+                format!("unsupported language: {}", lang)
+            ));
+        }
+    }
+    if let Some(seconds) = req.expires_in_seconds {
+        if seconds <= 0 {
+            return Err(AppError::ValidationError(
+                "expires_in_seconds must be positive".into()
+            ));
+        }
+    }
+    Ok(())
+}
+```
+
+Every validation failure returns the same error variant: `AppError::ValidationError`. Every failure produces a 400 Bad Request. The difference is the message, which tells the client specifically what was wrong like is it empty content, too long, bad language, negative expiry.
+
+## AppError - The Single Error Enum
+
+Now we arrive at the core pattern of this article. An `AppError` enum that:
+
+- Has one variant per category of error
+- Implements `IntoResponse` once, mapping each variant to the right status code
+- Has `From` impls so domain-level errors (like a failed lock acquisition) convert automatically
+
+```rust
+enum AppError {
+    ValidationError(String),
+    NotFound(String),
+    InternalError(String),
+}
+```
+
+Three variants and that's it. A real application might have more like `Unauthorized`, `Forbidden`, `Conflict` but three is enough to cover everything a simple API can encounter.
+
+### ValidationError → 400
+
+The client sent something wrong. The error is theirs to fix. Return a 400 with a message explaining what to fix.
+
+### NotFound → 404
+
+The requested resource does not exist. This covers both "never existed" and "existed but expired." From the client's perspective, an expired paste is the same as a paste that was never created: you cannot read it.
+
+### InternalError → 500
+
+Something went wrong on the server. The client cannot fix it. In a real application, you log the full error internally but send a generic message to the client. Leaking internal details like file paths, stack traces, database error strings is a security risk and a bad user experience.
+
+Now the `IntoResponse` implementation:
+
+```rust
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        let (status, message) = match &self {
+            AppError::ValidationError(msg) => (StatusCode::BAD_REQUEST, msg.clone()),
+            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg.clone()),
+            AppError::InternalError(msg) => {
+                eprintln!("internal error: {}", msg);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "internal server error".to_string(),
+                )
+            }
+        };
+
+        let body = Json(serde_json::json!({
+            "error": message,
+        }));
+
+        (status, body).into_response()
+    }
+}
+```
+
+Every error response is a JSON object with an `"error"` field. Validation errors include the specific message. Not-found errors include the resource name. Internal errors log the actual error to stderr via `eprintln!` but send a generic message to the client, the client sees `{"error": "internal server error"}` regardless of whether the database is down, the filesystem is full, or the lock is poisoned. We will replace `eprintln!` with structured logging via `tracing` in Part 16, but the principle is the same: the internal details are for the server operator, not the client.
+
+### From Impls - Automatic Error Conversion
+
+The `?` operator is the backbone of Rust error handling. It converts one error type into another via `From`. If we want to use `?` in our handlers, we need `From` impls that convert standard library and framework errors into `AppError`:
+
+```rust
+impl From<std::sync::PoisonError<std::sync::RwLockWriteGuard<'_, HashMap<String, Paste>>>> for AppError {
+    fn from(_: std::sync::PoisonError<std::sync::RwLockWriteGuard<'_, HashMap<String, Paste>>>) -> Self {
+        AppError::InternalError("lock poisoned".into())
+    }
+}
+```
+
+That type signature is... a lot. It is for `RwLockWriteGuard` specifically. We would need similar impls for `RwLockReadGuard`. Fortunately, in practice you rarely write these by hand. Many projects use `thiserror` to derive conversions for their own error types, while specific errors like `PoisonError` are often handled explicitly with `.map_err()` or wrapped in another error type.
+
+In practice, many projects use `thiserror` to reduce boilerplate for their own error types. Since our goal here is to understand what `From` is doing under the hood, we'll write the conversion manually instead.
+
+## Project Setup
+
+Create a new project:
+
+```
+cargo new pastebin_api
+cd pastebin_api
+```
+
+Open `Cargo.toml` and add the dependencies:
+
+```toml
+[package]
+name = "pastebin_api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+```
+
+We have two new dependencies compared to Part 1:
+
+- `chrono` handles timestamps and expiry calculations. The `serde` feature lets us serialize and deserialize `DateTime<Utc>` as ISO 8601 strings, which is the standard JSON representation for dates.
+- `uuid` for generating unique paste IDs, same as Part 1.
+
+## The Project: Pastebin API
+
+Our program will:
+
+- Accept `POST /paste` with a JSON body containing content, an optional language, and an optional expiry duration
+- Validate the input like reject empty content, oversized content, unsupported languages, and negative expiry
+- Generate a unique ID and store the paste in memory with a creation timestamp
+- Accept `GET /paste/{id}` that returns the paste as JSON
+- Return 404 if the paste does not exist or has expired
+- Return 400 for any validation failure with a specific message
+- Return 500 for any internal failure with a generic message
+
+### Data Model
+
+A paste is defined by six fields:
+
+```rust
+struct Paste {
+    id: String,
+    content: String,
+    language: Option<String>,
+    created_at: DateTime<Utc>,
+    expires_at: Option<DateTime<Utc>>,
+}
+```
+
+`language` is optional, not all pastes are code. `expires_at` is optional as pastes can live forever. `created_at` is always set, using the server's clock at creation time.
+
+### Supported Languages
+
+We limit language hints to a known set. This prevents typos like `"javscript"` and gives the client a clear error message:
+
+```rust
+const SUPPORTED_LANGUAGES: &[&str] = &[
+    "rust", "python", "javascript", "typescript", "go", "java", "c", "cpp",
+    "ruby", "php", "swift", "kotlin", "scala", "elixir", "haskell",
+    "bash", "sql", "html", "css", "json", "yaml", "toml", "markdown",
+    "plaintext",
+];
+```
+
+### Maximum Content Length
+
+We cap content at 500 KiB (500 × 1024 bytes). Larger pastes should be stored differently as object storage, not an in-memory API:
+
+```rust
+const MAX_CONTENT_LENGTH: usize = 500 * 1024; // 500 KiB
+```
+
+### The Full Code
+
+Replace everything in `src/main.rs` with this:
+
+```rust
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    routing::{get, post},
+    Json, Router,
+};
+use chrono::{DateTime, Duration, Utc};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
+use tokio::net::TcpListener;
+use uuid::Uuid;
+
+const SUPPORTED_LANGUAGES: &[&str] = &[
+    "rust", "python", "javascript", "typescript", "go", "java", "c", "cpp",
+    "ruby", "php", "swift", "kotlin", "scala", "elixir", "haskell",
+    "bash", "sql", "html", "css", "json", "yaml", "toml", "markdown",
+    "plaintext",
+];
+
+const MAX_CONTENT_LENGTH: usize = 500 * 1024;
+
+#[derive(Clone)]
+struct AppState {
+    pastes: Arc<RwLock<HashMap<String, Paste>>>,
+}
+
+#[derive(Clone, Serialize)]
+struct Paste {
+    id: String,
+    content: String,
+    language: Option<String>,
+    created_at: DateTime<Utc>,
+    expires_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Deserialize)]
+struct CreatePasteRequest {
+    content: String,
+    language: Option<String>,
+    expires_in_seconds: Option<i64>,
+}
+
+#[derive(Serialize)]
+struct CreatePasteResponse {
+    id: String,
+}
+
+#[derive(Serialize)]
+struct GetPasteResponse {
+    id: String,
+    content: String,
+    language: Option<String>,
+    created_at: DateTime<Utc>,
+    expires_at: Option<DateTime<Utc>>,
+}
+
+enum AppError {
+    ValidationError(String),
+    NotFound(String),
+    InternalError(String),
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        let (status, message) = match &self {
+            AppError::ValidationError(msg) => (StatusCode::BAD_REQUEST, msg.clone()),
+            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg.clone()),
+            AppError::InternalError(msg) => {
+                eprintln!("internal error: {}", msg);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "internal server error".to_string(),
+                )
+            }
+        };
+
+        let body = Json(serde_json::json!({
+            "error": message,
+        }));
+
+        (status, body).into_response()
+    }
+}
+
+impl<T> From<std::sync::PoisonError<RwLockReadGuard<'_, T>>> for AppError {
+    fn from(_: std::sync::PoisonError<RwLockReadGuard<'_, T>>) -> Self {
+        AppError::InternalError("lock poisoned".into())
+    }
+}
+
+impl<T> From<std::sync::PoisonError<RwLockWriteGuard<'_, T>>> for AppError {
+    fn from(_: std::sync::PoisonError<RwLockWriteGuard<'_, T>>) -> Self {
+        AppError::InternalError("lock poisoned".into())
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    let state = AppState {
+        pastes: Arc::new(RwLock::new(HashMap::new())),
+    };
+
+    let app = Router::new()
+        .route("/paste", post(create_paste))
+        .route("/paste/{id}", get(get_paste))
+        .with_state(state);
+
+    let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    println!("Listening on http://127.0.0.1:3000");
+
+    axum::serve(listener, app).await.unwrap();
+}
+
+async fn create_paste(
+    State(state): State<AppState>,
+    Json(payload): Json<CreatePasteRequest>,
+) -> Result<impl IntoResponse, AppError> {
+    validate_create_request(&payload)?;
+
+    let id = &Uuid::new_v4().to_string()[..8];
+
+    let expires_at = payload.expires_in_seconds.map(|seconds| {
+        Utc::now() + Duration::seconds(seconds)
+    });
+
+    let paste = Paste {
+        id: id.to_string(),
+        content: payload.content,
+        language: payload.language,
+        created_at: Utc::now(),
+        expires_at,
+    };
+
+    state.pastes.write()?.insert(id.to_string(), paste);
+
+    Ok((
+        StatusCode::CREATED,
+        Json(CreatePasteResponse { id: id.to_string() }),
+    ))
+}
+
+async fn get_paste(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<impl IntoResponse, AppError> {
+    let pastes = state.pastes.read()?;
+
+    let paste = pastes
+        .get(&id)
+        .ok_or_else(|| AppError::NotFound(format!("paste with id '{}' not found", id)))?;
+
+    if let Some(expires_at) = paste.expires_at {
+        if Utc::now() > expires_at {
+            return Err(AppError::NotFound(format!(
+                "paste with id '{}' has expired",
+                id
+            )));
+        }
+    }
+
+    let response = GetPasteResponse {
+        id: paste.id.clone(),
+        content: paste.content.clone(),
+        language: paste.language.clone(),
+        created_at: paste.created_at,
+        expires_at: paste.expires_at,
+    };
+
+    Ok((StatusCode::OK, Json(response)))
+}
+
+fn validate_create_request(req: &CreatePasteRequest) -> Result<(), AppError> {
+    if req.content.trim().is_empty() {
+        return Err(AppError::ValidationError(
+            "content must not be empty".into(),
+        ));
+    }
+
+    if req.content.len() > MAX_CONTENT_LENGTH {
+        return Err(AppError::ValidationError(format!(
+            "content exceeds maximum length of {} bytes (got {} bytes)",
+            MAX_CONTENT_LENGTH,
+            req.content.len()
+        )));
+    }
+
+    if let Some(ref lang) = req.language {
+        if !SUPPORTED_LANGUAGES.contains(&lang.as_str()) {
+            return Err(AppError::ValidationError(format!(
+                "unsupported language '{}'. supported languages: {}",
+                lang,
+                SUPPORTED_LANGUAGES.join(", ")
+            )));
+        }
+    }
+
+    if let Some(seconds) = req.expires_in_seconds {
+        if seconds <= 0 {
+            return Err(AppError::ValidationError(
+                "expires_in_seconds must be greater than 0".into(),
+            ));
+        }
+    }
+
+    Ok(())
+}
+```
+
+Now, let me explain what we just did.
+
+### The State
+
+```rust
+#[derive(Clone)]
+struct AppState {
+    pastes: Arc<RwLock<HashMap<String, Paste>>>,
+}
+```
+
+Same pattern as Part 1. `HashMap` mapping paste IDs to `Paste` structs, wrapped in `Arc<RwLock<...>>` for shared concurrent access. The difference is the value type, `Paste` is a struct with six fields, not just a `String`.
+
+`Paste` derives `Clone` and `Serialize`. `Clone` is necessary because `HashMap::get` returns a reference, and we need to clone some fields when building the response. `Serialize` is for the `DateTime<Utc>` fields to serialize as ISO 8601 strings.
+
+### The Request and Response Types
+
+Three request/response types, designed for three concerns:
+
+`CreatePasteRequest` - what the client sends. `content` is required. `language` and `expires_in_seconds` are optional. All validation logic references these fields.
+
+`CreatePasteResponse` - what the server returns after creating a paste. Just the ID. The client can use that ID to fetch the full paste.
+
+`GetPasteResponse` - the full paste returned on read. Includes the ID, content, language, timestamps, and expiry. This is the external representation. Notice it is a separate type from `Paste`, the internal `Paste` struct stores data, the response type formats it for the client.
+
+> **Why separate request/response types from domain types?** The Paste struct is our internal representation. It has an `id` field that the client never sends on creation (we generate it). The `CreatePasteRequest` does not have an `id` field. Separating these types prevents the client from setting `id` and prevents us from accidentally returning internal fields. This is a pattern you will see in every well-structured Rust API.
+
+### The AppError Enum and IntoResponse
+
+```rust
+enum AppError {
+    ValidationError(String),
+    NotFound(String),
+    InternalError(String),
+}
+```
+
+Three variants, one per HTTP error category. The `IntoResponse` implementation is the single place where errors become HTTP responses:
+
+```rust
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        let (status, message) = match &self {
+            AppError::ValidationError(msg) => (StatusCode::BAD_REQUEST, msg.clone()),
+            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg.clone()),
+            AppError::InternalError(msg) => {
+                eprintln!("internal error: {}", msg);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "internal server error".to_string(),
+                )
+            }
+        };
+
+        let body = Json(serde_json::json!({
+            "error": message,
+        }));
+
+        (status, body).into_response()
+    }
+}
+```
+
+Every error response is `{"error": "..."}` with the appropriate status code. The client always gets a consistent JSON structure, regardless of which handler produced the error. If you later decide to add a `request_id` field to every error response, you change one function, not twenty handlers.
+
+The `InternalError` variant logs the actual error to stderr via `eprintln!` but sends a generic message to the client: `{"error": "internal server error"}`. We will replace `eprintln!` with structured logging via `tracing` in Part 16, but the principle is the same, internal details are for the server operator, never for the client.
+
+### From Impls for Lock Poisoning
+
+```rust
+impl<T> From<std::sync::PoisonError<RwLockReadGuard<'_, T>>> for AppError {
+    fn from(_: std::sync::PoisonError<RwLockReadGuard<'_, T>>) -> Self {
+        AppError::InternalError("lock poisoned".into())
+    }
+}
+
+impl<T> From<std::sync::PoisonError<RwLockWriteGuard<'_, T>>> for AppError {
+    fn from(_: std::sync::PoisonError<RwLockWriteGuard<'_, T>>) -> Self {
+        AppError::InternalError("lock poisoned".into())
+    }
+}
+```
+
+These impls let us use `?` with lock acquisition. Instead of `.unwrap()`, we write:
+
+```rust
+let pastes = state.pastes.read()?;
+```
+
+The `?` converts `PoisonError<RwLockReadGuard<HashMap<...>>>` into `AppError::InternalError`, which `IntoResponse` converts into a 500 response. The handler never panics on a poisoned lock.
+
+> **What is a poisoned lock?** When a thread panics while holding a `Mutex` or `RwLock`, the lock is "poisoned", subsequent attempts to acquire it return an error. This prevents other threads from reading data that might be in an inconsistent state (the panicking thread might have been halfway through an update). In our case, the data is a `HashMap` of pastes. Rust does allow recovering from a poisoned lock, but this example intentionally treats it as an internal server error and returns a `500` instead.
+
+### The Create Paste Handler
+
+```rust
+async fn create_paste(
+    State(state): State<AppState>,
+    Json(payload): Json<CreatePasteRequest>,
+) -> Result<impl IntoResponse, AppError> {
+    validate_create_request(&payload)?;
+
+    let id = &Uuid::new_v4().to_string()[..8];
+
+    let expires_at = payload.expires_in_seconds.map(|seconds| {
+        Utc::now() + Duration::seconds(seconds)
+    });
+
+    let paste = Paste {
+        id: id.to_string(),
+        content: payload.content,
+        language: payload.language,
+        created_at: Utc::now(),
+        expires_at,
+    };
+
+    state.pastes.write()?.insert(id.to_string(), paste);
+
+    Ok((
+        StatusCode::CREATED,
+        Json(CreatePasteResponse { id: id.to_string() }),
+    ))
+}
+```
+
+Notice the return type: `Result<impl IntoResponse, AppError>`. This is the key pattern. The `Ok` branch returns a success response, a 201 with a JSON body. The `Err` branch is an `AppError`, which Axum converts via `IntoResponse`. The `?` operator on `validate_create_request` and `state.pastes.write()` converts failures into `AppError` automatically.
+
+`validate_create_request(&payload)?` runs all four validation checks before any work is done. If any check fails, the error is returned immediately. This is "fail fast", do not start creating a paste if the input is invalid.
+
+`payload.expires_in_seconds.map(|seconds| { ... })` converts the optional expiry duration into an absolute timestamp. If `expires_in_seconds` is `None`, `expires_at` is `None`, the paste lives forever. If it is `Some(3600)`, `expires_at` is `Utc::now() + 1 hour`.
+
+> For simplicity, we shorten the UUID to eight hexadecimal characters. Production systems typically use the full UUID or another identifier with collision guarantees appropriate for their scale.
+
+### The Get Paste Handler
+
+```rust
+async fn get_paste(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<impl IntoResponse, AppError> {
+    let pastes = state.pastes.read()?;
+
+    let paste = pastes
+        .get(&id)
+        .ok_or_else(|| AppError::NotFound(format!("paste with id '{}' not found", id)))?;
+
+    if let Some(expires_at) = paste.expires_at {
+        if Utc::now() > expires_at {
+            return Err(AppError::NotFound(format!(
+                "paste with id '{}' has expired",
+                id
+            )));
+        }
+    }
+
+    let response = GetPasteResponse {
+        id: paste.id.clone(),
+        content: paste.content.clone(),
+        language: paste.language.clone(),
+        created_at: paste.created_at,
+        expires_at: paste.expires_at,
+    };
+
+    Ok((StatusCode::OK, Json(response)))
+}
+```
+
+`pastes.get(&id)` returns `Option<&Paste>`. `.ok_or_else(|| ...)` converts `None` into an `AppError::NotFound`. The `?` propagates that error if the paste does not exist.
+
+The expiry check happens after the lookup. If the paste exists but has expired, we return the same `NotFound` error. From the client's perspective, an expired paste and a non-existent paste are identical, you cannot access either one. A real application might delete expired pastes from the map periodically (a background cleanup task), but for this in-memory implementation, we check at read time.
+
+The response construction clones the fields that are `String` or `Option<String>`. `DateTime<Utc>` implements `Copy`, so we can pass it directly. Cloning strings is not free, and cloning the paste content is the most expensive part of this handler. Production systems often avoid unnecessary copies by using shared ownership types such as `Arc<str>` or other ownership strategies, depending on the application's requirements.
+
+### The Validation Function
+
+```rust
+fn validate_create_request(req: &CreatePasteRequest) -> Result<(), AppError> {
+    if req.content.trim().is_empty() {
+        return Err(AppError::ValidationError("content must not be empty".into()));
+    }
+
+    if req.content.len() > MAX_CONTENT_LENGTH {
+        return Err(AppError::ValidationError(format!(
+            "content exceeds maximum length of {} bytes (got {} bytes)",
+            MAX_CONTENT_LENGTH,
+            req.content.len()
+        )));
+    }
+
+    if let Some(ref lang) = req.language {
+        if !SUPPORTED_LANGUAGES.contains(&lang.as_str()) {
+            return Err(AppError::ValidationError(format!(
+                "unsupported language '{}'. supported languages: {}",
+                lang,
+                SUPPORTED_LANGUAGES.join(", ")
+            )));
+        }
+    }
+
+    if let Some(seconds) = req.expires_in_seconds {
+        if seconds <= 0 {
+            return Err(AppError::ValidationError(
+                "expires_in_seconds must be greater than 0".into(),
+            ));
+        }
+    }
+
+    Ok(())
+}
+```
+
+A standalone function, not a method on the handler. This keeps the handler clean and makes the validation logic testable independently, you can call `validate_create_request` in a unit test without setting up an entire Axum router.
+
+Four checks, each returning a specific error message:
+
+1. **Content must not be empty** - `"".trim()` is empty, `"   ".trim()` is empty, `"hi".trim()` is not empty. Trimming prevents pastes that look empty but contain only whitespace.
+
+2. **Content must not exceed 500 KiB** - includes the actual byte count in the error message so the client knows how much to trim.
+
+3. **Language must be supported** - lists all supported languages in the error message. This is a self-documenting API: the error response tells the client what valid values look like.
+
+4. **Expiry must be positive** - rejects zero and negative values. Zero-second expiry is nonsensical. Negative expiry is almost certainly a bug.
+
+## Running the Project
+
+Start the server:
+
+```
+cargo run
+```
+
+You should see:
+
+```
+Listening on http://127.0.0.1:3000
+```
+
+### Create a Paste
+
+```
+curl -X POST http://localhost:3000/paste \
+  -H "Content-Type: application/json" \
+  -d '{"content": "fn main() {\n    println!(\"hello world\");\n}", "language": "rust"}'
+```
+
+Response:
+
+```json
+{"id":"a1b2c3d4"}
+```
+
+### Read the Paste
+
+```
+curl http://localhost:3000/paste/a1b2c3d4
+```
+
+Response:
+
+```json
+{
+  "id": "a1b2c3d4",
+  "content": "fn main() {\n    println!(\"hello world\");\n}",
+  "language": "rust",
+  "created_at": "2026-07-06T12:00:00Z",
+  "expires_at": null
+}
+```
+
+### Create a Paste with Expiry
+
+```
+curl -X POST http://localhost:3000/paste \
+  -H "Content-Type: application/json" \
+  -d '{"content": "this will expire soon", "expires_in_seconds": 5}'
+```
+
+Wait 6 seconds, then read it:
+
+```
+curl http://localhost:3000/paste/b2c3d4e5
+```
+
+Response:
+
+```json
+{"error":"paste with id 'b2c3d4e5' has expired"}
+```
+
+Status code: 404.
+
+### Test Validation - Empty Content
+
+```
+curl -X POST http://localhost:3000/paste \
+  -H "Content-Type: application/json" \
+  -d '{"content": ""}'
+```
+
+Response:
+
+```json
+{"error":"content must not be empty"}
+```
+
+Status code: 400.
+
+### Test Validation - Unsupported Language
+
+```
+curl -X POST http://localhost:3000/paste \
+  -H "Content-Type: application/json" \
+  -d '{"content": "some code", "language": "brainfuck"}'
+```
+
+Response:
+
+```json
+{"error":"unsupported language 'brainfuck'. supported languages: rust, python, ..."}
+```
+
+Status code: 400.
+
+### Test Validation - Negative Expiry
+
+```
+curl -X POST http://localhost:3000/paste \
+  -H "Content-Type: application/json" \
+  -d '{"content": "some code", "expires_in_seconds": -10}'
+```
+
+Response:
+
+```json
+{"error":"expires_in_seconds must be greater than 0"}
+```
+
+Status code: 400.
+
+### Test Structural Error - Missing Content
+
+```
+curl -X POST http://localhost:3000/paste \
+  -H "Content-Type: application/json" \
+  -d '{"language": "rust"}'
+```
+
+Response: `422 Unprocessable Entity`. Axum generates this response before our handler runs because deserializing the request into `CreatePasteRequest` fails when the required `content` field is missing.
+
+### Test Structural Error - Wrong Content-Type
+
+```
+curl -X POST http://localhost:3000/paste \
+  -H "Content-Type: text/plain" \
+  -d '{"content": "hello"}'
+```
+
+Response: 415 Unsupported Media Type. Axum rejects this because the request is not using a JSON media type.
+
+### Test Not Found
+
+```
+curl http://localhost:3000/paste/nonexistent
+```
+
+Response:
+
+```json
+{"error":"paste with id 'nonexistent' not found"}
+```
+
+Status code: 404.
+
+## The Boundary Between Framework and Application
+
+Look at the curl examples again. There are three categories of failure:
+
+1. **Structural errors** (422, 415) - handled by Axum automatically. Wrong content types, malformed JSON, and deserialization failures. You never write code for these.
+
+2. **Semantic errors** (400) - handled by your validation function. Empty content, unsupported language, negative expiry. You write explicit checks and return `AppError::ValidationError`.
+
+3. **Resource errors** (404) - handled by your handler logic. Missing paste, expired paste. You check the lookup result and return `AppError::NotFound`.
+
+This is the boundary Axum draws. The framework handles everything it can detect from the structure of the request. You handle everything that requires understanding the meaning of the data. There is no overlap, no ambiguity, no framework guessing what status code your error should be.
+
+This is the opposite of "convention over configuration." Axum says: "I will handle the HTTP plumbing - parsing, routing, serialization. You handle every business decision, including what status code means what. There is no hidden application-level error handling."
+
+## How an Error Flows Through
+
+Let us trace a single `GET /paste/nonexistent` request to see how the `AppError` pattern works end-to-end:
+
+1. The router matches `/paste/{id}` with `id = "nonexistent"` and selects `get_paste` as the handler.
+
+2. `State<AppState>` extracts the state (clones the `Arc`, cheap).
+
+3. `Path<String>` extracts `"nonexistent"` from the path.
+
+4. The handler runs. `state.pastes.read()?` succeeds (the lock is not poisoned). `pastes.get(&id)` returns `None`. `.ok_or_else(|| AppError::NotFound(...))` converts `None` into `Err(AppError::NotFound("paste with id 'nonexistent' not found"))`. The `?` operator propagates the error out of the handler.
+
+5. The handler returns `Err(AppError::NotFound(...))`. Because the return type is `Result<impl IntoResponse, AppError>`, Axum calls `AppError::into_response()` on the error.
+
+6. `AppError::into_response()` matches `NotFound`, sets the status to 404, formats the error message as `{"error": "paste with id 'nonexistent' not found"}`, and returns an `http::Response`.
+
+7. The response travels back through Hyper and Tokio, same as a success response.
+
+Compare this to the Part 1 error handling: an ad-hoc `(StatusCode::NOT_FOUND, &str)` in the handler. The new pattern separates error construction (in the handler) from error formatting (in `IntoResponse`). The handler says *what* went wrong. The `IntoResponse` implementation decides *how* to represent that to the client.
+
+## What We Skipped
+
+- **Persistence**: Pastes live in memory and disappear on restart. Part 3 replaces the `HashMap` with PostgreSQL via SQLx.
+- **Pagination**: We return a single paste by ID. A real API would have `GET /pastes?language=rust&page=1` for listing. We touched on `Query` parameters, but full pagination with SQL joins comes in Part 3.
+- **Content type validation on read**: A paste with `language: "markdown"` would ideally return `Content-Type: text/markdown`. For simplicity, we always return JSON.
+- **Expired paste cleanup**: Expired pastes stay in the `HashMap` forever, only rejected at read time. A background task that periodically removes expired entries would be the production pattern. Background tasks are Part 9.
+- **The thiserror crate**: We wrote `From` impls manually to show the mechanism. In practice, `thiserror` derives these for you. The manual impls are educational; the derive macro is what you use at work.
+
+## Conclusion
+
+In this post, you built a Pastebin API while learning Axum's extractors, validation, and centralized error handling. Next, we'll replace the in-memory `HashMap` with PostgreSQL and SQLx.
+
+If you like reading this, please subscribe and share this with others. It will really help me and motivate me to keep publishing more such articles.
