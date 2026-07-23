@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "generate:bg": "node scripts/generate-grid-bg.mjs",
+    "prebuild": "npm run generate:bg",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -12,7 +14,7 @@
     "lint:docs:fix": "nimbus-docs lint --fix",
     "prepreview:cf": "astro build",
     "preview:cf": "wrangler dev",
-    "predeploy": "astro check && astro build",
+    "predeploy": "npm run generate:bg && astro check && astro build",
     "deploy": "wrangler deploy"
   },
   "dependencies": {

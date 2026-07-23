@@ -12,27 +12,31 @@
 import type { OGImageOptions } from "astro-og-canvas";
 
 export const ogCardConfig = {
-  bgGradient: [
-    [11, 11, 12],
-    [26, 26, 28],
-  ],
-  border: { color: [39, 39, 42], width: 2, side: "inline-start" },
+  bgGradient: [[7, 7, 9]],
+  bgImage: {
+    path: "./public/images/og/grid-bg.png",
+    fit: "fill",
+  },
+  border: { color: [0, 255, 65], width: 4, side: "inline-start" },
   padding: 96,
-  fonts: ["./public/fonts/Inter-Bold.ttf"],
+  fonts: [
+    "./node_modules/geist/dist/fonts/geist-mono/GeistMono-Bold.ttf",
+    "./node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.ttf",
+  ],
   font: {
     title: {
-      color: [250, 250, 250],
-      size: 64,
+      color: [0, 255, 65],
+      size: 56,
       weight: "Bold",
-      families: ["Inter"],
-      lineHeight: 1.1,
+      families: ["Geist Mono"],
+      lineHeight: 1.2,
     },
     description: {
-      color: [161, 161, 170],
-      size: 32,
-      weight: "Bold",
-      families: ["Inter"],
-      lineHeight: 1.3,
+      color: [0, 200, 50],
+      size: 28,
+      weight: "Normal",
+      families: ["Geist Mono"],
+      lineHeight: 1.4,
     },
   },
   format: "PNG",
