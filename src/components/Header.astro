@@ -45,6 +45,17 @@ const showSections = sections.length >= 2;
           class="lg:hidden text-muted-foreground"
         />
       )}
+      {showSidebar && (
+        <Button
+          variant="ghost"
+          shape="square"
+          size="sm"
+          icon="ph:sidebar"
+          aria-label="Toggle sidebar"
+          data-sidebar-toggle
+          class="hidden lg:flex text-muted-foreground"
+        />
+      )}
 
       <a href="/" class="group">
         <span class="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
@@ -115,3 +126,20 @@ const showSections = sections.length >= 2;
     </div>
   </div>
 </header>
+
+<script>
+  const KEY = "sidebar-collapsed";
+  const btn = document.querySelector("[data-sidebar-toggle]");
+  if (btn) {
+    function apply() {
+      const collapsed = localStorage.getItem(KEY) === "true";
+      document.documentElement.classList.toggle("sidebar-collapsed", collapsed);
+    }
+    apply();
+    btn.addEventListener("click", () => {
+      const isCollapsed = !document.documentElement.classList.contains("sidebar-collapsed");
+      document.documentElement.classList.toggle("sidebar-collapsed", isCollapsed);
+      localStorage.setItem(KEY, String(isCollapsed));
+    });
+  }
+</script>

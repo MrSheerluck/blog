@@ -503,5 +503,16 @@ pre.astro-code .highlighted-word {
 
 /* Hide hamburger on pages without a sidebar dialog. */
 body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
-	display: none;
+  display: none;
+}
+
+/* ---- Collapsible sidebar ---- */
+.sidebar-collapsed [data-nb-desktop-sidebar] {
+  display: none !important;
+}
+.sidebar-collapsed #main-content {
+  max-width: none;
+}
+.sidebar-collapsed [data-nb-toc-scroll-host] {
+  display: none !important;
 }

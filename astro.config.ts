@@ -9,7 +9,7 @@ const nimbusConfig = defineNimbusConfig({
   title: "Mrsheerluck Blog",
   description: "Personal notes on engineering, systems, and software.",
   locale: "en",
-  github: "https://github.com/MrSheerluck",
+  github: "https://github.com/MrSheerluck/blog",
   editPattern: "https://github.com/MrSheerluck/blog/edit/main/{path}",
   socialImageAlt: "Mrsheerluck Blog",
 
