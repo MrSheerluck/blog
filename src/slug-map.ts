@@ -10,6 +10,7 @@ export const slugMap: Record<string, string> = {
   "learn-bevy-states-timers-by-building-snake": "gamedev/bevy/learn-bevy-states-timers-by-building-snake.mdx",
   "learn-error-hanlding-in-rust": "rust/learn-error-hanlding-in-rust.mdx",
   "learn-generics-traits-in-rust-by-building-blackjack-card-game-engine": "rust/learn-generics-traits-in-rust-by-building-blackjack-card-game-engine.mdx",
+  "learn-go-basics-by-building-a-brainfuck-intepreter": "programming-languages/go/learn-go-basics-by-building-a-brainfuck-intepreter.mdx",
   "learn-hashmap-iterators-by-building-a-git-object-store-reader": "rust/learn-hashmap-iterators-by-building-a-git-object-store-reader.mdx",
   "learn-rust-async-await-by-building-an-http-server": "rust/learn-rust-async-await-by-building-an-http-server.mdx",
   "learn-rust-basics-by-building-a-brainfuck-interpreter": "rust/learn-rust-basics-by-building-a-brainfuck-interpreter.mdx",

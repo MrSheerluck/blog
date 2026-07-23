@@ -23,29 +23,42 @@ All posts live under `src/content/docs/posts/` and render at `/posts/<slug>/`.
 
 ### Adding a post
 
-1. Create `src/content/docs/posts/<slug>.mdx` with YAML frontmatter:
+**Example: nested post**
+
+1. Create the file inside any folder structure you want:
+
+```
+src/content/docs/posts/programming-languages/go/introduction-to-go.mdx
+```
+
+2. Add YAML frontmatter:
 
 ```yaml
 ---
-title: My Post Title
-description: A short description for SEO, sidebar, and RSS.
-date: 2026-01-01
-series: ["my-series"]
-sidebar:
-  hidden: true   # hide from sidebar (optional)
+title: Introduction to Go
+description: Getting started with Go programming.
+date: 2026-07-23
 ---
 ```
 
-2. Add an entry to `src/slug-map.ts`:
-
-```ts
-"my-post-slug": "my-series/my-post.mdx",
-```
-
-3. Regenerate `src/components/PostContent.astro`:
+3. Run the generator to register the file:
 
 ```bash
 python3 scripts/generate-post-content.py
+```
+
+4. Done — the post renders at `/posts/introduction-to-go/`. The sidebar mirrors the folder structure.
+
+**The slug-map is auto-generated** — the filename (without `.mdx`) becomes the URL slug. The folder path controls sidebar nesting. Both are independent — you can reorganize folders freely without changing URLs.
+
+**Quick steps summary:**
+
+```bash
+# 1. Create the .mdx file anywhere under src/content/docs/posts/
+# 2. Regenerate imports and slug-map
+python3 scripts/generate-post-content.py
+# 3. Check it locally
+pnpm dev
 ```
 
 ### Organizing posts in folders
