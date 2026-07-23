@@ -1,0 +1,43 @@
+---
+title: Reliability Over Ideology
+description: Thoughts on Codeberg's LLM policy, infrastructure reliability, and why predictable governance matters when choosing a Git hosting platform.
+date: 2026-07-24
+---
+
+For a while, I’ve been thinking about moving away from Github to an Open Source Git Hosting Platform.
+
+I don’t hate Github but I just don’t want to tied up with Microsoft’s ecosystem (Ironically, I still use Github Sponsors for donation). Naturally, Codeberg was one of the alternatives I started looking into.
+
+But after reading Codeberg’s recent post on LLM-generated projects, I realized it probably isn’t the platform I’m looking for. Not because I disagree with its position on AI, but because it changed how I think about the platform’s long-term reliability.
+
+When I choose infrastructure, I care about predictability.
+
+A Git hosting platform should have stable governance and clear rules. I want to be confident that if my project follows the rules today, it’ll still follow them five years from now. That’s much more important to me than whether the platform agrees with or share my views on a particular technology or ideology.
+
+What changed my mind was seeing a Git hosting platform make decisions about which categories of software it wants to encourage. Today its repositories that are “mostly” (again, this is debatable) generated using LLMs, previously it took a similar stance toward cryptocurrency related projects.
+
+Maybe that’s where it stops. Maybe it doesn’t.
+
+The point is that once a platform starts making decisions based on technology categories instead of project behaviour, its difficult to know where that line will be drawn in the future.
+
+If I’m choosing a Git host, I’m making a long-term decision. I don’t want to wonder whether a project that’s acceptable today will become unwelcome because the platform’s view on a technology changes. That’s not the kind of uncertainty I want from infrastructure.
+
+Personally, I’ve a fairly conservative workflow with LLMs. I use them regularly at work and when I need to prototype something quickly or for fun.
+
+But when I’m learning something or building a product that I care about, I write almost all of the code myself because I want to understand the implementation and maintain complete control over it. You can say its a skill issue, but hey, that’s just me.
+
+I don’t think everyone should work like this.
+
+One of the most interesting things about LLMs is that they’ve lowered the barrier to contributing to open source. People who previously couldn’t navigate a large Rust or Go codebase can now understand it well enough to fix bugs, customize software or build tools for themselves.
+
+Whether that’s good or bad depends on the quality of the result, not on the fact that an LLM was involved.
+
+On the other side, I understand the concerns Codeberg raises. Repository spam, AI crawlers, hosting large number of low-quality repositories that are taking actual operational cost.
+
+But to me, those are problems of behavior, not technology and those are the kinds of problems Git hosting providers should focus on resolving.
+
+What I’m less convinced by is treating an entire category of software differently because of how it was produced.
+
+I don’t mean to say Codeberg is wrong. It’s their platform and they are free to define the community they want to build. It does, however, make me reconsider whether its the kind of infrastructure I want to depend on.
+
+For me, reliability is a more important property than alignment. I don’t expect a Git hosting provider to agree with every technology I use. But I expect it to host my projects consistently as long as I follow its rules

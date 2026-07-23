@@ -23,6 +23,7 @@ export const slugMap: Record<string, string> = {
   "learn-sql-and-sqlx-by-building-a-book-library-cli-in-rust": "rust/learn-sql-and-sqlx-by-building-a-book-library-cli-in-rust.mdx",
   "learn-the-basics-of-bevy-by-building-and-deploying-pong-to-itch-io": "gamedev/bevy/learn-the-basics-of-bevy-by-building-and-deploying-pong-to-itch-io.mdx",
   "lessons-in-stoicism": "misc/lessons-in-stoicism.mdx",
+  "reliability-over-ideology": "my-thoughts/reliability-over-ideology.mdx",
   "scalars-explained": "math/linear-algebra/scalars-explained.mdx",
   "welcome-to-mrsheerluck-blog": "misc/welcome-to-mrsheerluck-blog.mdx",
   "wtf-is-a-supply-chain-attack": "misc/wtf-is-a-supply-chain-attack.mdx",
