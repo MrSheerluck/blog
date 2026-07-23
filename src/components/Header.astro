@@ -74,6 +74,18 @@ const showSections = sections.length >= 2;
 
     <div class="flex items-center gap-2">
       {config.search !== false && <SearchTrigger />}
+      <LinkButton
+        href="https://github.com/sponsors/MrSheerluck"
+        variant="minimal"
+        size="sm"
+        aria-label="Sponsor on GitHub"
+        target="_blank"
+        rel="noopener"
+        class="text-[#db61a2] hover:text-[#bf4b8a]"
+      >
+        <Icon name="ph:heart" class="w-4 h-4" />
+        <span class="ml-1.5 hidden sm:inline">Sponsor</span>
+      </LinkButton>
       {config.github && (
         <LinkButton
           href={config.github}
