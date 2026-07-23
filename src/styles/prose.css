@@ -1,15 +1,10 @@
 /* Docs markdown styling scoped to docs content containers only. */
 
 .docs-content {
-  font-size: 0.9375rem;
+  font-family: var(--nb-font-mono);
+  font-size: 0.875rem;
   line-height: 1.75;
   color: var(--nb-foreground);
-  /* Break a long unbroken token (URL, hash, no-space string) so it wraps within
-     the content column instead of leaking past the page width. Inherited, so it
-     covers headings, paragraphs, list items, and inline code; `pre` code blocks
-     are unaffected (their `white-space: pre` doesn't wrap — they scroll instead,
-     via `pre.astro-code { overflow-x: auto }`), and wide tables keep their own
-     `.nb-table-scroll` handling. */
   overflow-wrap: break-word;
 }
 
