@@ -25,6 +25,7 @@ export const slugMap: Record<string, string> = {
   "lessons-in-stoicism": "misc/lessons-in-stoicism.mdx",
   "reliability-over-ideology": "my-thoughts/reliability-over-ideology.mdx",
   "scalars-explained": "math/linear-algebra/scalars-explained.mdx",
+  "the-basic-laws-of-human-stupidity": "book-notes/the-basic-laws-of-human-stupidity.mdx",
   "welcome-to-mrsheerluck-blog": "misc/welcome-to-mrsheerluck-blog.mdx",
   "wtf-is-a-supply-chain-attack": "misc/wtf-is-a-supply-chain-attack.mdx",
   "wtf-is-claude-mythos": "misc/wtf-is-claude-mythos.mdx"
