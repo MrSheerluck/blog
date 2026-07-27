@@ -506,13 +506,23 @@ body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
   display: none;
 }
 
-/* ---- Collapsible sidebar ---- */
+/* ---- Sidebar collapse ---- */
+[data-nb-desktop-sidebar] {
+  transition: width 250ms ease, border-right-width 250ms ease;
+}
+
+/* Collapsed sidebar — squeezes to a thin 48px strip. */
 .sidebar-collapsed [data-nb-desktop-sidebar] {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  flex-shrink: 0 !important;
+}
+/* Strip shows only the expand button — hide content and collapse button. */
+.sidebar-collapsed [data-sidebar-inner],
+.sidebar-collapsed [data-sidebar-collapse] {
   display: none !important;
 }
-.sidebar-collapsed #main-content {
-  max-width: none;
-}
-.sidebar-collapsed [data-nb-toc-scroll-host] {
-  display: none !important;
+.sidebar-collapsed [data-sidebar-expand] {
+  display: flex !important;
 }

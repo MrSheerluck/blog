@@ -87,15 +87,31 @@ const hasPagination = Astro.slots.has("pagination");
         <div class="flex">
           {showSidebar && (
             <aside id="desktop-sidebar" data-nb-desktop-sidebar class="hidden lg:flex w-(--nb-sidebar-width) shrink-0 border-r border-border bg-background sticky top-14 h-[calc(100vh-3.5rem)] flex-col overflow-y-auto overscroll-contain relative">
-              {hasSidebar ? (
-                <slot name="sidebar" />
-              ) : (
-                <nav class="px-4 pb-12 pt-5 flex-1">
-                  <SidebarFilter />
-                  <Sidebar items={sidebar} persist />
-                </nav>
-              )}
-              <div class="pointer-events-none sticky bottom-0 h-8 bg-gradient-to-t from-base to-transparent" />
+              <div data-sidebar-inner class="flex-1">
+                {hasSidebar ? (
+                  <slot name="sidebar" />
+                ) : (
+                  <nav class="px-4 pb-12 pt-5 flex-1">
+                    <SidebarFilter />
+                    <Sidebar items={sidebar} persist />
+                  </nav>
+                )}
+                <div class="pointer-events-none sticky bottom-0 h-8 bg-gradient-to-t from-base to-transparent" />
+              </div>
+              <button
+                data-sidebar-collapse
+                class="absolute right-2 top-3 flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors border border-border/60 bg-card/90 backdrop-blur-sm shadow-sm"
+                aria-label="Collapse sidebar"
+              >
+                <Icon name="ph:sidebar-simple" class="w-4 h-4" />
+              </button>
+              <button
+                data-sidebar-expand
+                class="hidden absolute top-3 left-1/2 -translate-x-1/2 flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors border border-border/60 bg-card/90 backdrop-blur-sm shadow-sm"
+                aria-label="Expand sidebar"
+              >
+                <Icon name="ph:sidebar-simple" class="w-4 h-4" />
+              </button>
             </aside>
           )}
 
@@ -344,6 +360,29 @@ const hasPagination = Astro.slots.has("pagination");
         // A swap while open never fires `close`; balance the scroll lock.
         if (dialog.open) unlockScroll();
       };
+    });
+  </script>
+
+  <script>
+    const SB_KEY = "sidebar-collapsed";
+    const collapseBtn = document.querySelector("[data-sidebar-collapse]");
+    const expandBtn = document.querySelector("[data-sidebar-expand]");
+
+    function applySidebarState() {
+      const collapsed = localStorage.getItem(SB_KEY) === "true";
+      document.documentElement.classList.toggle("sidebar-collapsed", collapsed);
+    }
+
+    applySidebarState();
+
+    collapseBtn?.addEventListener("click", () => {
+      document.documentElement.classList.add("sidebar-collapsed");
+      localStorage.setItem(SB_KEY, "true");
+    });
+
+    expandBtn?.addEventListener("click", () => {
+      document.documentElement.classList.remove("sidebar-collapsed");
+      localStorage.setItem(SB_KEY, "false");
     });
   </script>
 
