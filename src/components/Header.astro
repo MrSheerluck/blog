@@ -111,9 +111,41 @@ const showSections = sections.length >= 2;
           <Icon name="ph:github-logo" class="w-4 h-4" />
         </LinkButton>
       )}
+      <Button
+        variant="ghost"
+        shape="square"
+        size="sm"
+        icon="ph:text-aa"
+        aria-label="Change font size"
+        title="Change font size"
+        data-font-size-toggle
+        class="hidden lg:flex text-muted-foreground"
+      />
       <ThemeToggle />
     </div>
   </div>
 </header>
 
+<script>
+  const FONT_KEY = "font-size";
+  const SIZES = ["", "text-size-lg", "text-size-sm"];
+  const btn = document.querySelector("[data-font-size-toggle]");
+  if (btn) {
+    function apply() {
+      const size = localStorage.getItem(FONT_KEY) || "";
+      document.documentElement.classList.remove("text-size-sm", "text-size-lg");
+      if (size) document.documentElement.classList.add(size);
+    }
+    apply();
+    btn.addEventListener("click", () => {
+      const current = document.documentElement.classList.contains("text-size-lg") ? "text-size-lg"
+        : document.documentElement.classList.contains("text-size-sm") ? "text-size-sm" : "";
+      const idx = SIZES.indexOf(current);
+      const next = SIZES[(idx + 1) % SIZES.length];
+      document.documentElement.classList.remove("text-size-sm", "text-size-lg");
+      if (next) document.documentElement.classList.add(next);
+      localStorage.setItem(FONT_KEY, next);
+    });
+  }
+</script>
 

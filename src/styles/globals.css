@@ -91,13 +91,13 @@
 	--nb-font-mono:
 		"Geist Mono", "JetBrains Mono Variable", "JetBrains Mono", ui-monospace,
 		"Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
-	--nb-h1-size: 2.1875rem;
+	--nb-h1-size: 2.5rem;
 	--nb-h1-weight: 600;
 	--nb-h1-tracking: -0.025em;
-	--nb-h2-size: 1.3rem;
+	--nb-h2-size: 1.5rem;
 	--nb-h2-weight: 650;
 	--nb-h2-tracking: -0.015em;
-	--nb-h3-size: 1.1rem;
+	--nb-h3-size: 1.25rem;
 	--nb-h3-weight: 600;
 	--nb-h3-tracking: -0.01em;
 	--nb-h4-weight: 600;
@@ -525,4 +525,24 @@ body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
 }
 .sidebar-collapsed [data-sidebar-expand] {
   display: flex !important;
+}
+
+/* ---- Font size toggle ---- */
+.text-size-sm .docs-content { font-size: 1rem; }
+.text-size-sm {
+  --nb-h1-size: 2.1875rem;
+  --nb-h2-size: 1.3rem;
+  --nb-h3-size: 1.1rem;
+}
+
+.text-size-lg .docs-content { font-size: 1.35rem; }
+.text-size-lg {
+  --nb-h1-size: 2.85rem;
+  --nb-h2-size: 1.7rem;
+  --nb-h3-size: 1.45rem;
+}
+
+.text-size-sm [data-font-size-toggle],
+.text-size-lg [data-font-size-toggle] {
+  color: var(--nb-primary);
 }
