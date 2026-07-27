@@ -78,15 +78,6 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 ---
 
 <nav class="space-y-1 text-sm" data-nb-sidebar>
-  <div class="px-1 py-1">
-    <a
-      href="/"
-      class={`block rounded-md px-2 py-1.5 font-medium transition-colors ${currentPath === "/" ? "bg-selected text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
-    >
-      Home
-    </a>
-  </div>
-
   {root.children.map((node) => (
     <SidebarNode node={node} depth={0} currentPath={currentPath} />
   ))}

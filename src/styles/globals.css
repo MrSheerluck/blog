@@ -507,10 +507,6 @@ body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
 }
 
 /* ---- Sidebar collapse ---- */
-[data-nb-desktop-sidebar] {
-  transition: width 250ms ease, border-right-width 250ms ease;
-}
-
 /* Collapsed sidebar — squeezes to a thin 48px strip. */
 .sidebar-collapsed [data-nb-desktop-sidebar] {
   width: 48px !important;

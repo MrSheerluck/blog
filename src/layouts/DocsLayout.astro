@@ -87,7 +87,7 @@ const hasPagination = Astro.slots.has("pagination");
         <div class="flex">
           {showSidebar && (
             <aside id="desktop-sidebar" data-nb-desktop-sidebar class="hidden lg:flex w-(--nb-sidebar-width) shrink-0 border-r border-border bg-background sticky top-14 h-[calc(100vh-3.5rem)] flex-col overflow-y-auto overscroll-contain relative">
-              <div data-sidebar-inner class="flex-1">
+              <div data-sidebar-inner class="flex-1 pt-10">
                 {hasSidebar ? (
                   <slot name="sidebar" />
                 ) : (
