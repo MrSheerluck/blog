@@ -18,9 +18,9 @@ import { Badge } from "@/components/ui/badge";
 import type { DocsPageProps } from "@cloudflare/nimbus-docs/types";
 import { getVersionStatus, getVersionAlternates } from "@cloudflare/nimbus-docs";
 
-type Props = DocsPageProps & { audience?: "human" };
+type Props = DocsPageProps & { audience?: "human"; publishedDate?: string; readingTime?: number };
 
-const { title, description, sidebar, headings, breadcrumbs, prevNext, mode = "doc", banner, head = [], searchable, noindex, markdownUrl, socialImage, lastUpdated, editUrl, draft, audience, collection, entryId } = Astro.props;
+const { title, description, sidebar, headings, breadcrumbs, prevNext, mode = "doc", banner, head = [], searchable, noindex, markdownUrl, socialImage, lastUpdated, editUrl, draft, audience, collection, entryId, publishedDate, readingTime } = Astro.props;
 
 // `searchable` derives from `noindex` when omitted: a non-crawlable page is
 // by default not in the site search either. Explicit `searchable: true`
@@ -204,7 +204,7 @@ const hasPagination = Astro.slots.has("pagination");
                     {description && (
                       <p class="text-[0.9375rem] sm:text-[1.0625rem] text-muted-foreground leading-relaxed mt-2 mb-2 [text-wrap:pretty]">{description}</p>
                     )}
-                    <PageActions markdownUrl={markdownUrl} lastUpdated={lastUpdated} class={description ? undefined : "mt-3"} />
+                    <PageActions markdownUrl={markdownUrl} lastUpdated={lastUpdated} publishedDate={publishedDate} readingTime={readingTime} class={description ? undefined : "mt-3"} />
                     {headings !== false && headings.length > 0 && (
                       <div class="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-14 z-20 -mx-4 mt-3 border-y px-4 py-2 backdrop-blur lg:-mx-6 lg:px-6 xl:hidden">
                         <MobileTOC headings={headings} />

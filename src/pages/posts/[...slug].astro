@@ -25,11 +25,12 @@ const entry = await getEntry("docs", entryId);
 
 const title = entry?.data.title ?? slug;
 const description = entry?.data.description ?? "";
-const markdownUrl = Astro.site ? new URL(`/posts/${slug}/index.md`, Astro.site).href : `/posts/${slug}/index.md`;
+const markdownUrl = Astro.site ? new URL(`/${entryId}/index.md`, Astro.site).href : `/${entryId}/index.md`;
 const socialImage = `/og/${entryId}`;
 
 const fullPath = path.join(process.cwd(), "src/content/docs/posts", filePath);
 let headings: { depth: number; slug: string; text: string }[] = [];
+let readingTime = 1;
 try {
   const raw = fs.readFileSync(fullPath, "utf-8");
   const headingRegex = /^(#{2,6})\s+(.+)$/gm;
@@ -40,7 +41,14 @@ try {
     const headingSlug = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     headings.push({ depth, slug: headingSlug, text });
   }
+  const contentWithoutCode = raw.replace(/```[\s\S]*?```/g, "").replace(/^---[\s\S]*?---/m, "");
+  const wordCount = contentWithoutCode.split(/\s+/).filter(Boolean).length;
+  readingTime = Math.max(1, Math.ceil(wordCount / 200));
 } catch {}
+
+const postDate = entry?.data.date
+  ? new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric" }).format(new Date(entry.data.date))
+  : null;
 
 const pathParts = filePath.replace(/\.mdx$/, "").split("/");
 const breadcrumbs = [
@@ -63,9 +71,9 @@ const breadcrumbs = [
   prevNext={{}}
   markdownUrl={markdownUrl}
   socialImage={socialImage}
+  publishedDate={postDate}
+  readingTime={readingTime}
 >
   <SeriesSidebar slot="sidebar" />
-  <article class="docs-content max-w-none">
-    <PostContent filePath={filePath} />
-  </article>
+  <PostContent filePath={filePath} />
 </DocsLayout>

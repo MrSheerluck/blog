@@ -6,9 +6,11 @@ import type { HTMLAttributes } from "astro/types";
 interface Props extends HTMLAttributes<"div"> {
   markdownUrl?: string;
   lastUpdated?: Date;
+  publishedDate?: string;
+  readingTime?: number;
 }
 
-const { markdownUrl, lastUpdated, class: className, ...attrs } = Astro.props;
+const { markdownUrl, lastUpdated, publishedDate, readingTime, class: className, ...attrs } = Astro.props;
 
 const baseBtn =
   "inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-transparent px-2 py-1 text-muted-foreground no-underline transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2";
@@ -18,21 +20,46 @@ const formattedDate = lastUpdated
   : null;
 ---
 
-{(markdownUrl || lastUpdated) && (
+{(markdownUrl || lastUpdated || publishedDate || readingTime) && (
   <div
     data-nb-page-actions
     data-md-url={markdownUrl}
     class={cn("not-prose -ml-2 flex flex-wrap items-center gap-y-1 text-[0.8125rem]", className)}
     {...attrs}
   >
-    {lastUpdated && (
+    {publishedDate && (
+      <span class="inline-flex items-center gap-1.5 px-2 py-1 text-muted-foreground">
+        <Icon name="ph:calendar" class="w-3.5 h-3.5" />
+        <time datetime={new Date(publishedDate).toISOString()}>{publishedDate}</time>
+      </span>
+    )}
+
+    {publishedDate && (readingTime || lastUpdated) && (
+      <span aria-hidden="true" class="select-none text-muted-foreground/40">|</span>
+    )}
+
+    {readingTime && (
       <span class="inline-flex items-center gap-1.5 px-2 py-1 text-muted-foreground">
         <Icon name="ph:clock" class="w-3.5 h-3.5" />
+        {readingTime} min read
+      </span>
+    )}
+
+    {readingTime && lastUpdated && (
+      <span aria-hidden="true" class="select-none text-muted-foreground/40">|</span>
+    )}
+
+    {lastUpdated && (
+      <span class="inline-flex items-center gap-1.5 px-2 py-1 text-muted-foreground">
         Updated <time datetime={lastUpdated.toISOString()}>{formattedDate}</time>
       </span>
     )}
 
-    {markdownUrl && lastUpdated && (
+    {lastUpdated && markdownUrl && (
+      <span aria-hidden="true" class="select-none text-muted-foreground/40">|</span>
+    )}
+
+    {(publishedDate || readingTime) && markdownUrl && !lastUpdated && (
       <span aria-hidden="true" class="select-none text-muted-foreground/40">|</span>
     )}
 
