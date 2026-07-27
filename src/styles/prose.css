@@ -2,7 +2,7 @@
 
 .docs-content {
   font-family: var(--nb-font-mono);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.75;
   color: var(--nb-foreground);
   overflow-wrap: break-word;
