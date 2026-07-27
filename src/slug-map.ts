@@ -4,7 +4,6 @@ export const slugMap: Record<string, string> = {
   "build-breakout-in-bevy-step-by-step": "gamedev/bevy/build-breakout-in-bevy-step-by-step.mdx",
   "crito": "philosophy/plato/crito.mdx",
   "euthyphro": "philosophy/plato/euthyphro.mdx",
-  "katex-test": "math/linear-algebra/katex-test.mdx",
   "learn-axum-basics-and-routing-by-building-a-url-shortener": "axum/learn-axum-basics-and-routing-by-building-a-url-shortener.mdx",
   "learn-axum-error-handling-by-building-pastebin-api-in-rust": "axum/learn-axum-error-handling-by-building-pastebin-api-in-rust.mdx",
   "learn-axum-persistence-and-transaction-by-building-a-bookmark-manager": "axum/learn-axum-persistence-and-transaction-by-building-a-bookmark-manager.mdx",
