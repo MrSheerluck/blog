@@ -1,0 +1,79 @@
+---
+title: KaTeX Rendering Test
+description: "Test article to verify all KaTeX rendering features work correctly"
+date: 2026-07-27
+---
+
+This article tests various KaTeX rendering scenarios.
+
+## Display Math
+
+Standalone block:
+
+$$E = mc^2$$
+
+With limits and fractions:
+
+$$
+\int_0^\infty e^\{-x^2\} \, dx = \frac\{\sqrt\{\pi\}\}\{2\}
+$$
+
+## Inline Math
+
+Quadratic formula: $x = \frac\{-b \pm \sqrt\{b^2 - 4ac\}\}\{2a\}$.
+
+Pythagoras: $a^2 + b^2 = c^2$.
+
+More: $f(x) = x^2$, $\sin(\theta)$, and $\sum_\{i=1\}^\{n\} i = \frac\{n(n+1)\}\{2\}$.
+
+## Math in Tables
+
+| Function | Notation | Derivative |
+| --- | --- | --- |
+| Constant | $f(x) = c$ | $f'(x) = 0$ |
+| Power rule | $f(x) = x^n$ | $f'(x) = nx^\{n-1\}$ |
+| Exponential | $f(x) = e^x$ | $f'(x) = e^x$ |
+| Natural log | $f(x) = \ln x$ | $f'(x) = \frac\{1\}\{x\}$ |
+
+## Greek Letters and Symbols
+
+$\alpha, \beta, \gamma, \delta, \epsilon, \theta, \lambda, \mu, \pi, \sigma, \phi, \omega$
+
+$\Gamma, \Delta, \Theta, \Lambda, \Pi, \Sigma, \Phi, \Omega$
+
+## Matrices
+
+$$
+A = \begin\{bmatrix\}
+a_\{11\} & a_\{12\} \\
+a_\{21\} & a_\{22\}
+\end\{bmatrix\}
+$$
+
+## Probability
+
+Normal distribution: $X \sim \mathcal\{N\}(\mu, \sigma^2)$.
+
+Bayes: $P(A|B) = \frac\{P(B|A) \cdot P(A)\}\{P(B)\}$.
+
+## Sets and Logic
+
+$\forall x \in \mathbb\{R\}, \exists y \in \mathbb\{N\}$
+
+$\emptyset \subset A \subseteq \Omega$
+
+## Vectors and Norms
+
+$\vec\{v\} = (v_x, v_y, v_z)$
+
+$\lVert x \rVert_2 = \sqrt\{\sum_i x_i^2\}$
+
+Limits: $\lim_\{x \to 0\} \frac\{\sin x\}\{x\} = 1$
+
+## NOT Math — Should Stay as Raw Text
+
+The price is 50 dollars and the discount is 10 dollars.
+
+```sql
+SELECT * FROM users WHERE id = $1 AND status = $2;
+```
