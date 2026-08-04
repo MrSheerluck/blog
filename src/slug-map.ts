@@ -3,6 +3,7 @@ export const slugMap: Record<string, string> = {
   "apology": "philosophy/plato/apology.mdx",
   "build-breakout-in-bevy-step-by-step": "gamedev/bevy/build-breakout-in-bevy-step-by-step.mdx",
   "crito": "philosophy/plato/crito.mdx",
+  "epictetus-the-complete-works-handbook": "book-notes/epictetus-the-complete-works/epictetus-the-complete-works-handbook.mdx",
   "euthyphro": "philosophy/plato/euthyphro.mdx",
   "learn-axum-basics-and-routing-by-building-a-url-shortener": "axum/learn-axum-basics-and-routing-by-building-a-url-shortener.mdx",
   "learn-axum-error-handling-by-building-pastebin-api-in-rust": "axum/learn-axum-error-handling-by-building-pastebin-api-in-rust.mdx",
