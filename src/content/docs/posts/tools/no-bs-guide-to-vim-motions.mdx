@@ -1,0 +1,699 @@
+---
+title: No BS Guide to Vim Motions 
+description: "In this post, we are going to learn about vim motions"
+date: 2026-08-05
+---
+
+
+Hello there, in this article I’m going to explain vim motions and most of the common commands and motions that you need to know to start using it on your day to day work
+
+# Vim Basics
+
+## Playground
+
+We’ll use a simple Markdown file throughout this guide. Create a file called `notes.md` and paste the following into it.
+
+```markdown
+# Vim Playground
+
+## Todo
+
+- Learn Vim
+- Write an article
+- Push to GitHub
+
+## Languages
+
+- Rust
+- Go
+- Python
+
+Vim is a modal text editor.
+
+Learning by doing is the fastest way to get comfortable with Vim.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+```
+
+Everything in this guide can be tried inside this file.
+
+# Vim Concepts
+
+Let’s first learn a few terminologies before diving into vim motions
+
+## Buffer
+
+A buffer is a representation of a file in memory
+
+## Window
+
+A window displays a buffer. Even after you close a window the buffer can still remain in memory. Only the view disappear
+
+## Split
+
+A split is simply another window. Using splits you can work with multiple files at the same time
+
+## Opening Vim
+
+Open your terminal and run:
+
+```
+vim notes.md
+```
+
+This will open the file inside vim
+
+You should see something like this appears in your terminal:
+
+!Screenshot 2026-08-05 at 16.35.53.png
+
+Now, to quit vim, you can type `:q` and press enter. Now, you should be back in your terminal view.
+
+> If there are unsaved changes, you need to save them first by typing `:w` , this will save the changes, then you can type `:q` to quit. You can also do this thing in a single command `:wq`, this means you want to save and quit
+> 
+
+If you want to quit without saving, you can type `:q!` and press enter.
+
+## Modes
+
+There are different modes in vim. I’ll just mention the ones that you’ll use the most:
+
+- Normal Mode
+- Insert Mode
+- Visual Mode
+- Visual Line Mode
+
+When you start vim, it starts in normal mode
+
+### Insert Mode
+
+You can see, after you open that markdown file, you can’t type anything. That’s because you are in normal mode. So, lets first get into **insert mode** by typing `i`
+
+Now you can just type like any other editor. Once you are done typing, you can go back to normal mode by pressing `Esc` key.
+
+Ok, so there are multiple ways to enter insert mode, I’ll list them down here but for the sake of simplicity, just remember to use `i` to get into insert mode. 
+
+| i | Insert before cursor |
+| --- | --- |
+| a | insert after cursor |
+| I | insert at beginning of line |
+| A | insert at the end of line |
+| o | new line below |
+| O | new line above |
+
+## Basic Navigation
+
+To navigate, you need to be in normal mode. This is the reason, you should always get back to normal mode, once you are done editing your text or code.
+
+Let’s start with the 4 basic directions:
+
+| Left | h |
+| --- | --- |
+| Down | j |
+| Up | k |
+| Right | l |
+
+These basic navigations will help us to move character by character but ofcourse these are too slow and annoying. There are some better ways to fast forward navigations. These are word motions
+
+| w | to move to the beginning of the next word |
+| --- | --- |
+| b | to move back one word |
+| e | to move to the end of the current word |
+
+## Horizontal Navigation
+
+Until now we've been moving one character at a time using `h` and `l`. That works, but it's rarely the fastest way to move around a line.
+
+Let's look at a few commands you'll use all the time.
+
+Suppose you have:
+
+```rust
+let username="sheerluck";
+```
+
+### Beginning and End of Line
+
+To jump to the beginning of the line:
+
+| 0 | beginning of line |
+| --- | --- |
+| ^ | first non-whitespace character |
+| $ | end of line |
+
+There are navigations to move around the file as well
+
+| gg | go to first line |
+| --- | --- |
+| G | go to last line |
+
+### Find a Character
+
+Suppose your cursor is here:
+
+```
+let username="sheerluck";
+    ^
+```
+
+and you want to jump to the `=`.
+
+Instead of pressing `l` multiple times, type:
+
+```
+f=
+```
+
+`f` means **find**.
+
+It jumps to the next occurrence of that character.
+
+Some useful examples:
+
+```
+f"
+f(
+f{
+f,
+f:
+```
+
+### Before a Character
+
+Sometimes you don't want to land on the character itself.
+
+Suppose you want to stop just before `"`.
+
+Use:
+
+```
+t"
+```
+
+`t` means **till**.
+
+It's similar to `f`, but stops one character before.
+
+### Searching Backwards
+
+Both commands also work backwards.
+
+| Command | Action |
+| --- | --- |
+| `Fx` | Find previous `x` |
+| `Tx` | Move before previous `x` |
+
+### Repeat Find
+
+Suppose you used:
+
+```
+f,
+```
+
+To jump to the next comma again, press:
+
+```
+;
+```
+
+To go back to the previous one:
+
+```
+,
+```
+
+This is extremely useful when editing function arguments.
+
+## Vertical Navigation
+
+### Line Navigation
+
+Move to a specific line:
+
+```
+42G
+```
+
+Go to the first line:
+
+```
+gg
+```
+
+Go to the last line:
+
+```
+G
+```
+
+### Scrolling
+
+Sometimes you don't want to move the cursor one line at a time.
+
+Instead, scroll by pages.
+
+| Command | Action |
+| --- | --- |
+| `Ctrl-d` | Half page down |
+| `Ctrl-u` | Half page up |
+| `Ctrl-f` | Full page down |
+| `Ctrl-b` | Full page up |
+
+### Keep Cursor Centered
+
+After jumping around, your cursor often ends up at the top or bottom of the screen.
+
+Press:
+
+```
+zz
+```
+
+to center the current line.
+
+You can also use:
+
+| Command | Action |
+| --- | --- |
+| `zt` | Cursor at top |
+| `zz` | Cursor in middle |
+| `zb` | Cursor at bottom |
+
+`zz` is one of those commands you'll end up pressing constantly.
+
+## Delete, Copy and Paste
+
+| dd | delete current line |
+| --- | --- |
+| yy | to copy (or yank) the current line |
+| p | paste below the cursor |
+| P | paste above the cursor |
+| u | undo the last change |
+| Ctrl-r | redo it |
+
+## Visual Mode
+
+In visual mode, we can select or highlight text. To get to visual mode, press `v`. Now you can move around with the navigation commands you learned earlier and you can see text will be selected/highlighted.
+
+Again, press `Esc` to get back from visual to normal mode
+
+Once, you have selected some text, you can:
+
+- press `y` to copy it
+- press `d` to delete it
+- press `c` to replace it
+
+It’s basically the same how you would operate in any other text editor. The only thing is you are using your keyboard instead of mouse.
+
+## Visual Line Mode
+
+Sometimes instead of selecting randomly you want to select entire lines. To do that, you can press `V` and now you can move up and down to select multiple lines and you can again to the same operations as visual mode.
+
+> To indent lines, you can select them in visual line mode and then press `>` to indent and `<` to unindent them
+> 
+
+## Searching
+
+Searching is also very common when we use any code or text editor. To search in vim, you can just stay in normal mode and type `/word` . Whatever you type after the `/` will be searched and then press enter
+
+Now, once you do that, you can navigate around using `n` for the next match and `N` for the previous match.
+
+You can also place the cursor on a word and press `*` to search for the next occurrence and press `#` for previous occurrence. This really helps when searching for a variable or function name
+
+# Operators
+
+Until now we've only been moving around the file.
+
+Now let's actually start editing it.
+
+Most editing commands in Vim follow the same pattern:
+
+```
+operator + motion
+```
+
+An **operator** is simply an action.
+
+For example:
+
+| Operator | Action |
+| --- | --- |
+| `d` | Delete |
+| `c` | Change |
+| `y` | Copy (Yank) |
+
+The **motion** tells Vim what the action should apply to.
+
+Let's see a few examples.
+
+| Command | Meaning |
+| --- | --- |
+| `dw` | Delete a word |
+| `d$` | Delete to the end of the line |
+| `dd` | Delete the current line |
+| `cw` | Change a word |
+| `c$` | Change to the end of the line |
+| `yy` | Copy the current line |
+| `yw` | Copy a word |
+
+## Delete
+
+Suppose you have:
+
+```rust
+let username = "sheerluck";
+```
+
+To delete just the word `username`, place the cursor on it and type:
+
+```
+dw
+```
+
+To delete everything from the cursor to the end of the line:
+
+```
+d$
+```
+
+To delete the entire line:
+
+```
+dd
+```
+
+## Change
+
+Changing is one of the commands you'll use the most.
+
+Instead of deleting something and entering Insert mode manually, use `c`.
+
+For example:
+
+```
+cw
+```
+
+changes the current word and immediately puts you into Insert mode.
+
+Suppose you have:
+
+```rust
+let username = "sheerluck";
+```
+
+Place the cursor on `username`.
+
+Type:
+
+```
+cw
+```
+
+Now type:
+
+```
+email
+```
+
+Press `Esc`.
+
+The result becomes:
+
+```rust
+let email = "sheerluck";
+```
+
+To change everything until the end of the line:
+
+```
+C
+```
+
+## Copy (Yank)
+
+Copy works exactly the same way.
+
+Copy the current line:
+
+```
+yy
+```
+
+Copy the next word:
+
+```
+yw
+```
+
+Copy to the end of the line:
+
+```
+y$
+```
+
+Paste below:
+
+```
+p
+```
+
+Paste above:
+
+```
+P
+```
+
+## Counts
+
+Most commands accept a number.
+
+Delete five lines:
+
+```
+5dd
+```
+
+Copy three words:
+
+```
+3yw
+```
+
+Move down ten lines:
+
+```
+10j
+```
+
+Move forward five words:
+
+```
+5w
+```
+
+## Repeat the Last Change
+
+One of Vim's best commands is:
+
+```
+.
+```
+
+It repeats your last edit.
+
+For example, change one variable using `cw`.
+
+Now move to another variable and press:
+
+```
+.
+```
+
+Vim performs the same edit again.
+
+# Text Objects
+
+Motions work great, but sometimes you don't want to move from one place to another.
+
+Sometimes you want to edit **the thing your cursor is already inside**.
+
+That's where text objects come in.
+
+## Inner Word
+
+Suppose your cursor is anywhere inside:
+
+```rust
+let username = "sheerluck";
+```
+
+Type:
+
+```
+ciw
+```
+
+This stands for:
+
+- `c` → change
+- `iw` → inner word
+
+No matter where your cursor is inside `username`, the whole word is selected and replaced.
+
+To delete the current word instead:
+
+```
+diw
+```
+
+To copy it:
+
+```
+yiw
+```
+
+## Inside Quotes
+
+Suppose you have:
+
+```rust
+println!("Hello World");
+```
+
+Place the cursor anywhere inside `"Hello World"`.
+
+Type:
+
+```
+ci"
+```
+
+Everything inside the quotes is removed and you're placed into Insert mode.
+
+You don't have to move to the beginning or end of the string.
+
+To delete the contents:
+
+```
+di"
+```
+
+To copy them:
+
+```
+yi"
+```
+
+## Inside Parentheses
+
+The same idea works with brackets.
+
+```rust
+println!("Hello", name);
+```
+
+Place the cursor anywhere inside the parentheses.
+
+Type:
+
+```
+ci(
+```
+
+Everything inside the parentheses is replaced.
+
+Likewise:
+
+```
+di(
+yi(
+```
+
+work exactly as you'd expect.
+
+The same commands work for:
+
+```
+()
+[]
+{}
+<>
+```
+
+## Around Objects
+
+So far we've used **inside**.
+
+You can also use **around**.
+
+For example:
+
+```
+ci"
+```
+
+changes only the text inside the quotes.
+
+```
+ca"
+```
+
+changes the text **and** the quotes.
+
+The same works for brackets.
+
+| Command | Action |
+| --- | --- |
+| `ci(` | Inside parentheses |
+| `ca(` | Around parentheses |
+| `ci{` | Inside braces |
+| `ca{` | Around braces |
+| `ci[` | Inside brackets |
+| `ca[` | Around brackets |
+
+# Working with Multiple Files
+
+You might have to open multiple files at once. Although I don’t often do this but just putting it out here incase you need it
+
+To open another file:
+
+```
+:e main.rs
+```
+
+To open it in a vertical split:
+
+```
+:vsp main.rs
+```
+
+Or a horizontal split:
+
+```
+:sp main.rs
+```
+
+Move between splits:
+
+| Command | Action |
+| --- | --- |
+| `Ctrl-w h` | Left |
+| `Ctrl-w j` | Down |
+| `Ctrl-w k` | Up |
+| `Ctrl-w l` | Right |
+
+Close the current split:
+
+```
+Ctrl-w q
+```
+
+Equalize all splits:
+
+```
+Ctrl-w =
+```
+
+We can wrap this guide here. I think I’ve shared enough that you can start using vim motions in your day to day writing and find more useful stuff regarding vim motions. See you soon
