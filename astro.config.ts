@@ -3,6 +3,7 @@ import icon from "astro-icon";
 import tailwindcss from "@tailwindcss/vite";
 import nimbus, { defineConfig as defineNimbusConfig } from "@cloudflare/nimbus-docs";
 import { tableScroll } from "@cloudflare/nimbus-docs/markdown";
+import { satteriRustPlayground } from "./src/plugins/satteri-rust-playground";
 
 const nimbusConfig = defineNimbusConfig({
   site: "https://blog.sheerluck.dev",
@@ -32,6 +33,7 @@ export default defineConfig({
         "nimbus/internal-link": "error",
       },
       markdown: {
+        mdastPlugins: [satteriRustPlayground()],
         hastPlugins: [tableScroll()],
       },
     }),

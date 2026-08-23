@@ -542,3 +542,33 @@ body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
 .text-size-lg [data-font-size-toggle] {
   color: var(--nb-primary);
 }
+
+/* ---- Rust Playground ---- */
+.rust-playground__editor {
+  field-sizing: content;
+}
+.rust-playground__pre {
+  background: transparent;
+}
+.rust-playground__pre--stderr {
+  color: var(--nb-danger);
+}
+.rust-playground__status[data-state="idle"] { color: var(--nb-muted-foreground); }
+.rust-playground__status[data-state="running"] { color: var(--nb-info); }
+.rust-playground__status[data-state="success"] { color: var(--nb-success); }
+.rust-playground__status[data-state="warning"] { color: var(--nb-warning); }
+.rust-playground__status[data-state="error"] { color: var(--nb-danger); }
+[data-rust-output-wrap][data-state="success"] { border-color: color-mix(in oklch, var(--nb-success) 20%, var(--nb-border)); }
+[data-rust-output-wrap][data-state="error"] { border-color: color-mix(in oklch, var(--nb-danger) 20%, var(--nb-border)); }
+[data-rust-output-wrap][data-state="warning"] { border-color: color-mix(in oklch, var(--nb-warning) 20%, var(--nb-border)); }
+.rust-playground__spinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 9999px;
+  display: inline-block;
+  animation: rust-playground-spin 0.6s linear infinite;
+}
+@keyframes rust-playground-spin { to { transform: rotate(360deg); } }
+.rust-playground__editor::-webkit-scrollbar { width: 6px; height: 6px; }

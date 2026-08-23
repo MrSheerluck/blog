@@ -1,0 +1,127 @@
+---
+/**
+ * RustPlayground — editable, runnable Rust snippet via play.rust-lang.org/execute
+ *
+ * Usage MDX (explicit):
+ *   <RustPlayground code={`fn main(){ println!("hi"); }`} edition="2021" channel="stable" />
+ *
+ * Usage MD (fence opt-in, via remark):
+ *   ```rust playground edition=2024
+ *   fn main(){ ... }
+ *   ```
+ *
+ * Multiple per page are supported — client script scopes to [data-rust-playground].
+ */
+interface Props {
+  code: string;
+  title?: string;
+  edition?: "2015" | "2018" | "2021" | "2024";
+  channel?: "stable" | "beta" | "nightly";
+  mode?: "debug" | "release";
+  crateType?: "bin" | "lib";
+  /** Alias for channel — playground uses `version` param; we accept both. */
+  version?: "stable" | "beta" | "nightly";
+}
+
+const {
+  code,
+  title,
+  edition = "2024",
+  channel: channelProp,
+  version,
+  mode = "debug",
+  crateType = "bin",
+} = Astro.props as Props;
+
+const channel = channelProp ?? version ?? "stable";
+
+// Escape for textarea content (prevent </textarea> break). We render inside textarea, so escape `</textarea>` and `&`.
+function escapeForTextarea(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+// Escape attribute if needed (we use data-* plain)
+const safeTitle = title ?? "Rust Playground";
+---
+
+<div
+  data-rust-playground
+  data-edition={edition}
+  data-channel={channel}
+  data-mode={mode}
+  data-crate-type={crateType}
+  class="rust-playground not-prose my-6 overflow-hidden rounded-lg border border-border bg-card shadow-sm"
+>
+  {/* Header */}
+  <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/50 px-3 py-2">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+        <span class="inline-block h-2 w-2 rounded-full bg-success"></span>
+        {safeTitle}
+      </span>
+      <span class="hidden sm:inline text-[11px] text-muted-foreground">
+        {channel} • {edition} • {mode}
+      </span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <button
+        type="button"
+        data-rust-reset
+        class="inline-flex items-center justify-center rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+        title="Reset code"
+      >
+        Reset
+      </button>
+      <a
+        data-rust-open
+        target="_blank"
+        rel="noopener noreferrer"
+        href={`https://play.rust-lang.org/?version=${channel}&mode=${mode}&edition=${edition}`}
+        class="inline-flex items-center justify-center rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+      >
+        Open in Playground
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" class="ml-1"><path d="M6 4l4 4-4 4" /><path d="M10 8H3" opacity="0.0"/><path d="M5 3h7v7" /></svg>
+      </a>
+      <button
+        type="button"
+        data-rust-run
+        class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M4 3l8 5-8 5z"/></svg>
+        Run
+      </button>
+    </div>
+  </div>
+
+  {/* Editor */}
+  <div class="relative bg-card">
+    <textarea
+      data-rust-editor
+      spellcheck="false"
+      autocapitalize="off"
+      autocomplete="off"
+      autocorrect="off"
+      data-gramm="false"
+      data-gramm_editor="false"
+      data-enable-grammarly="false"
+      class="rust-playground__editor w-full min-h-[140px] resize-y bg-transparent px-4 py-3 font-mono text-sm leading-6 text-foreground placeholder:text-muted-foreground focus:outline-none"
+      rows="8"
+      aria-label="Editable Rust code"
+      set:html={escapeForTextarea(code)}
+    ></textarea>
+    <div class="pointer-events-none absolute bottom-2 right-2 hidden sm:block text-[11px] text-muted-foreground/70">
+      Ctrl+Enter to run
+    </div>
+  </div>
+
+  {/* Output */}
+  <div data-rust-output-wrap hidden data-state="idle" class="border-t border-border bg-muted/30">
+    <div class="flex items-center gap-2 px-3 py-2 border-b border-border/60">
+      <span class="text-xs font-medium text-muted-foreground">Output</span>
+      <span data-rust-status data-state="idle" class="rust-playground__status text-xs"></span>
+    </div>
+    <pre data-rust-output hidden class="rust-playground__pre m-0 max-h-[300px] overflow-auto px-4 py-3 font-mono text-xs leading-5 whitespace-pre-wrap break-words text-foreground"></pre>
+    <pre data-rust-stderr hidden class="rust-playground__pre rust-playground__pre--stderr m-0 max-h-[300px] overflow-auto px-4 py-3 font-mono text-xs leading-5 whitespace-pre-wrap break-words"></pre>
+  </div>
+</div>
+
+

@@ -1,0 +1,110 @@
+---
+title: Rust Playground Demo
+description: Interactive demo, multiple editable Rust playgrounds on one page via play.rust-lang.org.
+sidebar:
+  hidden: true
+---
+
+import { RustPlayground } from "@/components/ui/rust-playground";
+
+
+
+## 1. Hello, World!
+
+
+```rust playground title="Hello World"
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+Try editing `println!` to print your name and hit **Run**.
+
+## 2. With variables and mutability
+
+```rust playground title="Variables & Mutability" edition=2024 channel=stable mode=debug
+fn main() {
+    let mut x = 5;
+    println!("x is {x}");
+    x = 6;
+    println!("x is now {x}");
+}
+```
+
+## 3. Second example on same page — proves multiple embeds work
+
+```rust playground title="Second Example — Loops"
+fn main() {
+    for i in 0..5 {
+        println!("i = {}", i);
+    }
+}
+```
+
+## 4. Error handling — see compiler output
+
+Try running, then fix the error and run again.
+
+```rust playground title="Compilation Error Demo"
+fn main() {
+    let x = 5;
+    println!("{}", x);
+    // Uncomment next line to see an error:
+    // let y: i32 = "oops";
+}
+```
+
+```rust playground title="Fix Me — Error"
+fn main() {
+    let y: i32 = "oops";
+    println!("{}", y);
+}
+```
+
+## 5. Nightly + 2024 edition + release mode
+
+```rust playground title="Nightly • 2024 • Release" channel=nightly edition=2024 mode=release
+fn main() {
+    println!("Running on nightly, edition 2024, release mode");
+}
+```
+
+## 6. Explicit component usage (import)
+
+<RustPlayground
+  code={`fn main() {
+    let s = String::from("from component");
+    println!("Hello {s}!");
+}`}
+  title="Via <RustPlayground> Component"
+  edition="2024"
+  channel="stable"
+  mode="debug"
+/>
+
+## Static code stays static
+
+This block is plain ````rust` without `playground` — it remains a highlighted, non-runnable code block:
+
+```rust
+fn main() {
+    println!("This one is static — no Run button");
+}
+```
+
+---
+
+**Fence syntax:**
+
+````md
+```rust playground title="My Example" edition=2024 channel=stable mode=debug
+fn main() { println!("hi"); }
+```
+````
+
+For MDX you can also use the component:
+
+```mdx
+import { RustPlayground } from "@/components/ui/rust-playground";
+<RustPlayground code={`fn main(){...}`} title="Example" />
+```

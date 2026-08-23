@@ -11,6 +11,7 @@ import { CardGrid } from "./components/ui/card-grid";
 import { PackageManagers } from "./components/ui/package-managers";
 import { Step, Steps } from "./components/ui/steps";
 import { Tabs, TabItem } from "./components/ui/tabs";
+import { RustPlayground } from "./components/ui/rust-playground";
 
 export const components = {
   Aside,
@@ -18,6 +19,7 @@ export const components = {
   CardGrid,
   PackageManagers,
   Render,
+  RustPlayground,
   Step,
   Steps,
   TabItem,
