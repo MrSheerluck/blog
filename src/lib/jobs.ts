@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import boards from "../data/job-boards.json";
 
 export type ExperienceLevel =
@@ -241,7 +244,7 @@ async function fetchSmartRecruiters(token: string, company: string): Promise<Job
   return jobs;
 }
 
-export async function getAllJobs(): Promise<{ jobs: Job[]; errors: string[] }> {
+export async function fetchAllJobsFromBoards(): Promise<{ jobs: Job[]; errors: string[] }> {
   const results = await Promise.allSettled(
     (boards as BoardConfig[]).flatMap((b) => {
       const fetchers = [];
@@ -267,4 +270,40 @@ export async function getAllJobs(): Promise<{ jobs: Job[]; errors: string[] }> {
     return tb - ta;
   });
   return { jobs, errors };
+}
+
+/**
+ * Jobs as of the last `pnpm sync-jobs` run (see scripts/sync-jobs.ts).
+ * The build never hits the board APIs — it reads the snapshot file, so
+ * builds are fast and deterministic. Freshness comes from the hourly
+ * GitHub Actions cron that re-runs sync + deploy.
+ *
+ * Loaded via fs (not a static import) with a graceful fallback, so a
+ * fresh checkout without a snapshot still builds — it just renders an
+ * empty board until `pnpm sync-jobs` runs.
+ */
+let snapshotCache: { generatedAt: string | null; jobs: Job[] } | null = null;
+
+export function getAllJobs(): { generatedAt: string | null; jobs: Job[] } {
+  if (snapshotCache) return snapshotCache;
+  // Astro runs dev/build from the project root; keep a module-relative
+  // fallback for other contexts.
+  const candidates = [
+    resolve(process.cwd(), "src/data/jobs.json"),
+    fileURLToPath(new URL("../data/jobs.json", import.meta.url)),
+  ];
+  for (const path of candidates) {
+    try {
+      const data = JSON.parse(readFileSync(path, "utf-8")) as {
+        generatedAt?: string;
+        jobs?: Job[];
+      };
+      snapshotCache = { generatedAt: data.generatedAt ?? null, jobs: data.jobs ?? [] };
+      break;
+    } catch {
+      continue;
+    }
+  }
+  if (!snapshotCache) snapshotCache = { generatedAt: null, jobs: [] };
+  return snapshotCache;
 }
