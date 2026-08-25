@@ -1,24 +1,32 @@
-# Hourly job-board refresh: fetch all boards into src/data/jobs.json,
-# rebuild the site from that snapshot, and deploy to Cloudflare.
+# Daily job-board refresh.
 #
-# Required repo secrets:
-#   CLOUDFLARE_API_TOKEN   — token with Workers Scripts:Edit permission
-#   CLOUDFLARE_ACCOUNT_ID  — your Cloudflare account id
+# Fetches all boards into src/data/jobs.json and pushes the updated
+# snapshot to main. Deployment happens automatically via Cloudflare
+# Workers Builds (Git integration) watching main — no Cloudflare API
+# token needed here.
+#
+# One-time setup in Cloudflare dashboard:
+#   Workers & Pages → nimbus-temp → Settings → Build → Connect to Git
+#   Build command:  pnpm build
+#   Deploy command: npx wrangler deploy
 name: Refresh job board
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 5 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 concurrency:
   group: refresh-job-board
   cancel-in-progress: true
 
 jobs:
-  refresh-and-deploy:
+  refresh-snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -37,9 +45,14 @@ jobs:
       # blip), so a bad run can't wipe the job board.
       - run: pnpm sync-jobs
 
-      - run: pnpm build
-
-      - run: pnpm dlx wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Commit refreshed snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/jobs.json
+          if git diff --cached --quiet; then
+            echo "No job changes since last snapshot — skipping commit."
+          else
+            git commit -m "chore(jobs): refresh board snapshot ($(date -u '+%Y-%m-%dT%H:%MZ'))"
+            git push
+          fi

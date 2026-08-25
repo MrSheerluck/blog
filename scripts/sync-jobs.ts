@@ -4,7 +4,7 @@
  * hitting the APIs at build time.
  *
  * Run locally:      pnpm sync-jobs
- * Run in CI:        hourly via .github/workflows/jobs.yml (then deploys)
+ * Run in CI:        daily via .github/workflows/jobs.yml (then deploys)
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
