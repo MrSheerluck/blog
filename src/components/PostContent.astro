@@ -24,12 +24,14 @@ import axum_learn_axum_basics_and_routing_by_building_a_url_shortener from "../c
 import axum_learn_axum_error_handling_by_building_pastebin_api_in_rust from "../content/docs/posts/axum/learn-axum-error-handling-by-building-pastebin-api-in-rust.mdx";
 import axum_learn_axum_persistence_and_transaction_by_building_a_bookmark_manager from "../content/docs/posts/axum/learn-axum-persistence-and-transaction-by-building-a-bookmark-manager.mdx";
 import programming_languages_go_learn_go_basics_by_building_a_brainfuck_intepreter from "../content/docs/posts/programming-languages/go/learn-go-basics-by-building-a-brainfuck-intepreter.mdx";
+import programming_languages_rust_understanding_rust_variables_and_types_by_building_a_scientific_calculator from "../content/docs/posts/programming-languages/rust/understanding-rust-variables-and-types-by-building-a-scientific-calculator.mdx";
 import gamedev_bevy_build_breakout_in_bevy_step_by_step from "../content/docs/posts/gamedev/bevy/build-breakout-in-bevy-step-by-step.mdx";
 import gamedev_bevy_learn_bevy_states_timers_by_building_snake from "../content/docs/posts/gamedev/bevy/learn-bevy-states-timers-by-building-snake.mdx";
 import gamedev_bevy_learn_the_basics_of_bevy_by_building_and_deploying_pong_to_itch_io from "../content/docs/posts/gamedev/bevy/learn-the-basics-of-bevy-by-building-and-deploying-pong-to-itch-io.mdx";
 import philosophy_plato_apology from "../content/docs/posts/philosophy/plato/apology.mdx";
 import philosophy_plato_crito from "../content/docs/posts/philosophy/plato/crito.mdx";
 import philosophy_plato_euthyphro from "../content/docs/posts/philosophy/plato/euthyphro.mdx";
+import { components } from "../components";
 
 const fileToComponent = {
   "misc/lessons-in-stoicism.mdx": misc_lessons_in_stoicism,
@@ -57,6 +59,7 @@ const fileToComponent = {
   "axum/learn-axum-error-handling-by-building-pastebin-api-in-rust.mdx": axum_learn_axum_error_handling_by_building_pastebin_api_in_rust,
   "axum/learn-axum-persistence-and-transaction-by-building-a-bookmark-manager.mdx": axum_learn_axum_persistence_and_transaction_by_building_a_bookmark_manager,
   "programming-languages/go/learn-go-basics-by-building-a-brainfuck-intepreter.mdx": programming_languages_go_learn_go_basics_by_building_a_brainfuck_intepreter,
+  "programming-languages/rust/understanding-rust-variables-and-types-by-building-a-scientific-calculator.mdx": programming_languages_rust_understanding_rust_variables_and_types_by_building_a_scientific_calculator,
   "gamedev/bevy/build-breakout-in-bevy-step-by-step.mdx": gamedev_bevy_build_breakout_in_bevy_step_by_step,
   "gamedev/bevy/learn-bevy-states-timers-by-building-snake.mdx": gamedev_bevy_learn_bevy_states_timers_by_building_snake,
   "gamedev/bevy/learn-the-basics-of-bevy-by-building-and-deploying-pong-to-itch-io.mdx": gamedev_bevy_learn_the_basics_of_bevy_by_building_and_deploying_pong_to_itch_io,
@@ -70,4 +73,4 @@ const { filePath } = Astro.props;
 const Component = fileToComponent[filePath];
 ---
 
-{Component ? <Component /> : <p>Not found: {filePath}</p>}
+{Component ? <Component components={components} /> : <p>Not found: {filePath}</p>}
