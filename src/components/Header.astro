@@ -97,6 +97,19 @@ const showSections = sections.length >= 2;
         <Icon name="ph:heart" class="w-4 h-4" />
         <span class="ml-1.5 hidden sm:inline">Sponsor</span>
       </LinkButton>
+      <LinkButton
+        href="/jobs"
+        variant="minimal"
+        size="sm"
+        aria-label="Job board"
+        class:list={[
+          "text-muted-foreground hover:text-foreground",
+          currentSlug === "/jobs" && "text-foreground",
+        ]}
+      >
+        <Icon name="ph:briefcase" class="w-4 h-4" />
+        <span class="ml-1.5 hidden sm:inline">Jobs</span>
+      </LinkButton>
       {config.github && (
         <LinkButton
           href={config.github}

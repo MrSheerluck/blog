@@ -141,5 +141,56 @@ const llmsUrl = Astro.site
         });
       });
     </script>
+
+    <script is:inline>
+      // Persist series-sidebar <details> collapse state across page loads.
+      // Synchronous + end-of-body so restore happens before first paint
+      // (no flash of expanded sections). Groups are keyed by their ancestor
+      // path (e.g. "posts/learning-rust") so identically-named sections at
+      // different depths stay independent. Only touches native <details>
+      // groups — nimbus's own sidebar collapsibles use divs and have their
+      // own persistence.
+      (() => {
+        var KEY = "nb-series-sidebar-collapsed";
+        function labelOf(d) {
+          return (
+            d.querySelector(":scope > summary span.truncate")?.textContent?.trim() ??
+            d.querySelector(":scope > summary")?.textContent?.trim() ??
+            ""
+          );
+        }
+        function pathOf(d) {
+          var parts = [];
+          var cur = d;
+          while (cur instanceof HTMLDetailsElement) {
+            parts.unshift(labelOf(cur));
+            cur = cur.parentElement?.closest("details") ?? null;
+          }
+          return parts.join("/");
+        }
+        var collapsed;
+        try {
+          collapsed = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+        } catch (_) {
+          collapsed = new Set();
+        }
+        document.querySelectorAll("details[data-nb-sidebar-group]").forEach(function (d) {
+          if (collapsed.has(pathOf(d))) d.removeAttribute("open");
+          d.addEventListener("toggle", function () {
+            var set;
+            try {
+              set = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+            } catch (_) {
+              set = new Set();
+            }
+            if (d.open) set.delete(pathOf(d));
+            else set.add(pathOf(d));
+            try {
+              localStorage.setItem(KEY, JSON.stringify(Array.from(set)));
+            } catch (_) {}
+          });
+        });
+      })();
+    </script>
   </body>
 </html>
