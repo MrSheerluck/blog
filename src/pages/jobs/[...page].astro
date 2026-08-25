@@ -1,0 +1,296 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import SeriesSidebar from "../../components/SeriesSidebar.astro";
+import JobRow from "../../components/JobRow.astro";
+import { config } from "virtual:nimbus/config";
+import { getAllJobs, TECH_STACKS, EXPERIENCE_LEVELS, type Job } from "../../lib/jobs";
+
+export const PAGE_SIZE = 25;
+
+export async function getStaticPaths() {
+  const { jobs } = getAllJobs();
+  const pageCount = Math.max(1, Math.ceil(jobs.length / PAGE_SIZE));
+  const companies = [...new Set(jobs.map((j) => j.company))].sort();
+
+  return Array.from({ length: pageCount }, (_, i) => ({
+    params: { page: i === 0 ? undefined : String(i + 1) },
+    props: {
+      pageNumber: i + 1,
+      pageCount,
+      total: jobs.length,
+      slice: jobs.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE) as Job[],
+      companies,
+    },
+  }));
+}
+
+const { pageNumber, pageCount, total, slice, companies } = Astro.props;
+
+const title = `Jobs · ${config.title}`;
+const description = "Open roles across tech. Filter by company, tech stack, or experience level.";
+const issueUrl = config.github
+  ? `${config.github}/issues/new?title=${encodeURIComponent("Job board: add a company")}`
+  : null;
+
+const pageHref = (n: number) => (n <= 1 ? "/jobs" : `/jobs/${n}`);
+const rangeStart = total === 0 ? 0 : (pageNumber - 1) * PAGE_SIZE + 1;
+const rangeEnd = (pageNumber - 1) * PAGE_SIZE + slice.length;
+---
+
+<DocsLayout
+  title={title}
+  description={description}
+  sidebar={[]}
+  headings={false}
+  breadcrumbs={[]}
+  prevNext={{}}
+>
+  <SeriesSidebar slot="sidebar" />
+
+  <div
+    id="jobs-root"
+    data-page-size={PAGE_SIZE}
+    class="contents"
+  >
+    <div class="mt-6 flex flex-wrap items-end gap-x-4 gap-y-3">
+      <label class="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+        Company
+        <select
+          id="filter-company"
+          class="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          <option value="">All</option>
+          {companies.map((c: string) => <option value={c}>{c}</option>)}
+        </select>
+      </label>
+      <label class="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+        Tech stack
+        <select
+          id="filter-tech"
+          class="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          <option value="">All</option>
+          {TECH_STACKS.map((t) => <option value={t}>{t}</option>)}
+        </select>
+      </label>
+      <label class="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+        Experience
+        <select
+          id="filter-exp"
+          class="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          <option value="">All</option>
+          {EXPERIENCE_LEVELS.map((e) => <option value={e}>{e}</option>)}
+        </select>
+      </label>
+      <button
+        id="filter-reset"
+        class="hidden rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-border-strong"
+      >
+        Reset filters
+      </button>
+    </div>
+
+    <p id="jobs-status" class="text-sm text-muted-foreground" aria-live="polite">
+      {total > 0 ? `Showing ${rangeStart}–${rangeEnd} of ${total} roles` : "No jobs found right now — check back later."}
+    </p>
+
+    <ol id="jobs-list" class="divide-y divide-border list-none pl-0">
+      {slice.map((job) => (
+        <li class="m-0"><JobRow job={job} /></li>
+      ))}
+    </ol>
+
+    <nav id="pager-server" class="mt-10 flex items-center justify-center gap-4" aria-label="Pagination">
+      {pageNumber > 1 ? (
+        <a
+          href={pageHref(pageNumber - 1)}
+          rel="prev"
+          class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground no-underline transition-colors hover:border-border-strong"
+        >
+          Previous
+        </a>
+      ) : (
+        <span />
+      )}
+      <span class="text-sm text-muted-foreground">Page {pageNumber} of {pageCount}</span>
+      {pageNumber < pageCount ? (
+        <a
+          href={pageHref(pageNumber + 1)}
+          rel="next"
+          class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground no-underline transition-colors hover:border-border-strong"
+        >
+          Next
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+
+    <nav id="pager-client" class="mt-10 hidden items-center justify-center gap-4" aria-label="Filtered results pagination">
+      <button
+        id="pager-prev"
+        class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground no-underline transition-colors hover:border-border-strong disabled:pointer-events-none disabled:opacity-40"
+      >
+        Previous
+      </button>
+      <span id="pager-info" class="text-sm text-muted-foreground"></span>
+      <button
+        id="pager-next"
+        class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground no-underline transition-colors hover:border-border-strong disabled:pointer-events-none disabled:opacity-40"
+      >
+        Next
+      </button>
+    </nav>
+
+    {issueUrl && (
+      <p class="mt-14 text-sm text-muted-foreground">
+        Missing a company?{" "}
+        <a
+          href={issueUrl}
+          target="_blank"
+          rel="noopener"
+          class="text-primary hover:text-primary/80 underline underline-offset-2"
+        >
+          Open an issue on GitHub
+        </a>{" "}
+        and I'll add its board.
+      </p>
+    )}
+  </div>
+</DocsLayout>
+
+<script>
+  interface Job {
+    title: string;
+    company: string;
+    location: string;
+    url: string;
+    updatedAt: string | null;
+    tech: string[];
+    experience: string;
+  }
+
+  const root = document.getElementById("jobs-root");
+  const ssList = document.getElementById("jobs-list");
+  if (root && ssList) {
+    const listEl = ssList;
+    const statusEl = document.getElementById("jobs-status")!;
+    const companySel = document.getElementById("filter-company") as HTMLSelectElement;
+    const techSel = document.getElementById("filter-tech") as HTMLSelectElement;
+    const expSel = document.getElementById("filter-exp") as HTMLSelectElement;
+    const resetBtn = document.getElementById("filter-reset")!;
+    const ssPager = document.getElementById("pager-server")!;
+    const cPager = document.getElementById("pager-client")!;
+    const cPrev = document.getElementById("pager-prev") as HTMLButtonElement;
+    const cNext = document.getElementById("pager-next") as HTMLButtonElement;
+    const cInfo = document.getElementById("pager-info")!;
+
+    const PAGE_SIZE = Number(root.dataset.pageSize);
+    let clientPage = 1;
+    let dataPromise: Promise<{ jobs: Job[] }> | null = null;
+
+    // The full dataset (~3MB) is only downloaded when a filter is first
+    // used. Plain browsing is pure static pages.
+    function ensureData() {
+      if (!dataPromise) {
+        dataPromise = fetch("/jobs.json").then((res) => {
+          if (!res.ok) throw new Error(String(res.status));
+          return res.json();
+        });
+      }
+      return dataPromise;
+    }
+
+    const esc = (s: string) =>
+      s.replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+      );
+
+    const fmtDate = (iso: string | null) =>
+      iso
+        ? new Date(iso).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : null;
+
+    function rowHTML(job: Job): string {
+      const date = fmtDate(job.updatedAt);
+      return `<a href="${esc(job.url)}" target="_blank" rel="noopener" class="group flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:gap-4 no-underline transition-colors">
+  <div class="min-w-0 flex-1">
+    <span class="font-medium text-foreground group-hover:text-primary transition-colors">${esc(job.title)}</span>
+    <span class="block mt-0.5 text-sm text-muted-foreground">${esc(job.company)}${job.location ? ` · ${esc(job.location)}` : ""}</span>
+    ${(job.tech.length || job.experience !== "Not specified") ? `<div class="mt-1.5 flex flex-wrap gap-1.5">${job.experience !== "Not specified" ? `<span class="rounded-full border border-border px-2 py-0.5 text-[0.6875rem] text-muted-foreground">${esc(job.experience)}</span>` : ""}${job.tech.slice(0, 6).map((t) => `<span class="rounded-full border border-border px-2 py-0.5 text-[0.6875rem] text-muted-foreground">${esc(t)}</span>`).join("")}${job.tech.length > 6 ? `<span class="px-1 text-[0.6875rem] text-muted-foreground">+${job.tech.length - 6}</span>` : ""}</div>` : ""}
+  </div>
+  ${date ? `<time datetime="${esc(job.updatedAt!)}" class="text-xs text-muted-foreground whitespace-nowrap self-start sm:self-center">${date}</time>` : ""}
+</a>`;
+    }
+
+    function enterClientMode() {
+      listEl.classList.add("hidden");
+      ssPager.classList.add("hidden");
+      resetBtn.classList.remove("hidden");
+      cPager.classList.remove("hidden");
+      cPager.classList.add("flex");
+    }
+
+    function clientRender(data: { jobs: Job[] }) {
+      const company = companySel.value;
+      const tech = techSel.value;
+      const exp = expSel.value;
+
+      const filtered = data.jobs.filter(
+        (j) =>
+          (!company || j.company === company) &&
+          (!tech || j.tech.includes(tech)) &&
+          (!exp || j.experience === exp),
+      );
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      clientPage = Math.min(Math.max(1, clientPage), totalPages);
+
+      const start = (clientPage - 1) * PAGE_SIZE;
+      const slice = filtered.slice(start, start + PAGE_SIZE);
+
+      listEl.innerHTML = slice.map((j) => `<li class="m-0">${rowHTML(j)}</li>`).join("");
+      listEl.classList.remove("hidden");
+
+      statusEl.textContent = filtered.length
+        ? `Showing ${start + 1}–${start + slice.length} of ${filtered.length} roles`
+        : "No roles match your filters.";
+
+      cInfo.textContent = `Page ${clientPage} of ${totalPages}`;
+      cPrev.disabled = clientPage <= 1;
+      cNext.disabled = clientPage >= totalPages;
+      enterClientMode();
+    }
+
+    function onFilterChange() {
+      clientPage = 1;
+      statusEl.textContent = "Loading…";
+      ensureData()
+        .then(clientRender)
+        .catch(() => {
+          statusEl.textContent = "Couldn't load the job listings. Please refresh and try again.";
+        });
+    }
+
+    companySel.addEventListener("change", onFilterChange);
+    techSel.addEventListener("change", onFilterChange);
+    expSel.addEventListener("change", onFilterChange);
+
+    resetBtn.addEventListener("click", () => {
+      window.location.reload();
+    });
+
+    cPrev.addEventListener("click", () => {
+      clientPage -= 1;
+      ensureData().then(clientRender).catch(() => {});
+    });
+    cNext.addEventListener("click", () => {
+      clientPage += 1;
+      ensureData().then(clientRender).catch(() => {});
+    });
+  }
+</script>
