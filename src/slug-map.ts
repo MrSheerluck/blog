@@ -31,7 +31,8 @@ export const slugMap: Record<string, string> = {
   "understanding-rust-variables-and-types-by-building-a-scientific-calculator": "programming-languages/rust/understanding-rust-variables-and-types-by-building-a-scientific-calculator.mdx",
   "welcome-to-mrsheerluck-blog": "misc/welcome-to-mrsheerluck-blog.mdx",
   "wtf-is-a-supply-chain-attack": "misc/wtf-is-a-supply-chain-attack.mdx",
-  "wtf-is-claude-mythos": "misc/wtf-is-claude-mythos.mdx"
+  "wtf-is-claude-mythos": "misc/wtf-is-claude-mythos.mdx",
+  "your-first-gpui-app-building-a-desktop-ui-in-rust": "gpui/your-first-gpui-app-building-a-desktop-ui-in-rust.mdx"
 };
 
 export function getSlug(filePath: string): string | undefined {

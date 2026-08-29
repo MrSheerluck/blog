@@ -31,7 +31,7 @@ import gamedev_bevy_learn_the_basics_of_bevy_by_building_and_deploying_pong_to_i
 import philosophy_plato_apology from "../content/docs/posts/philosophy/plato/apology.mdx";
 import philosophy_plato_crito from "../content/docs/posts/philosophy/plato/crito.mdx";
 import philosophy_plato_euthyphro from "../content/docs/posts/philosophy/plato/euthyphro.mdx";
-import { components } from "../components";
+import gpui_your_first_gpui_app_building_a_desktop_ui_in_rust from "../content/docs/posts/gpui/your-first-gpui-app-building-a-desktop-ui-in-rust.mdx";
 
 const fileToComponent = {
   "misc/lessons-in-stoicism.mdx": misc_lessons_in_stoicism,
@@ -66,6 +66,7 @@ const fileToComponent = {
   "philosophy/plato/apology.mdx": philosophy_plato_apology,
   "philosophy/plato/crito.mdx": philosophy_plato_crito,
   "philosophy/plato/euthyphro.mdx": philosophy_plato_euthyphro,
+  "gpui/your-first-gpui-app-building-a-desktop-ui-in-rust.mdx": gpui_your_first_gpui_app_building_a_desktop_ui_in_rust,
 } as Record<string, unknown>;
 
 type Props = { filePath: string };
@@ -73,4 +74,4 @@ const { filePath } = Astro.props;
 const Component = fileToComponent[filePath];
 ---
 
-{Component ? <Component components={components} /> : <p>Not found: {filePath}</p>}
+{Component ? <Component /> : <p>Not found: {filePath}</p>}
