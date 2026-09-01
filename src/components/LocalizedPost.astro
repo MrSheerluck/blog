@@ -1,0 +1,60 @@
+---
+import DocsLayout from "../layouts/DocsLayout.astro";
+import { getCollection, getEntry, render, type CollectionEntry } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { components } from "../components";
+import { isLocale, type Locale } from "../i18n/config";
+import { postLocaleLinks } from "../i18n/links";
+import SeriesSidebar from "./SeriesSidebar.astro";
+import { slugMap } from "../slug-map";
+
+interface Props {
+  entry: CollectionEntry<"_translations">;
+  locale: Exclude<Locale, "en">;
+}
+
+const { entry, locale } = Astro.props;
+const sourceFilePath = slugMap[entry.data.translationKey];
+const sourceEntry = sourceFilePath
+  ? await getEntry("docs", `posts/${sourceFilePath.replace(/\.mdx$/, "")}`)
+  : undefined;
+const translatedEntries = await getCollection("_translations");
+const translations = translatedEntries
+  .filter((candidate) => candidate.data.translationKey === entry.data.translationKey)
+  .reduce<Partial<Record<Locale, string>>>((map, candidate) => {
+    if (isLocale(candidate.data.locale)) map[candidate.data.locale] = candidate.data.slug;
+    return map;
+  }, {});
+const { navigation: languageLinks, seo: seoLanguageLinks } = postLocaleLinks(entry.data.slug, translations);
+const { Content, headings } = await render(entry);
+const sourceHeadings = sourceEntry ? (await render(sourceEntry)).headings : headings;
+const body = sourceEntry?.body ?? entry.body ?? "";
+const readingTime = Math.max(1, Math.ceil(body.replace(/```[\s\S]*?```/g, "").split(/\s+/).filter(Boolean).length / 200));
+const postDate = entry.data.date
+  ? new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" }).format(new Date(entry.data.date))
+  : undefined;
+const postDateISO = entry.data.date?.toISOString();
+const breadcrumbs = [
+  { label: "Mrsheerluck Blog", href: getRelativeLocaleUrl(locale, "") },
+  { label: "Posts", href: getRelativeLocaleUrl(locale, "posts") },
+  { label: entry.data.title },
+];
+---
+
+<DocsLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  sidebar={[]}
+  headings={sourceHeadings}
+  breadcrumbs={breadcrumbs}
+  prevNext={{}}
+  locale={locale}
+  languageLinks={languageLinks}
+  seoLanguageLinks={seoLanguageLinks}
+  publishedDate={postDate}
+  publishedDateISO={postDateISO}
+  readingTime={readingTime}
+>
+  <SeriesSidebar slot="sidebar" currentPath={`/posts/${entry.data.slug}`} />
+  <Content components={components} />
+</DocsLayout>

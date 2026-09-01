@@ -1,0 +1,15 @@
+---
+import LocalizedPost from "../../../components/LocalizedPost.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+export const prerender = true;
+type TranslationEntry = CollectionEntry<"_translations">;
+
+export async function getStaticPaths() {
+  const entries = await getCollection("_translations");
+  return entries.filter((entry) => entry.data.locale === "de").map((entry) => ({ params: { slug: entry.data.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: TranslationEntry };
+---
+<LocalizedPost entry={entry} locale="de" />

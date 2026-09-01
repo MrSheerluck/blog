@@ -1,0 +1,70 @@
+---
+import { localeTag, type LanguageLink } from "../i18n/config";
+
+interface Props {
+  links?: LanguageLink[];
+  currentLocale?: string;
+}
+
+const { links = [], currentLocale = "en" } = Astro.props;
+---
+
+{links.length > 1 && (
+  <nav aria-label="Language" class="flex max-w-[min(52vw,28rem)] items-center gap-1 overflow-x-auto rounded-md border border-border px-1 py-0.5">
+    {links.map((link) => (
+      <a
+        href={link.href}
+        lang={localeTag(link.locale)}
+        data-language-link={link.locale}
+        data-language-equivalent={link.isEquivalent !== false ? "true" : "false"}
+        aria-current={link.locale === currentLocale ? "page" : undefined}
+        class:list={[
+          "shrink-0 rounded px-1.5 py-0.5 text-xs font-medium no-underline transition-colors",
+          link.locale === currentLocale
+            ? "bg-accent text-foreground"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground",
+        ]}
+      >
+        {link.label}
+      </a>
+    ))}
+  </nav>
+)}
+
+<script>
+  const LANGUAGE_PREFERENCE_KEY = "preferred-language";
+
+  function normalizePath(pathname: string) {
+    return pathname.replace(/\/$/, "") || "/";
+  }
+
+  function setupLanguagePreference() {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-language-link]"));
+    if (links.length === 0) return;
+
+    for (const link of links) {
+      if (link.dataset.languageReady === "true") continue;
+      link.dataset.languageReady = "true";
+      link.addEventListener("click", () => {
+        const locale = link.dataset.languageLink;
+        if (locale) localStorage.setItem(LANGUAGE_PREFERENCE_KEY, locale);
+      });
+    }
+
+    const preferredLocale = localStorage.getItem(LANGUAGE_PREFERENCE_KEY);
+    if (!preferredLocale) return;
+
+    const preferredLink = links.find(
+      (link) => link.dataset.languageLink === preferredLocale && link.dataset.languageEquivalent === "true",
+    );
+    if (!preferredLink) return;
+
+    const target = new URL(preferredLink.href, window.location.origin);
+    if (normalizePath(target.pathname) !== normalizePath(window.location.pathname)) {
+      window.location.replace(target.href);
+    }
+  }
+
+  setupLanguagePreference();
+  document.addEventListener("astro:page-load", setupLanguagePreference);
+</script>

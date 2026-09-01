@@ -6,6 +6,10 @@ import { ThemeToggle } from "./ui/theme-toggle";
 import { SearchTrigger } from "./ui/search";
 import { config } from "virtual:nimbus/config";
 import { getSidebarSections } from "@cloudflare/nimbus-docs";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import type { LanguageLink, Locale } from "../i18n/config";
+import { ui } from "../i18n/config";
+import { fallbackLocaleLinks } from "../i18n/links";
 
 interface Props {
   /** Astro collection id for the current page, forwarded from DocsLayout. */
@@ -18,12 +22,16 @@ interface Props {
    * shouldn't show a button that opens an empty dialog. Default `true`.
    */
   showSidebar?: boolean;
+  locale?: Locale;
+  languageLinks?: LanguageLink[];
 }
 
 // `entryId` is part of Props as a forward-compat hook (the version-switcher
 // recipe reads it) but the base Header doesn't use it — leave it off the
 // destructure to avoid an unused-var warning.
-const { collection, showSidebar = true } = Astro.props;
+const { collection, showSidebar = true, locale = "en", languageLinks = [] } = Astro.props;
+const labels = ui[locale];
+const navigationLinks = languageLinks.length > 1 ? languageLinks : fallbackLocaleLinks();
 
 // Normalize trailing slash so isActive matches sidebar hrefs.
 const currentSlug = Astro.url.pathname.replace(/\/$/, "") || "/";
@@ -40,7 +48,7 @@ const showSections = sections.length >= 2;
           shape="square"
           size="sm"
           icon="ph:list"
-          aria-label="Open navigation"
+          aria-label={labels.openNavigation}
           data-menu-btn
           class="lg:hidden text-muted-foreground"
         />
@@ -53,7 +61,7 @@ const showSections = sections.length >= 2;
       </a>
 
       {showSections && (
-        <nav aria-label="Sections" class="hidden md:flex items-center gap-1 ml-4 pl-4 border-l border-border h-6">
+        <nav aria-label={labels.sections} class="hidden md:flex items-center gap-1 ml-4 pl-4 border-l border-border h-6">
           {sections.map((section) => (
             <a
               href={section.href}
@@ -73,6 +81,7 @@ const showSections = sections.length >= 2;
     </div>
 
     <div class="flex items-center gap-2">
+      <LanguageSwitcher links={navigationLinks} currentLocale={locale} />
       {config.search !== false && <SearchTrigger />}
       <LinkButton
         href="https://mrsheerluck.substack.com/subscribe"
@@ -83,7 +92,7 @@ const showSections = sections.length >= 2;
         class="text-[#3b82f6] hover:text-[#60a5fa]"
       >
         <Icon name="ph:envelope" class="w-4 h-4" />
-        <span class="ml-1.5 hidden sm:inline">Subscribe</span>
+        <span class="ml-1.5 hidden sm:inline">{labels.subscribe}</span>
       </LinkButton>
       <LinkButton
         href="https://github.com/sponsors/MrSheerluck"
@@ -95,7 +104,7 @@ const showSections = sections.length >= 2;
         class="text-[#db61a2] hover:text-[#bf4b8a]"
       >
         <Icon name="ph:heart" class="w-4 h-4" />
-        <span class="ml-1.5 hidden sm:inline">Sponsor</span>
+        <span class="ml-1.5 hidden sm:inline">{labels.sponsor}</span>
       </LinkButton>
       <LinkButton
         href="/jobs"
@@ -108,7 +117,7 @@ const showSections = sections.length >= 2;
         ]}
       >
         <Icon name="ph:briefcase" class="w-4 h-4" />
-        <span class="ml-1.5 hidden sm:inline">Jobs</span>
+        <span class="ml-1.5 hidden sm:inline">{labels.jobs}</span>
       </LinkButton>
       {config.github && (
         <LinkButton
@@ -116,7 +125,7 @@ const showSections = sections.length >= 2;
           variant="minimal"
           shape="square"
           size="sm"
-          aria-label="GitHub"
+          aria-label={labels.github}
           target="_blank"
           rel="noopener"
           class="text-muted-foreground"
@@ -129,8 +138,8 @@ const showSections = sections.length >= 2;
         shape="square"
         size="sm"
         icon="ph:text-aa"
-        aria-label="Change font size"
-        title="Change font size"
+        aria-label={labels.changeFontSize}
+        title={labels.changeFontSize}
         data-font-size-toggle
         class="flex text-muted-foreground"
       />
@@ -161,4 +170,3 @@ const showSections = sections.length >= 2;
     });
   }
 </script>
-

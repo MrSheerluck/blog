@@ -1,0 +1,19 @@
+---
+import { localeTag, type LanguageLink } from "../i18n/config";
+
+interface Props {
+  links: LanguageLink[];
+  currentLocale?: string;
+}
+
+const { links, currentLocale = "en" } = Astro.props;
+const absolute = (href: string) => Astro.site ? new URL(href, Astro.site).href : href;
+---
+
+{links.map((link) => (
+  <Fragment>
+    {link.locale !== currentLocale && <meta property="og:locale:alternate" content={localeTag(link.locale)} />}
+    <link rel="alternate" hreflang={localeTag(link.locale)} href={absolute(link.href)} />
+  </Fragment>
+))}
+{links.length > 0 && <link rel="alternate" hreflang="x-default" href={absolute(links[0].href)} />}

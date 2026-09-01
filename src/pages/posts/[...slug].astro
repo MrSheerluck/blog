@@ -1,8 +1,10 @@
 ---
 import DocsLayout from "../../layouts/DocsLayout.astro";
 import { config } from "virtual:nimbus/config";
-import { getEntry } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import { slugMap } from "../../slug-map";
+import { isLocale, type Locale } from "../../i18n/config";
+import { postLocaleLinks } from "../../i18n/links";
 import SeriesSidebar from "../../components/SeriesSidebar.astro";
 import PostContent from "../../components/PostContent.astro";
 import fs from "node:fs";
@@ -22,6 +24,13 @@ const { filePath } = Astro.props;
 
 const entryId = `posts/${filePath.replace(/\.mdx$/, "")}`;
 const entry = await getEntry("docs", entryId);
+const translations = (await getCollection("_translations"))
+  .filter((candidate) => candidate.data.translationKey === slug)
+  .reduce<Partial<Record<Locale, string>>>((map, candidate) => {
+    if (isLocale(candidate.data.locale)) map[candidate.data.locale] = candidate.data.slug;
+    return map;
+  }, {});
+const { navigation: languageLinks, seo: seoLanguageLinks } = postLocaleLinks(slug, translations);
 
 const title = entry?.data.title ?? slug;
 const description = entry?.data.description ?? "";
@@ -48,7 +57,8 @@ try {
 
 const postDate = entry?.data.date
   ? new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric" }).format(new Date(entry.data.date))
-  : null;
+  : undefined;
+const postDateISO = entry?.data.date?.toISOString();
 
 const pathParts = filePath.replace(/\.mdx$/, "").split("/");
 const breadcrumbs = [
@@ -72,7 +82,11 @@ const breadcrumbs = [
   markdownUrl={markdownUrl}
   socialImage={socialImage}
   publishedDate={postDate}
+  publishedDateISO={postDateISO}
   readingTime={readingTime}
+  locale="en"
+  languageLinks={languageLinks}
+  seoLanguageLinks={seoLanguageLinks}
 >
   <SeriesSidebar slot="sidebar" />
   <PostContent filePath={filePath} />

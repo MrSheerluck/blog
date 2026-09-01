@@ -10,7 +10,7 @@ export async function GET() {
     description: config.description,
   });
 
-  return new Response(body, {
+  return new Response(new Uint8Array(body), {
     headers: { "Content-Type": "image/png" },
   });
 }

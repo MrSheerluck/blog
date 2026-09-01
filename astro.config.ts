@@ -18,6 +18,13 @@ const nimbusConfig = defineNimbusConfig({
 
 export default defineConfig({
   output: "static",
+  i18n: {
+    locales: ["en", "pt-br", "hi", "es", "de", "fr", "ja"],
+    defaultLocale: "en",
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   vite: {
     plugins: [tailwindcss()],
   },

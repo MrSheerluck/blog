@@ -8,8 +8,12 @@ import AgentDirective from "@/components/AgentDirective.astro";
 import { SearchDialog } from "@/components/ui/search";
 import NimbusHead from "@cloudflare/nimbus-docs/components/NimbusHead.astro";
 import type { BasePageProps } from "@cloudflare/nimbus-docs/types";
+import type { LanguageLink, Locale } from "../i18n/config";
+import LocalizedHead from "../components/LocalizedHead.astro";
+import LanguageAlternates from "../components/LanguageAlternates.astro";
+import { localeLabels, localeTag } from "../i18n/config";
 
-type Props = BasePageProps;
+type Props = BasePageProps & { locale?: Locale; languageLinks?: LanguageLink[]; seoLanguageLinks?: LanguageLink[]; publishedDateISO?: string };
 
 const {
   title,
@@ -21,9 +25,19 @@ const {
   head: pageHead = [],
   collection,
   entryId,
+  locale = "en",
+  languageLinks = [],
+  seoLanguageLinks = [],
+  publishedDateISO,
 } = Astro.props;
 
-const lang = config.locale ?? "en";
+const lang = localeTag(locale);
+const exactSeoLinks = seoLanguageLinks.length > 0
+  ? seoLanguageLinks
+  : languageLinks.length > 0
+    ? languageLinks
+    : [{ locale, label: localeLabels[locale], href: Astro.url.pathname }];
+
 // Per-page agent-index pointer. For pages in non-primary or version
 // collections, this resolves to `/<prefix>/llms.txt` (e.g. `/v0/llms.txt`
 // for a v0 docs page, `/blog/llms.txt` for a blog post). Falls back to
@@ -46,8 +60,8 @@ const llmsUrl = Astro.site
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FTJ10CMM55"></script>
-    <script>
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-FTJ10CMM55"></script>
+    <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
@@ -93,17 +107,33 @@ const llmsUrl = Astro.site
       })();
     </script>
 
-    <NimbusHead
-      title={title}
-      description={description}
-      noindex={noindex}
-      markdownUrl={markdownUrl}
-      socialImage={socialImage}
-      lastUpdated={lastUpdated}
-      head={pageHead}
-      collection={collection}
-      entryId={entryId}
-    />
+    {locale === "en" ? (
+      <NimbusHead
+        title={title}
+        description={description}
+        noindex={noindex}
+        markdownUrl={markdownUrl}
+        socialImage={socialImage}
+        lastUpdated={lastUpdated}
+        head={pageHead}
+        collection={collection}
+        entryId={entryId}
+      />
+    ) : (
+      <LocalizedHead
+        title={title}
+        description={description}
+        noindex={noindex}
+        markdownUrl={markdownUrl}
+        socialImage={socialImage}
+        lastUpdated={lastUpdated}
+        publishedDateISO={publishedDateISO}
+        head={pageHead}
+        locale={locale}
+        languageLinks={exactSeoLinks}
+      />
+    )}
+    {locale === "en" && <LanguageAlternates links={exactSeoLinks} currentLocale={locale} />}
   </head>
   <body class="min-h-screen bg-background text-foreground antialiased">
     <a
@@ -116,20 +146,20 @@ const llmsUrl = Astro.site
     <slot />
     {config.search !== false && <SearchDialog />}
 
-    <script>
+    <script is:inline>
       import { codeCopy, headingAnchors } from "@cloudflare/nimbus-docs/client";
       codeCopy();
       headingAnchors();
     </script>
 
-    <script>
+    <script is:inline>
       import "@/components/ui/rust-playground/rust-playground.client";
     </script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" crossorigin="anonymous">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
-    <script>
+    <script is:inline defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script is:inline defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <script is:inline>
       document.addEventListener("DOMContentLoaded", () => {
         if (typeof renderMathInElement === "undefined") return;
         renderMathInElement(document.body, {

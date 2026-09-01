@@ -1,0 +1,225 @@
+---
+import type { Locale } from "../i18n/config";
+import { getEntry, render } from "astro:content";
+import { components } from "../components";
+
+interface Props {
+  article: "gpui" | "rust-calculator";
+  locale: Exclude<Locale, "en">;
+}
+
+type Section = { heading: string; paragraphs: string[] };
+type TutorialCopy = { intro: string; sections: Section[] };
+
+const { article, locale } = Astro.props;
+
+const sourceEntryId = article === "gpui"
+  ? "posts/gpui/your-first-gpui-app-building-a-desktop-ui-in-rust"
+  : "posts/programming-languages/rust/understanding-rust-variables-and-types-by-building-a-scientific-calculator";
+const sourceEntry = await getEntry("docs", sourceEntryId);
+if (!sourceEntry) throw new Error(`Missing source tutorial: ${sourceEntryId}`);
+const { Content: FullTutorial } = await render(sourceEntry);
+
+const copy: Record<Exclude<Locale, "en">, { gpui: TutorialCopy; "rust-calculator": TutorialCopy }> = {
+  "pt-br": {
+    gpui: {
+      intro: "Nesta série, vamos aprender GPUI construindo um projeto interessante em cada artigo. Aqui, criaremos uma interface de acompanhamento de issues inspirada no Linear e aprenderemos o modelo de renderização, elementos, estilo, layout e composição de componentes.",
+      sections: [
+        { heading: "Pré-requisitos", paragraphs: ["Você deve conhecer Rust e ter o básico de HTML e CSS, especialmente flexbox, margem e espaçamento. O GPUI está evoluindo, então versões futuras podem trazer mudanças incompatíveis."] },
+        { heading: "Criando o projeto", paragraphs: ["Comece criando o projeto com Cargo e adicione GPUI, gpui-platform, gpui-component, gpui-component-assets, rust-embed e anyhow ao Cargo.toml. Usaremos a versão mais recente do GPUI diretamente do repositório do Zed."] },
+        { heading: "O menor aplicativo GPUI possível", paragraphs: ["Uma view GPUI implementa a trait Render. O método render devolve uma árvore de elementos, semelhante à árvore de elementos do HTML. Um div pode receber texto e outros elementos como filhos."] },
+        { heading: "Janela, tamanho e estilo", paragraphs: ["Abra o event loop com gpui_platform::application(), inicialize os componentes e crie uma janela com cx.open_window. Use WindowBounds para definir um tamanho previsível. Em GPUI, dimensões usam unidades tipadas como px(), e os estilos são aplicados encadeando métodos."] },
+        { heading: "Layout com flexbox", paragraphs: ["O contêiner principal usa size_full(), flex() e flex_row() para separar a barra lateral da área de conteúdo. A barra lateral tem largura fixa; flex_1() faz o conteúdo ocupar o espaço restante. flex_col(), gap(), padding e bordas completam o layout."] },
+        { heading: "Componentes reutilizáveis", paragraphs: ["Funções como sidebar_item, project_item, tab, group_header e issue encapsulam estruturas repetidas. APIs condicionais como when(), when_some() e hover() permitem variar o resultado sem duplicar markup."] },
+        { heading: "Barra lateral e conteúdo", paragraphs: ["A barra lateral recebe o seletor de workspace, busca, navegação, projetos e o usuário. A área principal recebe o cabeçalho, título, abas, grupos e cards de issues. Assets SVG podem ser incorporados ao binário com rust-embed e disponibilizados ao GPUI por meio de AssetSource."] },
+        { heading: "Resumo", paragraphs: ["Partimos de um único div e chegamos a uma interface completa por composição. Você praticou dimensões, espaçamento, cores, bordas, flex_1(), mt_auto() e renderização condicional. No próximo artigo, a interface passará a responder às ações do usuário."] },
+      ],
+    },
+    "rust-calculator": {
+      intro: "Nesta série, aprendemos Rust construindo um projeto por artigo. Neste primeiro projeto, vamos entender variáveis e tipos enquanto construímos uma calculadora científica simples.",
+      sections: [
+        { heading: "Pré-requisitos", paragraphs: ["Você deve conhecer pelo menos uma linguagem de programação e seus conceitos básicos: condições, variáveis, loops e funções. Mais importante: esteja disposto a aprender e praticar; esta será uma jornada longa."] },
+        { heading: "Instalando Rust e conhecendo Cargo", paragraphs: ["Instale Rust com rustup e confirme a instalação usando rustc --version, cargo --version e rustup --version. Cargo é o sistema de build e gerenciador de pacotes do Rust. Use cargo new para criar, cargo check para verificar, cargo run para compilar e executar e cargo build para compilar."] },
+        { heading: "Variáveis, mutabilidade e shadowing", paragraphs: ["let cria uma binding entre um nome e um valor. Bindings são imutáveis por padrão; use mut quando precisar atribuir outro valor. Reatribuição altera a mesma binding, enquanto shadowing cria uma nova binding com o mesmo nome e pode até mudar o tipo."] },
+        { heading: "Escopo e armazenamento", paragraphs: ["Uma binding só pode ser usada dentro do seu escopo. Uma binding criada em um bloco interno deixa de existir quando o programa sai desse bloco. Detalhes sobre stack, registradores, ownership e lifetimes virão depois; por enquanto, concentre-se no comportamento da linguagem."] },
+        { heading: "Tipos escalares", paragraphs: ["Rust possui inteiros com sinal e sem sinal, números de ponto flutuante, bool e char. i32, u32, f64, bool e char são exemplos comuns. O compilador normalmente infere o tipo, mas você pode usar uma anotação como let number: i32 = 10 ou um sufixo como 10_i64."] },
+        { heading: "Conversão de tipos", paragraphs: ["Rust não converte números implicitamente. Somar i32 e f64 falha até que um dos valores seja convertido explicitamente, por exemplo com a as f64. Essa regra evita conversões silenciosas e ficará ainda mais importante em projetos maiores."] },
+        { heading: "Construindo a calculadora", paragraphs: ["Crie um projeto scientific-calculator e use apenas a biblioteca padrão. Comece com adição, subtração, multiplicação e divisão; depois acrescente raiz quadrada, potência, seno e cosseno. Leia os argumentos com std::env::args(), colete-os em Vec<String> e faça o parse para f64."] },
+        { heading: "Escolhendo a operação", paragraphs: ["O primeiro argumento é o nome da operação e os seguintes são os valores. Use if/else para selecionar add, subtract, multiply, divide, sqrt, pow, sin ou cos. No final, você terá uma calculadora científica funcional e uma base sólida para estudar controle de fluxo no próximo artigo."] },
+      ],
+    },
+  },
+  hi: {
+    gpui: {
+      intro: "इस श्रृंखला में हम हर लेख में एक रोचक प्रोजेक्ट बनाकर GPUI सीखेंगे। इस लेख में Linear से प्रेरित issue-tracking interface बनाएँगे और rendering model, elements, styling, layout तथा component composition समझेंगे।",
+      sections: [
+        { heading: "पूर्व-आवश्यकताएँ", paragraphs: ["आपको Rust और HTML/CSS की बुनियादी जानकारी होनी चाहिए, विशेषकर flexbox, margin और spacing की। GPUI लगातार विकसित हो रहा है, इसलिए भविष्य के संस्करणों में breaking changes आ सकते हैं।"] },
+        { heading: "प्रोजेक्ट बनाना", paragraphs: ["Cargo से प्रोजेक्ट बनाएँ और Cargo.toml में GPUI, gpui-platform, gpui-component, gpui-component-assets, rust-embed और anyhow जोड़ें। हम Zed repository से GPUI का नवीनतम संस्करण उपयोग करेंगे।"] },
+        { heading: "सबसे छोटा GPUI ऐप", paragraphs: ["GPUI view Render trait को implement करता है। render method elements की tree लौटाता है, जो HTML element tree जैसी होती है। एक div में text और दूसरे elements को children की तरह जोड़ा जा सकता है।"] },
+        { heading: "विंडो, आकार और styling", paragraphs: ["gpui_platform::application() से event loop शुरू करें, components initialize करें और cx.open_window से window बनाएँ। WindowBounds से निश्चित आकार दें। GPUI में dimensions px() जैसी typed units में और styles chained methods से लिखे जाते हैं।"] },
+        { heading: "Flexbox layout", paragraphs: ["मुख्य container size_full(), flex() और flex_row() से sidebar तथा content area को अलग करता है। Sidebar की width fixed है और flex_1() बाकी space content को देता है। flex_col(), gap(), padding और borders layout पूरा करते हैं।"] },
+        { heading: "Reusable components", paragraphs: ["sidebar_item, project_item, tab, group_header और issue जैसी functions दोहराए जाने वाले structures को encapsulate करती हैं। when(), when_some() और hover() जैसी conditional APIs markup दोहराए बिना UI बदलने देती हैं।"] },
+        { heading: "Sidebar और main content", paragraphs: ["Sidebar में workspace selector, search, navigation, projects और user section जोड़ें। Main area में header, title, tabs, groups और issue cards जोड़ें। rust-embed से SVG assets binary में embed करके AssetSource के माध्यम से GPUI को दिए जा सकते हैं।"] },
+        { heading: "सारांश", paragraphs: ["एक div से शुरू करके हमने composition से पूरी interface बनाई। आपने dimensions, spacing, colors, borders, flex_1(), mt_auto() और conditional rendering सीखी। अगले लेख में interface user actions पर प्रतिक्रिया देगी।"] },
+      ],
+    },
+    "rust-calculator": {
+      intro: "इस श्रृंखला में हम हर लेख में एक project बनाकर Rust सीखेंगे। इस पहले project में variables और types समझने के लिए एक simple scientific calculator बनाएँगे।",
+      sections: [
+        { heading: "पूर्व-आवश्यकताएँ", paragraphs: ["आपको किसी एक programming language और conditions, variables, loops तथा functions का basic knowledge होना चाहिए। सबसे जरूरी है सीखने और मेहनत करने की इच्छा; यह लंबी यात्रा होगी।"] },
+        { heading: "Rust और Cargo install करना", paragraphs: ["rustup से Rust install करें और rustc --version, cargo --version तथा rustup --version चलाकर जाँचें। Cargo Rust का build system और package manager है। cargo new project बनाता है, cargo check code जाँचता है, cargo run compile और run करता है और cargo build compile करता है।"] },
+        { heading: "Variables, mutability और shadowing", paragraphs: ["let name और value के बीच binding बनाता है। Bindings default रूप से immutable होती हैं; बदलने के लिए mut लगाएँ। Reassignment उसी binding को बदलता है, जबकि shadowing उसी नाम की नई binding बनाता है और उसका type भी बदल सकता है।"] },
+        { heading: "Scope और storage", paragraphs: ["Binding केवल अपने scope में उपलब्ध होती है। Nested block में बनी binding block से बाहर निकलते ही उपलब्ध नहीं रहती। Stack, registers, ownership और lifetimes की गहराई बाद में आएगी; अभी language behavior पर ध्यान दें।"] },
+        { heading: "Scalar types", paragraphs: ["Rust में signed और unsigned integers, floating-point numbers, bool और char होते हैं। i32, u32, f64, bool और char सामान्य उदाहरण हैं। Compiler type infer कर सकता है, या let number: i32 = 10 और 10_i64 जैसे तरीके से type स्पष्ट कर सकते हैं।"] },
+        { heading: "Type conversion", paragraphs: ["Rust numeric types को implicitly convert नहीं करता। i32 और f64 को जोड़ना तब तक fail होगा जब तक a as f64 जैसा explicit conversion न करें। इससे silent conversions से बचा जा सकता है।"] },
+        { heading: "Scientific calculator बनाना", paragraphs: ["scientific-calculator project बनाएँ और standard library ही उपयोग करें। Addition, subtraction, multiplication और division से शुरू करें, फिर square root, power, sine और cosine जोड़ें। std::env::args() से arguments पढ़कर Vec<String> में collect करें और f64 में parse करें।"] },
+        { heading: "Operation चुनना", paragraphs: ["पहला argument operation का नाम और अगले arguments values हैं। add, subtract, multiply, divide, sqrt, pow, sin और cos चुनने के लिए if/else उपयोग करें। अंत में आपके पास working calculator और control flow सीखने का मजबूत आधार होगा।"] },
+      ],
+    },
+  },
+  es: {
+    gpui: {
+      intro: "En esta serie aprenderemos GPUI construyendo un proyecto interesante en cada artículo. Aquí crearemos una interfaz de seguimiento de issues inspirada en Linear y estudiaremos renderizado, elementos, estilos, layout y composición de componentes.",
+      sections: [
+        { heading: "Requisitos previos", paragraphs: ["Necesitas conocer Rust y las bases de HTML/CSS, especialmente flexbox, márgenes y espaciado. GPUI sigue evolucionando, así que las versiones futuras pueden introducir cambios incompatibles."] },
+        { heading: "Crear el proyecto", paragraphs: ["Crea el proyecto con Cargo y añade GPUI, gpui-platform, gpui-component, gpui-component-assets, rust-embed y anyhow a Cargo.toml. Usaremos la versión más reciente de GPUI desde el repositorio de Zed."] },
+        { heading: "La aplicación GPUI más pequeña", paragraphs: ["Una vista de GPUI implementa Render. El método render devuelve un árbol de elementos, parecido al árbol de elementos de HTML. Un div puede contener texto y otros elementos como hijos."] },
+        { heading: "Ventana, tamaño y estilos", paragraphs: ["Inicia el event loop con gpui_platform::application(), inicializa los componentes y crea una ventana con cx.open_window. Usa WindowBounds para fijar el tamaño. GPUI representa las dimensiones con unidades tipadas como px() y aplica estilos encadenando métodos."] },
+        { heading: "Layout con flexbox", paragraphs: ["El contenedor principal usa size_full(), flex() y flex_row() para separar la barra lateral del contenido. La barra lateral tiene un ancho fijo y flex_1() entrega el espacio restante al contenido. flex_col(), gap(), padding y bordes completan el layout."] },
+        { heading: "Componentes reutilizables", paragraphs: ["Funciones como sidebar_item, project_item, tab, group_header e issue encapsulan estructuras repetidas. Las APIs when(), when_some() y hover() permiten variar el resultado sin duplicar markup."] },
+        { heading: "Barra lateral y contenido", paragraphs: ["La barra lateral recibe selector de workspace, búsqueda, navegación, proyectos y usuario. El área principal recibe encabezado, título, pestañas, grupos y tarjetas de issues. rust-embed permite incluir SVG en el binario y exponerlos a GPUI mediante AssetSource."] },
+        { heading: "Resumen", paragraphs: ["Comenzamos con un div y llegamos a una interfaz completa mediante composición. Practicamos dimensiones, espaciado, colores, bordes, flex_1(), mt_auto() y renderizado condicional. En el siguiente artículo haremos que la interfaz responda al usuario."] },
+      ],
+    },
+    "rust-calculator": {
+      intro: "En esta serie aprenderemos Rust construyendo un proyecto por artículo. En el primero entenderemos variables y tipos mientras creamos una calculadora científica sencilla.",
+      sections: [
+        { heading: "Requisitos previos", paragraphs: ["Debes conocer al menos un lenguaje de programación y sus conceptos básicos: condiciones, variables, bucles y funciones. Lo más importante es tener ganas de aprender y practicar; será un camino largo."] },
+        { heading: "Instalar Rust y conocer Cargo", paragraphs: ["Instala Rust con rustup y comprueba la instalación con rustc --version, cargo --version y rustup --version. Cargo es el sistema de compilación y gestor de paquetes de Rust. cargo new crea proyectos, cargo check verifica, cargo run compila y ejecuta, y cargo build compila."] },
+        { heading: "Variables, mutabilidad y shadowing", paragraphs: ["let crea un binding entre un nombre y un valor. Los bindings son inmutables por defecto; usa mut para reasignar. La reasignación cambia el mismo binding, mientras que el shadowing crea uno nuevo con el mismo nombre y puede cambiar su tipo."] },
+        { heading: "Scope y almacenamiento", paragraphs: ["Un binding solo está disponible dentro de su scope. El binding de un bloque interno deja de existir al salir de él. Más adelante veremos stack, registros, ownership y lifetimes; por ahora céntrate en el comportamiento del lenguaje."] },
+        { heading: "Tipos escalares", paragraphs: ["Rust tiene enteros con y sin signo, números de punto flotante, bool y char. i32, u32, f64, bool y char son ejemplos comunes. El compilador puede inferir el tipo, o puedes escribir let number: i32 = 10 y 10_i64."] },
+        { heading: "Conversión de tipos", paragraphs: ["Rust no convierte tipos numéricos implícitamente. Sumar i32 y f64 falla hasta convertir explícitamente uno de ellos, por ejemplo con a as f64. Así se evitan conversiones silenciosas."] },
+        { heading: "Construir la calculadora", paragraphs: ["Crea scientific-calculator y usa solo la biblioteca estándar. Empieza con suma, resta, multiplicación y división; después añade raíz cuadrada, potencia, seno y coseno. Lee argumentos con std::env::args(), recopílalos en Vec<String> y conviértelos a f64."] },
+        { heading: "Elegir la operación", paragraphs: ["El primer argumento es la operación y los siguientes son valores. Usa if/else para seleccionar add, subtract, multiply, divide, sqrt, pow, sin o cos. Terminarás con una calculadora funcional y una base para aprender control de flujo."] },
+      ],
+    },
+  },
+  de: {
+    gpui: {
+      intro: "In dieser Serie lernen wir GPUI, indem wir in jedem Artikel ein interessantes Projekt bauen. Hier erstellen wir eine von Linear inspirierte Issue-Tracking-Oberfläche und behandeln Rendering-Modell, Elemente, Styling, Layout und Komposition.",
+      sections: [
+        { heading: "Voraussetzungen", paragraphs: ["Du solltest Rust sowie die Grundlagen von HTML und CSS kennen, besonders Flexbox, Abstände und Padding. GPUI entwickelt sich weiter; zukünftige Versionen können daher Breaking Changes enthalten."] },
+        { heading: "Das Projekt erstellen", paragraphs: ["Erstelle das Projekt mit Cargo und füge GPUI, gpui-platform, gpui-component, gpui-component-assets, rust-embed und anyhow in Cargo.toml ein. Wir verwenden die aktuelle GPUI-Version direkt aus dem Zed-Repository."] },
+        { heading: "Die kleinste GPUI-Anwendung", paragraphs: ["Eine GPUI-View implementiert das Render- trait. Die Methode render gibt einen Elementbaum zurück, ähnlich einem HTML-Elementbaum. Ein div kann Text und weitere Elemente als Kinder enthalten."] },
+        { heading: "Fenster, Größe und Styling", paragraphs: ["Starte die Event-Schleife mit gpui_platform::application(), initialisiere die Komponenten und öffne mit cx.open_window ein Fenster. WindowBounds legt eine verlässliche Größe fest. GPUI nutzt typisierte Einheiten wie px() und verkettet Styling-Methoden."] },
+        { heading: "Layout mit Flexbox", paragraphs: ["Der Hauptcontainer verwendet size_full(), flex() und flex_row(), um Sidebar und Inhalt zu trennen. Die Sidebar hat eine feste Breite; flex_1() nimmt den übrigen Platz ein. flex_col(), gap(), Padding und Rahmen vervollständigen das Layout."] },
+        { heading: "Wiederverwendbare Komponenten", paragraphs: ["Funktionen wie sidebar_item, project_item, tab, group_header und issue kapseln wiederholte Strukturen. when(), when_some() und hover() ändern das Ergebnis bedingt, ohne Markup zu duplizieren."] },
+        { heading: "Sidebar und Hauptinhalt", paragraphs: ["Die Sidebar erhält Workspace-Auswahl, Suche, Navigation, Projekte und Benutzerbereich. Im Hauptbereich liegen Header, Titel, Tabs, Gruppen und Issue-Karten. Mit rust-embed lassen sich SVG-Dateien ins Binary einbetten und über AssetSource bereitstellen."] },
+        { heading: "Zusammenfassung", paragraphs: ["Ausgehend von einem div haben wir durch Komposition eine vollständige Oberfläche gebaut. Dabei wurden Größen, Abstände, Farben, Rahmen, flex_1(), mt_auto() und bedingtes Rendering geübt. Im nächsten Artikel reagiert die Oberfläche auf Benutzeraktionen."] },
+      ],
+    },
+    "rust-calculator": {
+      intro: "In dieser Serie lernen wir Rust, indem wir pro Artikel ein Projekt bauen. Im ersten Projekt verstehen wir Variablen und Typen und erstellen dafür einen einfachen wissenschaftlichen Taschenrechner.",
+      sections: [
+        { heading: "Voraussetzungen", paragraphs: ["Du solltest mindestens eine Programmiersprache und die Grundlagen von Bedingungen, Variablen, Schleifen und Funktionen kennen. Noch wichtiger ist die Bereitschaft zu lernen und zu üben; der Weg wird lang."] },
+        { heading: "Rust installieren und Cargo kennenlernen", paragraphs: ["Installiere Rust mit rustup und prüfe die Installation mit rustc --version, cargo --version und rustup --version. Cargo ist Rusts Build-System und Paketmanager. cargo new erstellt Projekte, cargo check prüft Code, cargo run kompiliert und startet und cargo build kompiliert."] },
+        { heading: "Variablen, Mutabilität und Shadowing", paragraphs: ["let erstellt eine Bindung zwischen Name und Wert. Bindungen sind standardmäßig unveränderlich; mit mut darfst du neu zuweisen. Eine Zuweisung verändert dieselbe Bindung, Shadowing erstellt dagegen eine neue mit demselben Namen und kann sogar den Typ ändern."] },
+        { heading: "Gültigkeitsbereich und Speicher", paragraphs: ["Eine Bindung ist nur in ihrem Scope verfügbar. Eine Bindung in einem inneren Block ist außerhalb dieses Blocks nicht mehr verfügbar. Stack, Register, Ownership und Lifetimes behandeln wir später; zunächst zählt das Verhalten der Sprache."] },
+        { heading: "Skalare Typen", paragraphs: ["Rust bietet vorzeichenbehaftete und vorzeichenlose Ganzzahlen, Gleitkommazahlen, bool und char. i32, u32, f64, bool und char sind typische Beispiele. Der Compiler kann Typen ableiten; alternativ funktionieren let number: i32 = 10 oder 10_i64."] },
+        { heading: "Typkonvertierung", paragraphs: ["Rust konvertiert Zahlentypen nicht implizit. Eine Addition von i32 und f64 schlägt fehl, bis du einen Wert explizit mit a as f64 konvertierst. So werden stille Konvertierungen vermieden."] },
+        { heading: "Den Taschenrechner bauen", paragraphs: ["Erstelle scientific-calculator und nutze nur die Standardbibliothek. Beginne mit Addition, Subtraktion, Multiplikation und Division; ergänze danach Quadratwurzel, Potenz, Sinus und Kosinus. Lies Argumente mit std::env::args(), sammle sie in Vec<String> und parse sie als f64."] },
+        { heading: "Die Operation auswählen", paragraphs: ["Das erste Argument ist der Operationsname, die folgenden sind Werte. Wähle mit if/else add, subtract, multiply, divide, sqrt, pow, sin oder cos. Am Ende hast du einen funktionierenden Rechner und eine gute Grundlage für Rusts Kontrollfluss."] },
+      ],
+    },
+  },
+  fr: {
+    gpui: {
+      intro: "Dans cette série, nous apprendrons GPUI en construisant un projet intéressant à chaque article. Ici, nous créerons une interface de suivi d’issues inspirée de Linear et étudierons le rendu, les éléments, les styles, le layout et la composition.",
+      sections: [
+        { heading: "Prérequis", paragraphs: ["Vous devez connaître Rust ainsi que les bases de HTML et CSS, notamment flexbox, les marges et les espacements. GPUI évolue rapidement : des changements incompatibles peuvent apparaître dans les futures versions."] },
+        { heading: "Créer le projet", paragraphs: ["Créez le projet avec Cargo et ajoutez GPUI, gpui-platform, gpui-component, gpui-component-assets, rust-embed et anyhow dans Cargo.toml. Nous utiliserons la version la plus récente de GPUI depuis le dépôt de Zed."] },
+        { heading: "La plus petite application GPUI", paragraphs: ["Une vue GPUI implémente le trait Render. La méthode render renvoie un arbre d’éléments, comparable à un arbre d’éléments HTML. Un div peut contenir du texte et d’autres éléments enfants."] },
+        { heading: "Fenêtre, dimensions et styles", paragraphs: ["Démarrez la boucle d’événements avec gpui_platform::application(), initialisez les composants et ouvrez une fenêtre avec cx.open_window. WindowBounds fixe ses dimensions. GPUI utilise des unités typées comme px() et applique les styles par chaînage de méthodes."] },
+        { heading: "Layout avec flexbox", paragraphs: ["Le conteneur principal utilise size_full(), flex() et flex_row() pour séparer la barre latérale du contenu. La barre latérale a une largeur fixe et flex_1() utilise l’espace restant. flex_col(), gap(), padding et bordures terminent le layout."] },
+        { heading: "Composants réutilisables", paragraphs: ["Les fonctions sidebar_item, project_item, tab, group_header et issue encapsulent les structures répétées. Les APIs when(), when_some() et hover() permettent de varier le rendu sans dupliquer le markup."] },
+        { heading: "Barre latérale et contenu", paragraphs: ["La barre latérale contient le workspace, la recherche, la navigation, les projets et l’utilisateur. La zone principale contient l’en-tête, le titre, les onglets, les groupes et les cartes d’issues. rust-embed intègre les SVG au binaire et AssetSource les rend disponibles à GPUI."] },
+        { heading: "Résumé", paragraphs: ["Nous sommes partis d’un div pour construire une interface complète par composition. Vous avez pratiqué les dimensions, espacements, couleurs, bordures, flex_1(), mt_auto() et le rendu conditionnel. L’article suivant rendra l’interface interactive."] },
+      ],
+    },
+    "rust-calculator": {
+      intro: "Dans cette série, nous apprendrons Rust en construisant un projet par article. Pour ce premier projet, nous étudierons les variables et les types en créant une petite calculatrice scientifique.",
+      sections: [
+        { heading: "Prérequis", paragraphs: ["Vous devez connaître au moins un langage de programmation et les bases des conditions, variables, boucles et fonctions. Surtout, il faut vouloir apprendre et pratiquer : le parcours sera long."] },
+        { heading: "Installer Rust et découvrir Cargo", paragraphs: ["Installez Rust avec rustup puis vérifiez rustc --version, cargo --version et rustup --version. Cargo est le système de compilation et le gestionnaire de paquets de Rust. cargo new crée un projet, cargo check le vérifie, cargo run le compile et l’exécute, et cargo build le compile."] },
+        { heading: "Variables, mutabilité et shadowing", paragraphs: ["let crée une liaison entre un nom et une valeur. Les liaisons sont immuables par défaut ; utilisez mut pour réassigner. La réassignation modifie la même liaison, tandis que le shadowing en crée une nouvelle avec le même nom et peut changer son type."] },
+        { heading: "Portée et stockage", paragraphs: ["Une liaison n’est disponible que dans sa portée. Une liaison créée dans un bloc interne disparaît en dehors de ce bloc. Nous verrons plus tard la stack, les registres, l’ownership et les lifetimes ; pour l’instant, concentrez-vous sur le comportement du langage."] },
+        { heading: "Types scalaires", paragraphs: ["Rust possède des entiers signés et non signés, des nombres flottants, bool et char. i32, u32, f64, bool et char sont des exemples courants. Le compilateur peut inférer le type, ou vous pouvez écrire let number: i32 = 10 et 10_i64."] },
+        { heading: "Conversion de types", paragraphs: ["Rust ne convertit pas implicitement les types numériques. Additionner i32 et f64 échoue tant qu’une conversion explicite comme a as f64 n’est pas effectuée. Cette règle évite les conversions silencieuses."] },
+        { heading: "Construire la calculatrice", paragraphs: ["Créez scientific-calculator avec la bibliothèque standard uniquement. Commencez par les quatre opérations, puis ajoutez racine carrée, puissance, sinus et cosinus. Lisez les arguments avec std::env::args(), collectez-les dans Vec<String> et parsez-les en f64."] },
+        { heading: "Choisir l’opération", paragraphs: ["Le premier argument est le nom de l’opération et les suivants sont les valeurs. Utilisez if/else pour choisir add, subtract, multiply, divide, sqrt, pow, sin ou cos. Vous aurez une calculatrice fonctionnelle et une base pour le contrôle de flux."] },
+      ],
+    },
+  },
+  ja: {
+    gpui: {
+      intro: "このシリーズでは、各記事でひとつのプロジェクトを作りながら GPUI を学びます。この記事では Linear に着想を得た issue tracker の UI を作り、レンダリングモデル、要素、スタイル、レイアウト、コンポーネント合成を扱います。",
+      sections: [
+        { heading: "前提知識", paragraphs: ["Rust と HTML/CSS の基礎、特に flexbox、margin、padding を理解しておいてください。GPUI は発展中のため、将来のバージョンでは破壊的変更が起こる可能性があります。"] },
+        { heading: "プロジェクトを作る", paragraphs: ["Cargo でプロジェクトを作成し、Cargo.toml に GPUI、gpui-platform、gpui-component、gpui-component-assets、rust-embed、anyhow を追加します。Zed のリポジトリから最新の GPUI を使用します。"] },
+        { heading: "最小の GPUI アプリ", paragraphs: ["GPUI の view は Render trait を実装します。render メソッドは HTML の要素ツリーに似た要素ツリーを返します。div にはテキストや別の要素を子として追加できます。"] },
+        { heading: "ウィンドウ、サイズ、スタイル", paragraphs: ["gpui_platform::application() でイベントループを開始し、コンポーネントを初期化して cx.open_window でウィンドウを開きます。WindowBounds でサイズを決めます。GPUI の寸法は px() のような型付き単位で表し、メソッドチェーンでスタイルを指定します。"] },
+        { heading: "Flexbox レイアウト", paragraphs: ["メインコンテナで size_full()、flex()、flex_row() を使い、サイドバーとコンテンツを分けます。サイドバーの幅は固定し、flex_1() で残りの空間をコンテンツに割り当てます。flex_col()、gap()、padding、border でレイアウトを整えます。"] },
+        { heading: "再利用できるコンポーネント", paragraphs: ["sidebar_item、project_item、tab、group_header、issue などの関数で繰り返し構造をまとめます。when()、when_some()、hover() を使うと markup を重複させずに表示を条件分岐できます。"] },
+        { heading: "サイドバーとメインコンテンツ", paragraphs: ["サイドバーには workspace selector、検索、ナビゲーション、プロジェクト、ユーザー情報を配置します。メイン領域にはヘッダー、タイトル、タブ、グループ、issue card を配置します。rust-embed で SVG をバイナリに埋め込み、AssetSource 経由で GPUI に渡せます。"] },
+        { heading: "まとめ", paragraphs: ["ひとつの div から始め、合成によって完全な UI を作りました。寸法、間隔、色、境界線、flex_1()、mt_auto()、条件付きレンダリングを学びました。次の記事ではユーザー操作に反応する UI を作ります。"] },
+      ],
+    },
+    "rust-calculator": {
+      intro: "このシリーズでは、各記事でひとつのプロジェクトを作りながら Rust を学びます。最初のプロジェクトでは、簡単な科学計算機を作り、変数と型を理解します。",
+      sections: [
+        { heading: "前提知識", paragraphs: ["少なくともひとつのプログラミング言語と、条件分岐、変数、ループ、関数の基礎を知っておくとよいでしょう。最も大切なのは学び、努力する意志です。長い旅になります。"] },
+        { heading: "Rust をインストールして Cargo を知る", paragraphs: ["rustup で Rust をインストールし、rustc --version、cargo --version、rustup --version で確認します。Cargo は Rust のビルドシステム兼パッケージマネージャです。cargo new は作成、cargo check は検査、cargo run はビルドと実行、cargo build はビルドに使います。"] },
+        { heading: "変数、可変性、シャドーイング", paragraphs: ["let は名前と値の binding を作ります。binding はデフォルトで不変なので、再代入には mut が必要です。再代入は同じ binding を変更しますが、shadowing は同じ名前で新しい binding を作り、型も変更できます。"] },
+        { heading: "スコープと保存場所", paragraphs: ["binding は自分のスコープ内でだけ使えます。内側のブロックで作った binding はブロックの外では使えません。stack、レジスタ、所有権、ライフタイムの詳細は後で扱うため、今は言語の動作に集中します。"] },
+        { heading: "スカラー型", paragraphs: ["Rust には符号付き整数、符号なし整数、浮動小数点数、bool、char があります。i32、u32、f64、bool、char は代表例です。型推論を使うことも、let number: i32 = 10 や 10_i64 のように明示することもできます。"] },
+        { heading: "型変換", paragraphs: ["Rust は数値型を暗黙に変換しません。i32 と f64 の加算は、a as f64 のような明示的変換をしない限り失敗します。これにより意図しない変換を防げます。"] },
+        { heading: "科学計算機を作る", paragraphs: ["scientific-calculator プロジェクトを作り、標準ライブラリだけを使います。四則演算から始め、平方根、べき乗、sin、cos を追加します。std::env::args() で引数を読み、Vec<String> に集めて f64 に parse します。"] },
+        { heading: "演算を選ぶ", paragraphs: ["最初の引数が演算名で、続く引数が値です。if/else で add、subtract、multiply、divide、sqrt、pow、sin、cos を選びます。最後には動く計算機と、次に制御フローを学ぶための基礎が完成します。"] },
+      ],
+    },
+  },
+};
+
+const tutorial = copy[locale][article];
+const fullTutorialHeading = {
+  "pt-br": "Tutorial completo",
+  hi: "पूरा tutorial",
+  es: "Tutorial completo",
+  de: "Vollständiges Tutorial",
+  fr: "Tutoriel complet",
+  ja: "完全なチュートリアル",
+}[locale];
+const fullTutorialIntro = {
+  "pt-br": "Abaixo está o tutorial completo, incluindo todas as explicações, imagens e exemplos. O código permanece em inglês e usa a sintaxe original para que você possa copiá-lo e executá-lo diretamente.",
+  hi: "नीचे पूरा tutorial दिया गया है, जिसमें सभी explanations, images और examples शामिल हैं। Code English में ही रखा गया है ताकि आप उसे सीधे copy करके चला सकें।",
+  es: "A continuación está el tutorial completo, con todas las explicaciones, imágenes y ejemplos. El código permanece en inglés y conserva la sintaxis original para que puedas copiarlo y ejecutarlo directamente.",
+  de: "Unten findest du das vollständige Tutorial mit allen Erklärungen, Bildern und Beispielen. Der Code bleibt auf Englisch und verwendet die originale Syntax, damit du ihn direkt kopieren und ausführen kannst.",
+  fr: "Vous trouverez ci-dessous le tutoriel complet, avec toutes les explications, images et exemples. Le code reste en anglais et conserve la syntaxe originale afin que vous puissiez le copier et l’exécuter directement.",
+  ja: "以下に、すべての説明、画像、例を含む完全なチュートリアルを掲載します。コードは英語のまま、コピーしてそのまま実行できるように元の構文を維持しています。",
+}[locale];
+---
+
+<p>{tutorial.intro}</p>
+
+{tutorial.sections.map((section) => (
+  <section>
+    <h2>{section.heading}</h2>
+    {section.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+  </section>
+))}
+
+<hr />
+<h2>{fullTutorialHeading}</h2>
+<p>{fullTutorialIntro}</p>
+<FullTutorial components={components} />

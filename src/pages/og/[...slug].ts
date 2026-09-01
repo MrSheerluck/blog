@@ -16,8 +16,8 @@ export async function getStaticPaths() {
 
 export async function GET({ props }: { props: OgParams }) {
   const body = await renderOg({
-    url: "blog.sheerluck.dev",
     ...props,
+    url: "blog.sheerluck.dev",
     date: props.date
       ? new Date(props.date).toLocaleDateString("en-US", {
           year: "numeric",
@@ -27,7 +27,7 @@ export async function GET({ props }: { props: OgParams }) {
       : undefined,
   });
 
-  return new Response(body, {
+  return new Response(new Uint8Array(body), {
     headers: { "Content-Type": "image/png" },
   });
 }

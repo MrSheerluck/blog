@@ -17,10 +17,21 @@ import { PageActions } from "@/components/ui/page-actions";
 import { Badge } from "@/components/ui/badge";
 import type { DocsPageProps } from "@cloudflare/nimbus-docs/types";
 import { getVersionStatus, getVersionAlternates } from "@cloudflare/nimbus-docs";
+import type { LanguageLink, Locale } from "../i18n/config";
+import { fallbackLocaleLinks } from "../i18n/links";
 
-type Props = DocsPageProps & { audience?: "human"; publishedDate?: string; readingTime?: number };
+type Props = DocsPageProps & {
+  audience?: "human";
+  publishedDate?: string;
+  publishedDateISO?: string;
+  readingTime?: number;
+  locale?: Locale;
+  languageLinks?: LanguageLink[];
+  seoLanguageLinks?: LanguageLink[];
+};
 
-const { title, description, sidebar, headings, breadcrumbs, prevNext, mode = "doc", banner, head = [], searchable, noindex, markdownUrl, socialImage, lastUpdated, editUrl, draft, audience, collection, entryId, publishedDate, readingTime } = Astro.props;
+const { title, description, sidebar, headings, breadcrumbs, prevNext, mode = "doc", banner, head = [], searchable, noindex, markdownUrl, socialImage, lastUpdated, editUrl, draft, audience, collection, entryId, publishedDate, publishedDateISO, readingTime, locale = "en", languageLinks = [], seoLanguageLinks = [] } = Astro.props;
+const navigationLinks = languageLinks.length > 1 ? languageLinks : fallbackLocaleLinks();
 
 // `searchable` derives from `noindex` when omitted: a non-crawlable page is
 // by default not in the site search either. Explicit `searchable: true`
@@ -74,9 +85,9 @@ const hasContentFooter = Astro.slots.has("content-footer");
 const hasPagination = Astro.slots.has("pagination");
 ---
 
-<BaseLayout title={title} description={description} noindex={noindex || draft} markdownUrl={markdownUrl} socialImage={socialImage} lastUpdated={lastUpdated} head={head} collection={collection} entryId={entryId}>
+<BaseLayout title={title} description={description} noindex={noindex || draft} markdownUrl={markdownUrl} socialImage={socialImage} lastUpdated={lastUpdated} publishedDateISO={publishedDateISO} head={head} collection={collection} entryId={entryId} locale={locale} languageLinks={languageLinks} seoLanguageLinks={seoLanguageLinks}>
   <div class="flex flex-col min-h-screen">
-    {hasHeader ? <slot name="header" /> : <Header collection={collection} entryId={entryId} showSidebar={showSidebar} />}
+    {hasHeader ? <slot name="header" /> : <Header collection={collection} entryId={entryId} showSidebar={showSidebar} locale={locale} languageLinks={navigationLinks} />}
 
     {isCustom ? (
       <main id="main-content" class="flex-1">
@@ -204,7 +215,7 @@ const hasPagination = Astro.slots.has("pagination");
                     {description && (
                       <p class="text-[0.9375rem] sm:text-[1.0625rem] text-muted-foreground leading-relaxed mt-2 mb-2 [text-wrap:pretty]">{description}</p>
                     )}
-                    <PageActions markdownUrl={markdownUrl} lastUpdated={lastUpdated} publishedDate={publishedDate} readingTime={readingTime} class={description ? undefined : "mt-3"} />
+                    <PageActions markdownUrl={markdownUrl} lastUpdated={lastUpdated} publishedDate={publishedDate} publishedDateISO={publishedDateISO} readingTime={readingTime} class={description ? undefined : "mt-3"} />
                     {headings !== false && headings.length > 0 && (
                       <div class="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-14 z-20 -mx-4 mt-3 border-y px-4 py-2 backdrop-blur lg:-mx-6 lg:px-6 xl:hidden">
                         <MobileTOC headings={headings} />

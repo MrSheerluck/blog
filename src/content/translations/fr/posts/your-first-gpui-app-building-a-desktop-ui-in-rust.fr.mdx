@@ -1,0 +1,1010 @@
+---
+title: Votre première application GPUI — créer une interface desktop en Rust
+description: Apprenez GPUI en construisant avec Rust une interface d’issues inspirée de Linear.
+date: 2026-08-30
+locale: fr
+translationKey: your-first-gpui-app-building-a-desktop-ui-in-rust
+slug: your-first-gpui-app-building-a-desktop-ui-in-rust
+---
+Bonjour, je commence cette série d'apprentissage du GPUI complètement par curiosité pour en savoir plus sur le GPUI et partager tout ce que j'apprends avec vous. Une chose que je peux vous assurer, c'est que nous suivrons le même modèle que le reste de mes articles, nous construirons un projet intéressant par article et apprendrons les concepts nécessaires pour construire ce projet. J'essaierai de publier un article sur GPUI toutes les 2 semaines, mais je ne peux pas le promettre, cela peut également prendre 3 semaines par article.
+
+À la fin de cet article, nous aurons ce type d’interface utilisateur :
+![Aspect final de l'interface utilisateur du suivi des problèmes GPUI](/images/gpui/first/final-result.png)
+
+<div class="aspect-video w-full overflow-hidden rounded-xl border border-border bg-black">
+  <iframe
+    class="h-full w-full"
+    src="https://www.youtube.com/embed/NT2XPvtof-Y"
+    title="Your First GPUI App - Building a Desktop UI in Rust"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+  ></iframe>
+</div>
+
+Commençons simplement à apprendre GPUI et dans cet article, nous nous concentrons sur la mise en œuvre des mises en page et du style dans GPUI et nous allons construire un clone linéaire de type UI où nous aurons une interface statique de suivi des problèmes. Il comportera une barre latérale, une navigation, des projets, un en-tête, des onglets et des cartes de problèmes.
+
+Vous pouvez obtenir le code source [ici](https://github.com/MrSheerluck/gpui-linear-ui-clone)
+
+GPUI est un framework d'interface utilisateur Rust développé par l'équipe derrière [Zed](https://zed.dev). Il est conçu pour créer des applications de bureau natives à l'aide de Rust et l'interface elle-même est décrite à l'aide du code Rust.
+
+## Pré-requis
+- Langage de programmation Rust
+- Avoir Rust installé sur votre machine ([guide d'installation](https://www.rust-lang.org/tools/install))
+- HTML et CSS (juste des bases pour que vous compreniez clairement les concepts comme flex, margin, padding, etc.)
+Je vous conseille vivement de ne pas avancer si vous ne connaissez pas les bases de Rust ou les bases du HTML et du CSS. Veuillez acquérir quelques connaissances de base sur les pré-requis, puis revenez.
+
+> À mesure que GPUI évolue, vous pourriez rencontrer des changements importants dans les versions futures. Si tel est le cas, veuillez m'en informer afin que je puisse mettre à jour l'article en conséquence. Vous pouvez soit accéder à l'onglet Problèmes du dépôt Github du blog et créer un nouveau problème, soit m'informer via n'importe quel canal de médias sociaux.
+
+## Création du projet
+Commençons par créer un nouveau projet Rust :
+```bash
+cargo new gpui-issue-tracker-ui
+```
+Ouvrez le projet dans votre éditeur préféré.
+
+Commençons par ajouter des dépendances à `Cargo.toml` :
+```toml
+[package]
+name = "gpui-issue-tracker-ui"
+version = "0.1.1"
+edition = "2024"
+
+[dependencies]
+gpui = { git = "https://github.com/zed-industries/zed" }
+gpui_platform = { git = "https://github.com/zed-industries/zed", features = ["font-kit"] }
+gpui-component = { git = "https://github.com/longbridge/gpui-component" }
+gpui-component-assets = { git = "https://github.com/longbridge/gpui-component" }
+rust-embed = "8"
+anyhow = "1"
+```
+Il existe une caisse publiée pour GPUI mais nous allons utiliser la dernière version de git. Ici, nous avons ajouté la dépendance `gpui` car c'est le framework dont nous avons besoin, `gpui-platform` nous donne un point d'entrée d'application spécifique à la plate-forme, `gpui-component` nous donne les composants d'interface utilisateur de niveau supérieur que nous utiliserons plus tard, y compris les icônes et les boutons, `gpui-component-assets` contient les actifs utilisés par ces composants, `rust-embed` nous permet d'intégrer notre propres actifs d'application dans le binaire et enfin `anyhow` est utilisé pour la gestion des erreurs.
+
+## Création de la plus petite application GPUI possible
+Nous allons créer cette application progressivement, de sorte qu'après chaque étape, vous puissiez exécuter l'application et vérifier à quoi elle ressemble. Ok, commençons par ouvrir `src/main.rs` et importer GPUI :
+```rust
+use gpui::*;
+```
+Maintenant, définissons une vue d'application :
+```rust
+struct App;
+```
+À ce stade, `App` ne fait rien, nous devons indiquer à GPUI comment cette vue doit être rendue.
+
+### Le trait `Render`
+Implémentons `Render` pour `App` :
+```rust
+impl Render for App {
+	fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+		div().child("Hello, GPUI!")
+	}
+}
+```
+Ce `impl Render for App` indique à GPUI que `App` est une vue qui peut produire l'interface utilisateur. La méthode `render` renvoie `impl IntoElement` pour construire une arborescence d'éléments. Si vous pensez en termes de HTML, vous venez de créer un élément `div` et d'ajouter un enfant contenant le texte `Hello, GPUI!`
+
+Vous pouvez visualiser l'arborescence des éléments comme ceci :
+```tree
+App
+└── div
+    └── "Hello, GPUI!"
+```
+C'est le genre de modèle que nous suivrons pour le reste de l'article où une vue GPUI restitue un élément et les éléments peuvent contenir d'autres éléments, tout comme nous le faisons en HTML.
+
+Permettez-moi également de vous expliquer un peu le trait `Render`. `fn render` est la méthode i=requise par le trait `Render`, la méthode `&mut self` moyenne `render` reçoit une référence mutable à notre instance `App`. Ainsi, lorsque nous commencerons à utiliser des éléments tels que l'état de l'application à l'avenir, nous pourrons transmettre cet état en utilisant ceci. La chose suivante est `_window: &mut Window`, cela donne à la méthode de rendu un accès modifiable à la fenêtre GPUI actuelle. Vous pouvez le voir écrit comme ceci `_window` car nous ne l'utilisons pas pour le moment, nous disons "nous savons que ce paramètre existe, mais je ne l'utilise pas". Nous commencerons à l'utiliser plus tard une fois que nous aurons travaillé sur des choses comme `focus`, `input` etc. Enfin, nous avons le contexte `_cx: &mut Context<Self>`, ce contexte donne accès à la fonctionnalité GPUI associée à cette vue particulière. Par exemple, dans notre prochain article, nous pouvons utiliser le contexte pour informer GPUI que l'état de la vue a changé, ce qui est vraiment génial lorsque nous gérons un événement. Ici également, nous utilisons ce format de trait de soulignement simplement pour signifier que nous ne l'utilisons pas pour le moment.
+## Démarrage de l'application GPUI
+Maintenant, nous avons besoin de `Root` du composant GPUI. Mettons à jour nos importations vers :
+```rust
+use gpui::*;
+use gpui_component::Root;
+```
+Ajoutez maintenant une fonction `main` :
+```rust
+fn main() {
+	let app = gpui_platform::application();
+	
+	app.run(|cx| {
+		gpui_component::init(cx);
+		
+		cx.open_window(
+			WindowOptions::default(),
+			|window, cx| {
+				let view = cx.new(|_| App);
+				cx.new(|cx| Root::new(view, window, cx))
+			},
+		)
+		.expect("failed to open window");
+	});
+}
+```
+Tout d'abord, nous créons notre application `let app = gpui_platform::application();`, puis une fois notre application prête, `app.run(|cx| {...});` nous démarrons sa boucle d'événements et cela nous donne un contexte d'application `cx`, après avoir obtenu le contexte de l'application, nous initialisons le composant GPUI que nous utilisons pour le style `gpui_component::init(cx);`. 
+Une fois tout cela fait, nous commençons par créer la fenêtre de notre application `cx.open_window(...)`. Je ne vais pas expliquer tous les détails ici, je les expliquerai plus tard dans cet article.
+
+Maintenant, si vous exécutez l'application en utilisant `cargo run`, vous devriez voir une fenêtre avec le texte `Hello GPUI!`
+
+## Donner à la fenêtre une taille prévisible
+À l'heure actuelle, notre application a une taille de fenêtre par défaut en raison de cette ligne `WindowOptions::default()`, modifions cela et ayons une taille de fenêtre spécifique pour notre application. Au lieu de `WindowOptions::default()`, utilisez ceci :
+```rust
+WindowOptions {
+    window_bounds: Some(WindowBounds::Windowed(Bounds {
+        origin: point(px(0.0), px(0.0)),
+        size: size(px(1200.0), px(760.0)),
+    })),
+    ..Default::default()
+}
+```
+
+Exécutez-le et vous voyez quelque chose comme ceci :
+![Bonjour fenêtre GPUI de taille fixe](/images/gpui/first/hello-gpui-window.png)
+Vous pouvez voir qu'avec l'option par défaut et maintenant avec une taille spécifique, la taille de la fenêtre change réellement, vous pouvez essayer différentes tailles pour vérifier par vous-même.
+
+Vous devez noter que, dans GPUI, nous devons représenter les dimensions en utilisant des unités typées GPUI comme `px()`.
+
+## Faire en sorte que notre élément remplisse la fenêtre
+Pour le moment, notre `div` ne contient que le texte, faisons-le occuper tout l'espace ou la fenêtre disponible. Modifions la méthode `render` comme suit :
+```rust
+impl Render for App {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .size_full()
+            .child("Hello, GPUI!")
+    }
+}
+```
+Si vous l'exécutez, vous ne verrez aucun changement car il n'y a pas de couleur d'arrière-plan pour notre `div`, donc même si cela occupe maintenant toute la fenêtre, nous ne pouvons pas nous en rendre compte, ajoutons donc une couleur d'arrière-plan.
+
+## Ajout de couleur
+Ajoutez une couleur d'arrière-plan et une couleur de texte :
+```rust
+impl Render for App {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .size_full()
+            .bg(rgb(0x0f1012))
+            .text_color(rgb(0xe8e9ea))
+            .child("Hello, GPUI!")
+    }
+}
+```
+Maintenant, exécutez-le et vous verrez que l'arrière-plan est de couleur noire et le texte est de couleur claire. Nous représentons la couleur en notation hexadécimale RVB.
+
+Une chose que vous pouvez remarquer maintenant est que, dans GPUI, nous créons un élément et le configurons simplement en chaînant des méthodes.
+
+![Bonjour GPUI avec fond sombre et texte clair](/images/gpui/first/hello-gpui-colours.png)
+
+## Éléments imbriqués
+Bien sûr, pour créer une mise en page complexe, nous devons savoir comment utiliser ou imbriquer plusieurs éléments, alors commençons à en apprendre davantage.
+Changez la méthode de rendu comme suit :
+```rust
+impl Render for App {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .size_full()
+            .bg(rgb(0x0f1012))
+            .text_color(rgb(0xe8e9ea))
+            .child(
+                div()
+                    .child("Hello, GPUI!"),
+            )
+    }
+}
+```
+Exécutez-le et vous verrez que visuellement, c'est toujours le même, mais la chose importante à noter ici est que notre arborescence d'éléments ressemble maintenant à ceci :
+```bash
+App
+└── div
+    └── div
+        └── "Hello, GPUI!"
+```
+Le `div` externe est notre conteneur d'application, le interne `div` est son enfant et la méthode `.child()` est l'une des méthodes fondamentales que nous utiliserons dans GPUI. C'est une façon d'avoir cette structure parent-enfant pour les structures d'éléments imbriqués ou frères.
+
+## Création d'une mise en page à deux colonnes
+Notre application finale comporte une barre latérale et une zone de contenu principale. Pour y parvenir, nous devons savoir comment créer des dispositions de colonnes et nous pouvons le faire en utilisant flexbox. Changeons le `div` interne par ceci :
+```rust
+div()
+    .size_full()
+    .flex()
+    .flex_row()
+    .child(sidebar())
+    .child(main_content())
+```
+
+Vous pouvez voir que nous utilisons deux fonctions `sidebar()` et `main_content()`, ce sont deux fonctions d'assistance que nous allons créer, cela nous aidera à maintenir et réutiliser notre code
+```rust
+fn sidebar() -> impl IntoElement {
+    div()
+        .w(px(232.0))
+        .h_full()
+}
+```
+Nous créons un composant de barre latérale qui a une largeur de `232px` et prend toute la hauteur de la fenêtre et la disposition du contenu principal prend la largeur restante de la fenêtre et toute la hauteur de la fenêtre :
+```rust
+fn main_content() -> impl IntoElement {
+    div()
+        .flex_1()
+        .h_full()
+}
+```
+Maintenant, notre méthode `render` devrait ressembler à ceci :
+```rust
+impl Render for App {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .size_full()
+            .bg(rgb(0x0f1012))
+            .text_color(rgb(0xe8e9ea))
+            .child(
+                div()
+                    .size_full()
+                    .flex()
+                    .flex_row()
+                    .child(sidebar())
+                    .child(main_content()),
+            )
+    }
+}
+```
+Vous pouvez exécuter et voir que le texte a disparu et que l'application entière a une couleur de fond sombre, c'est tout, nous ne pouvons pas voir visiblement la barre latérale et la zone de contenu principale. Travaillons maintenant sur le conteneur de la barre latérale
+
+## Construire le conteneur de la barre latérale
+Remplacez le `sidebar()` par ceci :
+```rust
+fn sidebar() -> impl IntoElement {
+    div()
+        .w(px(232.0))
+        .h_full()
+        .flex()
+        .flex_col()
+        .bg(rgb(0x131416))
+        .border_r_1()
+        .border_color(rgb(0x272a2f))
+        .px(px(10.0))
+        .py(px(10.0))
+        .gap(px(14.0))
+}
+```
+Maintenant, si vous l'exécutez, vous pouvez voir que la disposition de la barre latérale est là. 
+![Conteneur de barre latérale avec arrière-plan et bordure](/images/gpui/first/sidebar-container.png)
+Nous avons juste la même largeur fixe pour la barre latérale et elle prend la hauteur égale à la hauteur totale de la fenêtre. Ensuite, nous transformons cette barre latérale en un conteneur flexible avec `flex()` et `flex_col()` est utilisé pour que ses enfants soient disposés verticalement. Ensuite, nous définissons l'arrière-plan et la bordure et enfin, nous définissons également le remplissage pour les axes horizontal et vertical et l'espace.
+
+## Ajout du sélecteur d'espace de travail
+Il est maintenant temps d'ajouter du contenu à la barre latérale. La première chose que nous ajouterons est le sélecteur d'espace de travail. Ajoutez cet enfant à la fin de la barre latérale :
+
+> Veuillez accéder au dépôt github, télécharger les images à partir du dossier d'actifs et créer également un dossier d'actifs à la racine de votre projet. Sinon, les sections à partir de maintenant pourraient ne pas fonctionner ou du moins ne pas afficher les deux éléments personnalisés que nous allons utiliser.
+
+Tout d’abord, mettons à jour nos importations afin que nous puissions utiliser des icônes et des ressources :
+```rust
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use gpui_component::{
+    Icon,
+    IconName,
+    Root,
+    Sizable,
+    button::Button,
+    button::ButtonVariants,
+};
+```
+
+```rust
+.child(
+    div()
+        .h(px(34.0))
+        .flex()
+        .items_center()
+        .px(px(7.0))
+        .rounded(px(7.0))
+        .hover(|this| this.bg(rgb(0x1d2024)))
+        .child(img("org.svg").size(px(22.0)).rounded(px(6.0)))
+        .child(
+            div()
+                .ml(px(9.0))
+                .flex_1()
+                .text_size(px(13.0))
+                .font_weight(FontWeight::MEDIUM)
+                .child("SMBL"),
+        )
+        .child(
+            Icon::new(IconName::ChevronDown)
+                .size(px(14.0))
+                .text_color(rgb(0x777b83)),
+        ),
+)
+```
+
+> À partir de maintenant, je ne pense pas avoir besoin d'expliquer les méthodes de style que nous utilisons car il devrait être facile de raisonner sur ce que nous essayons de faire. Si vous pensez toujours que je devrais expliquer, faites-le-moi savoir, je modifierai l'article et ajouterai plus d'explications si nécessaire.
+
+Les deux svgs personnalisés que nous utilisons dans ce projet sont `org.svg` : il est utilisé par le sélecteur d'espace de travail et `user.svg` : il est utilisé par la section utilisateur en bas de la barre latérale.
+Nous souhaitons que ces fichiers soient intégrés à l'application plutôt que de compter sur leur présence à côté de l'exécutable au moment de l'exécution.
+
+C'est pourquoi nous avons ajouté `rust-embed` à `Cargo.toml`. En haut du `main.rs`, ajoutez simplement :
+```rust
+use std::borrow::Cow;
+
+use anyhow::Result;
+use rust_embed::RustEmbed;
+```
+Définissez ensuite la collection d'actifs incorporés comme ceci :
+```rust
+#[derive(RustEmbed)]
+#[folder = "assets"]
+struct AppAssets;
+```
+L'attribut `#[folder = "assets"]` indique à `rust-embed` de tout inclure dans notre répertoire `assets`. Nous devons maintenant mettre ces actifs à la disposition du GPUI. Pour ce faire, nous devons écrire ceci :
+```rust
+impl AssetSource for AppAssets {
+    fn load(&self, path: &str) -> Result<Option<Cow<'static, [u8]>>> {
+        // Our custom application assets first.
+        if let Some(file) = AppAssets::get(path) {
+            return Ok(Some(file.data));
+        }
+
+        // Fall back to GPUI Component's bundled icon assets.
+        Ok(gpui_component_assets::Assets::get(path).map(|file| file.data))
+    }
+
+    fn list(&self, path: &str) -> Result<Vec<SharedString>> {
+        let mut files = AppAssets::iter()
+            .filter(|file| file.starts_with(path))
+            .map(SharedString::from)
+            .collect::<Vec<_>>();
+
+        files.extend(
+            gpui_component_assets::Assets::iter()
+                .filter(|file| file.starts_with(path))
+                .map(SharedString::from),
+        );
+
+        Ok(files)
+    }
+}
+```
+Il y a donc deux sources d'actifs ici, la première concerne nos propres actifs d'application `AppAssets::get(path)`. Si le fichier demandé existe dans notre répertoire `assets`, nous le renvoyons, sinon nous retomberons sur `gpui_component_assets::Assets::get(path)`
+
+Maintenant que cela est fait, nous devons maintenant enregistrer cette source d'actifs auprès de l'application, alors remplacez ceci `let app = gpui_platform::application();` par ceci :
+```rust
+let app = gpui_platform::application().with_assets(AppAssets);
+```
+
+maintenant, si vous exécutez ceci, vous devriez voir :
+![Sélecteur d'espace de travail dans la barre latérale](/images/gpui/first/workspace-selector.png)
+
+## Construire le champ de recherche
+Maintenant, ajoutons le champ de recherche juste en dessous du sélecteur d'espace de travail. ajoutons un `child()` après l'élément workspace :
+```rust
+.child(
+    div()
+        .h(px(32.0))
+        .flex()
+        .items_center()
+        .px(px(8.0))
+        .rounded(px(7.0))
+        .bg(rgb(0x181a1d))
+        .border_1()
+        .border_color(rgb(0x272a2f))
+        .child(
+            Icon::new(IconName::Search)
+                .size(px(14.0))
+                .text_color(rgb(0x777b83)),
+        )
+        .child(
+            div()
+                .ml(px(8.0))
+                .flex_1()
+                .text_color(rgb(0x777b83))
+                .text_size(px(12.0))
+                .child("Search"),
+        )
+        .child(
+            div()
+                .px(px(5.0))
+                .py(px(2.0))
+                .rounded(px(4.0))
+                .border_1()
+                .border_color(rgb(0x303339))
+                .text_color(rgb(0x696d75))
+                .text_size(px(10.0))
+                .child("⌘K"),
+        ),
+)
+```
+
+Si vous exécutez ceci, vous devriez voir quelque chose comme ceci :
+![Zone de recherche ajoutée sous le sélecteur d'espace de travail](/images/gpui/first/search-box.png)
+
+## Création d'éléments de navigation réutilisables
+Maintenant, apprenons un autre modèle, parfois nous voulons créer plusieurs éléments qui peuvent être des boutons, des options ou autre chose qui partagent la même structure.
+
+Par exemple, nous voulons maintenant créer plusieurs entrées de navigation et elles ont toutes la même structure, au lieu de dupliquer la mise en page, créons une fonction d'assistance comme nous l'avons fait pour la barre latérale et le contenu principal :
+```rust
+fn sidebar_item(
+    icon: IconName,
+    label: &'static str,
+    count: Option<&'static str>,
+    active: bool,
+) -> impl IntoElement {
+    div()
+        .h(px(31.0))
+        .flex()
+        .items_center()
+        .px(px(8.0))
+        .rounded(px(6.0))
+        .when(active, |this| this.bg(rgb(0x202227)))
+        .hover(|this| this.bg(rgb(0x1d2024)))
+        .child(Icon::new(icon).size(px(14.0)).text_color(if active {
+            rgb(0xd9dbe0)
+        } else {
+            rgb(0x777b83)
+        }))
+        .child(
+            div()
+                .ml(px(9.0))
+                .flex_1()
+                .text_size(px(12.0))
+                .text_color(if active { rgb(0xe0e1e4) } else { rgb(0x858990) })
+                .child(label),
+        )
+        .when_some(count, |this, count| {
+            this.child(
+                div()
+                    .text_size(px(10.0))
+                    .text_color(rgb(0x656970))
+                    .child(count),
+            )
+        })
+}
+```
+Cette fonction prend `icon`, `label`, `count`, `active`. Ce sont toutes les choses que nous transmettrons à cette fonction lorsque nous voulons créer une entrée de navigation et en fonction de ces valeurs, l'élément de navigation s'affichera différemment.
+
+> Nous utiliserons `'static` pour toutes nos entrées littérales de chaîne car nous voulons que leur durée de vie soit valide tant que le programme existe. Dans des articles ultérieurs, nous verrons comment nous pouvons utiliser un système de magasin pour mieux mettre en œuvre cela.
+
+Je veux que vous remarquiez que `when()` est une API conditionnelle qui restitue les choses en fonction de la condition. Pour l'instant, nous vérifions si l'élément est actif ou non, si oui, appliquez une certaine couleur d'arrière-plan, nous faisons également le même genre de chose pour la couleur du texte.
+
+Il y en a un autre appelé `when_some()`, cela ajoute l'élément count uniquement lorsqu'un count a été fourni. Bien sûr, je ne peux pas couvrir toutes les méthodes ou détails sur les méthodes GPUI intégrées, vous pourrez les consulter plus tard. Mais ces choses sont intéressantes
+
+Maintenant, une fois cela fait, nous pouvons ajouter la section de navigation à `sidebar()` :
+```rust
+.child(
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(1.0))
+        .child(sidebar_item(IconName::Inbox, "Inbox", Some("3"), false))
+        .child(sidebar_item(IconName::User, "My issues", Some("7"), false))
+        .child(sidebar_item(IconName::CircleX, "Active issues", None, true))
+        .child(sidebar_item(IconName::FolderOpen, "Projects", None, false))
+        .child(sidebar_item(IconName::PanelLeft, "Views", None, false)),
+)
+```
+
+Si vous l'exécutez, vous verrez quelque chose comme ceci, ça a l'air vraiment bien en ce moment. Nous venons d'ajouter un autre élément enfant à la barre latérale et ajouté plusieurs éléments enfants en utilisant notre fonction d'assistance `sidebar_item` avec des valeurs différentes. Veuillez expérimenter différentes valeurs pour comprendre comment cela fonctionne
+![Éléments de navigation dans la barre latérale](/images/gpui/first/navigation-items.png)
+
+## Ajout de la section Projets
+Ajoutons une autre section sous la navigation. Nous allons à nouveau écrire une fonction d'assistance pour cela :
+```rust
+fn project_item(label: &'static str, color: u32) -> impl IntoElement {
+    div()
+        .h(px(29.0))
+        .flex()
+        .items_center()
+        .px(px(8.0))
+        .rounded(px(6.0))
+        .hover(|this| this.bg(rgb(0x1d2024)))
+        .child(div().size(px(8.0)).rounded_full().bg(rgb(color)))
+        .child(
+            div()
+                .ml(px(10.0))
+                .text_size(px(12.0))
+                .text_color(rgb(0x858990))
+                .child(label),
+        )
+}
+```
+Maintenant, ajoutons la section projets à la barre latérale :
+```rust
+.child(
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(2.0))
+        .child(
+            div()
+                .px(px(8.0))
+                .pt(px(4.0))
+                .pb(px(4.0))
+                .text_size(px(10.0))
+                .font_weight(FontWeight::SEMIBOLD)
+                .text_color(rgb(0x656970))
+                .child("PROJECTS"),
+        )
+        .child(project_item("Website", 0x7c6ff2))
+        .child(project_item("Mobile", 0x4e9f7a))
+        .child(project_item("API", 0xd9a441)),
+)
+```
+
+Si vous l'exécutez, vous devriez voir quelque chose comme ceci. Nous suivons encore une fois le modèle similaire que nous avons suivi pour les entrées de navigation.
+![Section Projets avec points colorés](/images/gpui/first/projects-section.png)
+
+Les petits cercles sont en fait eux-mêmes des éléments GPUI :
+```rust
+div()
+    .size(px(8.0))
+    .rounded_full()
+    .bg(rgb(color))
+```
+
+## Ajout d'une section utilisateur à la barre latérale
+Nous voulons que les informations utilisateur restent en bas de la barre latérale, comme le font de nombreuses autres applications. Ajoutons ce dernier enfant à `sidebar()` :
+```rust
+.child(
+    div()
+        .mt_auto()
+        .h(px(40.0))
+        .flex()
+        .items_center()
+        .px(px(6.0))
+        .rounded(px(7.0))
+        .hover(|this| this.bg(rgb(0x1d2024)))
+        .child(img("user.svg").size(px(26.0)).rounded_full())
+        .child(
+            div()
+                .ml(px(8.0))
+                .flex_1()
+                .flex()
+                .flex_col()
+                .justify_center()
+                .gap(px(1.0))
+                .child(
+                    div()
+                        .text_size(px(11.0))
+                        .text_color(rgb(0xd0d2d6))
+                        .child("Sheerluck"),
+                )
+                .child(
+                    div()
+                        .text_size(px(9.0))
+                        .text_color(rgb(0x656970))
+                        .child("Personal"),
+                ),
+        )
+        .child(
+            Icon::new(IconName::EllipsisVertical)
+                .size(px(14.0))
+                .text_color(rgb(0x656970)),
+        ),
+)
+```
+Si vous l'exécutez, vous pouvez voir quelque chose comme ceci :
+![Section utilisateur en bas de la barre latérale](/images/gpui/first/user-section.png)
+
+## Création de la zone de contenu principale
+Maintenant, travaillons sur le côté droit pendant que nous avons fini de travailler sur la barre latérale. Remplacez le `main_content()` par ceci :
+```rust
+fn main_content() -> impl IntoElement {
+    div()
+        .flex_1()
+        .h_full()
+        .flex()
+        .flex_col()
+}
+```
+Nous créons cette disposition de contenu principal sous la forme d'un conteneur flexible et d'un conteneur flexible vertical, tout comme la barre latérale.
+Celui-ci contiendra deux sections principales : `header` et `content`. Commençons par la section d'en-tête.
+
+## Création de l'en-tête
+Ajoutez ceci comme premier enfant de `main_content()` :
+```rust
+.child(
+    div()
+        .h(px(56.0))
+        .flex()
+        .items_center()
+        .px(px(28.0))
+        .border_b_1()
+        .border_color(rgb(0x272a2f))
+        .child(
+            div()
+                .text_color(rgb(0x686c74))
+                .text_size(px(12.0))
+                .child("Issues"),
+        )
+        .child(div().mx(px(8.0)).text_color(rgb(0x44474d)).child("/"))
+        .child(div().text_size(px(12.0)).child("Active"))
+        .child(div().flex_1())
+        .child(
+            div()
+                .flex()
+                .items_center()
+                .gap(px(6.0))
+                .child(Button::new("filter").ghost().label("Filter").small())
+                .child(Button::new("sort").ghost().label("Sort").small())
+                .child(Button::new("new").primary().label("New issue").small()),
+        ),
+)
+```
+
+Une fois que vous l'aurez exécuté, vous devriez voir ceci :
+![En-tête du contenu principal avec fil d'Ariane et boutons](/images/gpui/first/main-header.png)
+Il y a une chose que je veux expliquer, c'est que `ghost()` vient du composant GPUI pour son composant `Button`, c'est juste une question de style, nous ne créons pas ce style manuellement.
+
+## Création de la zone de contenu
+ajoutons le contenu principal sous l'en-tête :
+```rust
+.child(
+    div()
+        .flex_1()
+        .px(px(44.0))
+        .py(px(30.0))
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+)
+```
+exécutez-le et vous ne devriez rien voir de différent, mais cela ajoute un peu d'espacement à notre application pour le contenu principal.
+
+## Ajout du titre de la page
+à l'intérieur du conteneur de contenu, ajoutez ceci :
+```rust
+.child(
+    div()
+        .flex()
+        .items_end()
+        .child(
+            div()
+                .flex_1()
+                .child(
+                    div()
+                        .text_size(px(23.0))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .child("Active issues"),
+                )
+                .child(
+                    div()
+                        .mt(px(5.0))
+                        .text_size(px(12.0))
+                        .text_color(rgb(0x777b83))
+                        .child("Issues currently being worked on"),
+                ),
+        )
+        .child(Button::new("more").ghost().label("•••").xsmall()),
+)
+```
+Maintenant, si vous exécutez ceci, vous pouvez voir que le titre de la page de contenu principale est là
+![En-tête de page pour les problèmes actifs](/images/gpui/first/page-heading.png)
+
+## Ajout d'onglets
+Ajoutons des onglets au contenu principal. Dans ces onglets, nous afficherons des onglets d'options tels que "Tous", "M'attribué" et "Créé par moi". Nous suivrons le même modèle de fonction d’assistance réutilisable :
+```rust
+fn tab(label: &'static str, active: bool) -> impl IntoElement {
+    div()
+        .h_full()
+        .flex()
+        .items_center()
+        .text_size(px(12.0))
+        .text_color(if active { rgb(0xe2e3e6) } else { rgb(0x696d75) })
+        .when(active, |this| this.border_b_2().border_color(rgb(0x7c6ff2)))
+        .child(label)
+}
+```
+Ajoutez maintenant le conteneur d'onglets sous le titre :
+```rust
+.child(
+    div()
+        .h(px(36.0))
+        .flex()
+        .items_center()
+        .gap(px(18.0))
+        .border_b_1()
+        .border_color(rgb(0x272a2f))
+        .child(tab("All", true))
+        .child(tab("Assigned to me", false))
+        .child(tab("Created by me", false)),
+)
+```
+
+Vous devriez voir quelque chose comme ceci :
+![Onglets sous le titre de la page](/images/gpui/first/tabs.png)
+
+## Création d'en-têtes de groupe de problèmes
+Créons une fonction d'assistance `group_header` . Ces en-têtes de groupe seront utilisés pour définir le titre d'un groupe et nous pourrons alors avoir plusieurs numéros par groupe
+```rust
+fn group_header(name: &'static str, count: u32) -> impl IntoElement {
+    div()
+        .px(px(8.0))
+        .py(px(8.0))
+        .flex()
+        .items_center()
+        .gap(px(7.0))
+        .child(
+            div()
+                .text_size(px(10.0))
+                .font_weight(FontWeight::SEMIBOLD)
+                .text_color(rgb(0x777b83))
+                .child(name),
+        )
+        .child(
+            div()
+                .text_size(px(10.0))
+                .text_color(rgb(0x50545b))
+                .child(count.to_string()),
+        )
+}
+```
+
+## Création du composant de problème
+Les cartes de problèmes contiennent plus d'informations, créons donc une fonction `issue()` réutilisable, ces cartes de problèmes feront partie d'un certain groupe :
+```rust
+fn issue(
+    id: &'static str,
+    title: &'static str,
+    team: &'static str,
+    assignee: &'static str,
+    updated: &'static str,
+    priority: &'static str,
+    priority_color: u32,
+) -> impl IntoElement {
+    div()
+        .h(px(60.0))
+        .flex()
+        .items_center()
+        .px(px(12.0))
+        .rounded(px(7.0))
+        .border_1()
+        .border_color(rgb(0x202227))
+        .bg(rgb(0x141619))
+        .hover(|this| this.bg(rgb(0x1a1c20)).border_color(rgb(0x303339)))
+        .child(
+            div()
+                .size(px(16.0))
+                .rounded_full()
+                .border_2()
+                .border_color(rgb(priority_color))
+                .mr(px(11.0)),
+        )
+        .child(
+            div()
+                .flex_1()
+                .flex()
+                .flex_col()
+                .gap(px(3.0))
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(8.0))
+                        .child(
+                            div()
+                                .text_size(px(13.0))
+                                .font_weight(FontWeight::MEDIUM)
+                                .child(title),
+                        )
+                        .child(
+                            div()
+                                .text_size(px(10.0))
+                                .text_color(rgb(0x5f636b))
+                                .child(id),
+                        ),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(4.0))
+                        .text_size(px(10.0))
+                        .text_color(rgb(0x656970))
+                        .child(team)
+                        .child("·")
+                        .child(format!("Updated {updated} ago")),
+                ),
+        )
+        .child(
+            div()
+                .px(px(7.0))
+                .py(px(3.0))
+                .rounded(px(4.0))
+                .bg(rgb(priority_color))
+                .text_color(rgb(0x101113))
+                .text_size(px(9.0))
+                .font_weight(FontWeight::SEMIBOLD)
+                .child(priority),
+        )
+        .child(
+            div()
+                .ml(px(16.0))
+                .size(px(26.0))
+                .rounded_full()
+                .bg(rgb(0x30343b))
+                .flex()
+                .items_center()
+                .justify_center()
+                .text_size(px(10.0))
+                .text_color(rgb(0xc4c6cb))
+                .child(assignee.chars().next().unwrap_or('?').to_string()),
+        )
+}
+```
+Je pense que c'est un excellent exemple de la raison pour laquelle la composition est si utile. Ici, chaque numéro a la même structure visuelle mais les valeurs changent comme `title`, `team` et tous les autres paramètres que la fonction prend en entrée.
+
+maintenant que nous avons le composant réutilisable avec nous, ajoutons-le au conteneur de contenu après les onglets :
+```rust
+fn issue(
+    id: &'static str,
+    title: &'static str,
+    team: &'static str,
+    assignee: &'static str,
+    updated: &'static str,
+    priority: &'static str,
+    priority_color: u32,
+) -> impl IntoElement {
+    div()
+        .h(px(60.0))
+        .flex()
+        .items_center()
+        .px(px(12.0))
+        .rounded(px(7.0))
+        .border_1()
+        .border_color(rgb(0x202227))
+        .bg(rgb(0x141619))
+        .hover(|this| this.bg(rgb(0x1a1c20)).border_color(rgb(0x303339)))
+        .child(
+            div()
+                .size(px(16.0))
+                .rounded_full()
+                .border_2()
+                .border_color(rgb(priority_color))
+                .mr(px(11.0)),
+        )
+        .child(
+            div()
+                .flex_1()
+                .flex()
+                .flex_col()
+                .gap(px(3.0))
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(8.0))
+                        .child(
+                            div()
+                                .text_size(px(13.0))
+                                .font_weight(FontWeight::MEDIUM)
+                                .child(title),
+                        )
+                        .child(
+                            div()
+                                .text_size(px(10.0))
+                                .text_color(rgb(0x5f636b))
+                                .child(id),
+                        ),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(4.0))
+                        .text_size(px(10.0))
+                        .text_color(rgb(0x656970))
+                        .child(team)
+                        .child("·")
+                        .child(format!("Updated {updated} ago")),
+                ),
+        )
+        .child(
+            div()
+                .px(px(7.0))
+                .py(px(3.0))
+                .rounded(px(4.0))
+                .bg(rgb(priority_color))
+                .text_color(rgb(0x101113))
+                .text_size(px(9.0))
+                .font_weight(FontWeight::SEMIBOLD)
+                .child(priority),
+        )
+        .child(
+            div()
+                .ml(px(16.0))
+                .size(px(26.0))
+                .rounded_full()
+                .bg(rgb(0x30343b))
+                .flex()
+                .items_center()
+                .justify_center()
+                .text_size(px(10.0))
+                .text_color(rgb(0xc4c6cb))
+                .child(assignee.chars().next().unwrap_or('?').to_string()),
+        )
+}
+```
+
+Maintenant, vous devriez voir quelque chose comme ceci, vous pouvez réellement utiliser des icônes personnalisées si vous le souhaitez pour ces étiquettes de priorité.
+![Émettre des cartes avec des badges prioritaires](/images/gpui/first/issue-cards.png)
+
+## Ajout des problèmes de produit
+Ajoutons un groupe de produits supplémentaire pour voir à quoi il ressemble avec plusieurs produits sur la page :
+```rust
+.child(
+    div()
+        .mt(px(12.0))
+        .flex()
+        .flex_col()
+        .gap(px(1.0))
+        .child(group_header("PRODUCT", 2))
+        .child(issue(
+            "PRO-087",
+            "Redesign onboarding flow",
+            "Product",
+            "Maya",
+            "5h",
+            "MEDIUM",
+            0xd9a441,
+        ))
+        .child(issue(
+            "PRO-086",
+            "Add keyboard shortcuts",
+            "Desktop",
+            "David",
+            "1d",
+            "LOW",
+            0x5b8fd8,
+        )),
+)
+```
+Si vous l'exécutez, vous verrez quelque chose comme ceci :
+![Groupe de problèmes de produit ajouté](/images/gpui/first/product-issues.png)
+
+## Ajout du nombre de problèmes
+Ajoutons une dernière chose, ce sera notre petit résumé pour la zone de contenu :
+```rust
+.child(
+    div()
+        .pt(px(12.0))
+        .text_size(px(11.0))
+        .text_color(rgb(0x555960))
+        .child("Showing 5 of 24 active issues"),
+)
+```
+C'est le look final que nous aurons
+![Aspect final de l'interface utilisateur du suivi des problèmes GPUI](/images/gpui/first/final-result.png)
+
+## Résumant ce que nous venons de construire
+Nous avons commencé avec un seul élément `div().child("Hello, GPUI!")`, puis nous avons lentement ajouté des éléments et travaillé avec la structure des éléments parent-enfant et frère, personnalisé chaque élément avec des méthodes de style enchaînées.
+Nous avons contrôlé la dimension avec ceux-ci :
+```rust
+.w(...)
+.h(...)
+.size_full()
+```
+nous avons appris à implémenter l'espacement en utilisant ceux-ci :
+```rust
+.px(...)
+.py(...)
+.pt(...)
+.mt(...)
+.ml(...)
+.gap(...)
+```
+couleurs en utilisant ceux-ci :
+```rust
+.bg(...)
+.text_color(...)
+```
+frontières de ceux-ci :
+```rust
+.border_1()
+.border_r_1()
+.border_b_1()
+.border_2()
+.border_color(...)
+```
+
+Nous avons utilisé `flex_1()` pour laisser les éléments consommer l'espace restant, `mt_auto()` pour pousser la section utilisateur vers le bas de la barre latérale, et enfin nous avons également utilisé certaines méthodes basées sur des conditions :
+```rust
+.when(...)
+.when_some(...)
+.hover(...)
+```
+
+J'espère que vous avez au moins compris l'essentiel de la façon de concevoir une interface utilisateur de descente avec GPUI, nous devons encore apprendre à faire en sorte que l'interface réponde à l'utilisateur et c'est ce que nous ferons dans notre prochain article et nous nous en tiendrons à ce projet unique pour toute notre série. À bientôt

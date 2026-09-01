@@ -7,10 +7,11 @@ interface Props extends HTMLAttributes<"div"> {
   markdownUrl?: string;
   lastUpdated?: Date;
   publishedDate?: string;
+  publishedDateISO?: string;
   readingTime?: number;
 }
 
-const { markdownUrl, lastUpdated, publishedDate, readingTime, class: className, ...attrs } = Astro.props;
+const { markdownUrl, lastUpdated, publishedDate, publishedDateISO, readingTime, class: className, ...attrs } = Astro.props;
 
 const baseBtn =
   "inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-transparent px-2 py-1 text-muted-foreground no-underline transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2";
@@ -30,7 +31,7 @@ const formattedDate = lastUpdated
     {publishedDate && (
       <span class="inline-flex items-center gap-1.5 px-2 py-1 text-muted-foreground">
         <Icon name="ph:calendar" class="w-3.5 h-3.5" />
-        <time datetime={new Date(publishedDate).toISOString()}>{publishedDate}</time>
+        <time datetime={publishedDateISO ?? new Date(publishedDate).toISOString()}>{publishedDate}</time>
       </span>
     )}
 

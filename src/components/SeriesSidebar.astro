@@ -4,6 +4,12 @@ import { getSlug } from "../slug-map";
 import SidebarNode, { type TreeNode } from "./SidebarNode.astro";
 import archivedSeries from "../archived-series.json";
 
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath: currentPathProp } = Astro.props;
+
 const archivedSet = new Set(archivedSeries);
 
 const docs = await getCollection("docs");
@@ -17,12 +23,10 @@ function buildTree(posts: typeof docs): TreeNode {
     const mappedSlug = getSlug(fileRel);
     if (!mappedSlug) continue;
 
-    // @ts-expect-error
-    const sidebar: Record<string, unknown> | undefined = e.data.sidebar;
-    if (sidebar?.hidden === true) continue;
+    const sidebar = e.data.sidebar;
+    if (sidebar === false || sidebar?.hidden === true) continue;
 
-    // @ts-expect-error
-    const series: string[] | undefined = e.data.series;
+    const series = e.data.series;
 
     const parts = fileRel.split("/");
     let current = root;
@@ -74,7 +78,7 @@ function buildTree(posts: typeof docs): TreeNode {
 }
 
 const root = buildTree(posts);
-const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+const currentPath = currentPathProp ?? (Astro.url.pathname.replace(/\/$/, "") || "/");
 ---
 
 <nav class="space-y-1 text-sm" data-nb-sidebar>

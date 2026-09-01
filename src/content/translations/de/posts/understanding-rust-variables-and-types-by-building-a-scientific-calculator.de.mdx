@@ -1,0 +1,783 @@
+---
+title: Einen wissenschaftlichen Rechner in Rust bauen — Variablen und Typen verstehen
+description: Lerne Rust-Variablen und -Typen, indem du einen einfachen wissenschaftlichen Rechner baust.
+date: 2026-08-25
+locale: de
+translationKey: understanding-rust-variables-and-types-by-building-a-scientific-calculator
+slug: understanding-rust-variables-and-types-by-building-a-scientific-calculator
+---
+Willkommen zu dieser Rust-Lernreihe, in der wir Rust lernen, indem wir pro Artikel ein Projekt erstellen und jedes einzelne Konzept ausführlich erlernen. Dies ist meine neue Rust-Serie und sie wird viel umfassender sein als meine vorherige Rust-Serie. In den ersten 5 bis 6 Artikeln werden die Projekte relativ einfach sein, aber ich versichere Ihnen, dass wir danach eine Menge interessanter Projekte erstellen und viel lernen werden. Beginnen wir also mit dem ersten Artikel
+
+In diesem Artikel lernen wir Rust-Variablen und -Typen kennen, indem wir einen einfachen wissenschaftlichen Rechner erstellen.
+
+<div class="aspect-video w-full overflow-hidden rounded-xl border border-border bg-black">
+  <iframe
+    class="h-full w-full"
+    src="https://www.youtube.com/embed/g46VpaqoFa0"
+    title="Build a Scientific Calculator in Rust - Understanding Variables and Types"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+  ></iframe>
+</div>
+
+## Voraussetzungen
+Sie sollten jede Programmiersprache kennen, zumindest die Grundlagen davon wie Bedingungen, Variablen, Schleifen, Funktionen. *Das Wichtigste ist, dass Sie den Willen haben, zu lernen und sich anzustrengen*. Das wird eine lange, aber anstrengende Reise, also schnallen Sie sich an.
+
+## Teil 1 – Rust installieren
+Wie jede andere Sprache müssen wir sie zuerst installieren, bevor wir sie verwenden können. Befolgen Sie also einfach die Rust-Installationsanweisungen und kehren Sie zurück [Rust mit Rustup installieren](https://www.rust-lang.org/tools/install?utm_source=chatgpt.com)
+
+Öffnen Sie nach der Installation von Rust ein neues Terminal und prüfen Sie, ob der Compiler verfügbar ist:
+```bash
+rustc --version
+```
+
+Sie sollten eine ähnliche Version sehen:
+```text
+rustc 1.97.0
+```
+
+Die genaue Version hängt davon ab, wann Sie Rust installieren.
+
+Überprüfen Sie nun Fracht:
+```bash
+cargo --version
+```
+
+Sie fragen sich vielleicht: **Was ist Cargo?** Cargo ist Rusts Build-System und Paketmanager. Wir werden in dieser Serie durchgehend Cargo verwenden.
+
+Sie können Rustup auch überprüfen:
+```bash
+rustup --version
+```
+
+Wenn alle drei Befehle funktionieren, ist Ihre Rust-Installation fertig.
+
+## Erste Schritte mit Fracht
+
+Bevor wir mit dem Erlernen von Rust beginnen, wollen wir kurz verstehen, wie wir in dieser Serie unsere Rust-Projekte erstellen, erstellen und ausführen.
+
+### Was ist Fracht?
+
+Cargo ist Rusts Build-System und Paketmanager. Es übernimmt Aufgaben wie das Erstellen von Projekten, das Kompilieren von Code, das Ausführen von Programmen, das Überprüfen von Code und das Verwalten von Abhängigkeiten.
+
+In dieser Serie werden Sie Cargo verwenden, also machen wir uns mit den grundlegenden Befehlen vertraut.
+
+### Erstellen eines Rust-Projekts
+
+Lassen Sie uns unser erstes Rust-Projekt erstellen.
+
+Öffnen Sie Ihr Terminal, navigieren Sie zu dem Ordner, in dem Sie Ihr Projekt speichern möchten, und führen Sie Folgendes aus:
+
+```bash
+cargo new hello-rust
+```
+
+Cargo erstellt ein neues Verzeichnis namens `hello-rust` mit einem grundlegenden Rust-Projekt darin.
+
+In das Projekt einsteigen:
+
+```bash
+cd hello-rust
+```
+
+Wenn Sie das Projekt in Ihrem Editor öffnen, sehen Sie eine Struktur ähnlich dieser:
+
+```text
+hello-rust/
+├── Cargo.toml
+└── src/
+    └── main.rs
+```
+
+Lassen Sie uns verstehen, was diese Dateien sind.
+
+`Cargo.toml` ist die Manifestdatei des Projekts. Es enthält Informationen zum Projekt, wie z. B. Name, Version, Rust-Edition und Abhängigkeiten.
+
+`src/main.rs` ist der Einstiegspunkt einer binären Rust-Anwendung. Hier wird unsere Funktion `main` leben.
+
+Cargo erstellt außerdem eine `Cargo.lock`-Datei, nachdem Abhängigkeiten während eines Builds aufgelöst wurden. Sie brauchen sich darüber noch keine Sorgen zu machen; Wir werden das Abhängigkeitsmanagement später in der Serie besprechen.
+
+### Ausführen des Projekts
+
+Öffnen Sie `src/main.rs`. Cargo generiert für uns ein kleines Hello World-Programm:
+
+```rust
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+Wir können das Programm ausführen mit:
+
+```bash
+cargo run
+```
+
+Sie sollten Folgendes sehen:
+
+```text
+Hello, world!
+```
+
+`cargo run` kompiliert bei Bedarf zunächst das Projekt und führt dann die resultierende ausführbare Datei aus.
+
+### Überprüfen Sie Ihren Code
+
+Ein weiterer nützlicher Befehl ist:
+
+```bash
+cargo check
+```
+
+`cargo check` prüft, ob Ihr Projekt kompiliert wird, ohne die endgültige ausführbare Datei zu erstellen.
+
+Dies ist beim Entwickeln nützlich, da Sie damit schnell überprüfen können, ob Ihr Code gültig ist, ohne einen vollständigen Build durchführen zu müssen.
+
+Sie werden sehen, dass ich in dieser Serie häufig `cargo check` verwende.
+
+### Erstellen Sie Ihr Projekt
+
+Um das Projekt zu kompilieren, können Sie Folgendes verwenden:
+
+```bash
+cargo build
+```
+
+Standardmäßig wird dadurch ein Debug-Build erstellt. Wenn Sie schließlich einen optimierten Release-Build wünschen, können Sie Folgendes verwenden:
+
+```bash
+cargo build --release
+```
+
+Im Moment müssen Sie sich über den Unterschied zwischen Debug- und Release-Builds keine Gedanken machen. Wir werden darauf zurückkommen, wenn es relevant wird.
+
+### Der Fracht-Workflow
+
+An dieser Stelle müssen Sie sich den folgenden grundlegenden Arbeitsablauf merken:
+
+```text
+cargo new       → create a new project
+cargo check     → check that the code compiles
+cargo run       → compile and run the program
+cargo build     → compile the project
+```
+
+Das ist jetzt genug Cargo-Wissen.
+
+Wir werden später in der Serie mehr über Cargo, Abhängigkeiten, Arbeitsbereiche, Builds und Projektkonfiguration erfahren, wenn wir sie tatsächlich benötigen.
+
+Nachdem wir nun wissen, wie man ein Rust-Projekt erstellt und ausführt, beginnen wir mit dem Erlernen von Rust selbst.
+## Variablen
+Das allererste, was wir lernen werden, sind **Variablen in Rust**. Die Syntax ist der anderer Programmiersprachen sehr ähnlich, dennoch gibt es einige Unterschiede, die Sie von Anfang an kennen und verstehen sollten.
+### Eine Variable erstellen
+Beginnen wir damit, zu lernen, wie man eine Variable erstellt:
+```rust
+fn main() {
+	let number = 10;
+	
+	println!("{number}")
+}
+```
+Sie können dies ausführen, indem Sie Folgendes in Ihr Terminal eingeben:
+```bash
+cargo run
+```
+Sie sollten die Ausgabe `10` sehen. Die Zeile `let number = 10;` erstellt eine Variablenbindung. Lassen Sie mich es Ihnen mit dem folgenden Bild zeigen:
+
+![Bild 1](/images/rust-02.png)
+
+In der Rust-Terminologie ist es sinnvoll, sich `let` als die Schaffung einer **Bindung** zwischen einem Namen und einem Wert vorzustellen. Hier teilen wir Rust im Grunde mit, dass sich der Name `number` auf den Wert `10` bezieht. Machen Sie sich im Moment keine Gedanken über die Typen, wir werden sie in Kürze kennenlernen
+
+Jetzt denken Sie vielleicht, dass es Sprachen wie JavaScript und Python sehr, sehr ähnlich zu sein scheint. Was ist dann der Unterschied, über den ich gesprochen habe? Lassen Sie mich Ihnen zeigen, welche Informationen mit der Bindung verbunden sind:
+![Bild 2](/images/rust-03.png)
+Im Moment müssen Sie nur beachten, dass die Bindung einen Namen namens `number` hat und auf einen Wert `10` verweist, der Wert einen Typ hat, die Bindung standardmäßig unveränderlich ist und die Bindung innerhalb eines bestimmten Bereichs existiert. Wir werden später in diesem und auch im nächsten Abschnitt auf diese Eigenschaften zurückkommen.
+## Variablen sind standardmäßig unveränderlich
+Versuchen wir, dieses Programm auszuführen:
+```rust
+fn main() {
+    let number = 10;
+
+    number = 20;
+
+    println!("{number}");
+}
+```
+
+Es wird eine Fehlermeldung angezeigt, die besagt, dass die Zuweisung zu einer unveränderlichen Variablen nicht möglich ist.
+> Sie müssen sich Folgendes merken: Mit `let` erstellte Bindungen sind standardmäßig unveränderlich
+
+Wenn wir den mit der Bindung verknüpften Wert ändern möchten, müssen wir explizit angeben, dass er veränderbar ist, und zwar mithilfe des Schlüsselworts `mut`:
+
+```rust
+fn main() {
+    let mut number = 10;
+
+    number = 20;
+
+    println!("{number}");
+}
+```
+
+Führen Sie nun das Programm mit `cargo run` aus und Sie sehen die Ausgabe `20`. 
+> Im Moment reicht diese Unterscheidung. Eigentum und Kreditaufnahme werden diese Unterscheidung später in der Serie noch wichtiger machen.
+### Neuzuweisung
+Versuchen wir, dieses Programm auszuführen:
+```rust
+fn main() {
+	let mut number = 10l;
+	
+	number = 20;
+	number = 30;
+	
+	println!("{number}")
+}
+```
+Sie erhalten die Ausgabe `30`. Wir erstellen zuerst die Bindung `number` mit dem Wert `10`, weisen sie dann `20` neu zu und weisen sie dann erneut `30` zu und drucken schließlich `number`
+
+### Beschattung
+In Rust können wir eine andere Bindung mit demselben Namen deklarieren, etwa so:
+```rust
+fn main() {
+	let number = 10;
+	let number = 20;
+	
+	println!("{number}")
+}
+```
+Führen Sie nun den Befehl aus und überprüfen Sie die Ausgabe. Sie erhalten die Ausgabe `20`. Das mag auf den ersten Blick wie eine Neuzuweisung erscheinen, ist es aber nicht. Das nennen wir `shadowing`. Es gibt einen subtilen Unterschied zwischen Neuzuweisung und Shadowing. Beim Shadowing können Sie sehen, dass das zweite `let` eine neue Bindung erstellt, die denselben Namen wie die vorherige Bindung hat. Bei der Neuzuweisung erstellen wir nicht mehrere Bindungen mit demselben Namen.
+
+Auch das Abschatten kann den Typ verändern:
+```rust
+fn main() {
+	let value = 10;
+	let value = "ten";
+	
+	println!("{value}")
+}
+```
+Wenn Sie dies ausführen, sehen Sie, dass die Ausgabe `ten` sein wird. Wenn Sie dies mithilfe einer Neuzuweisung tun, schlägt dies fehl und es wird eine Fehlermeldung angezeigt:
+```rust
+fn main() {
+	let mut value = 10;
+	value = "ten";
+	
+	println!("{value}")
+}
+```
+Dieses Shadowing-Konzept wird später in unserer Serie verwendet, daher lasse ich dieses Konzept vorerst hier und wir werden es in einem späteren Artikel aufgreifen, um noch mehr darüber zu erfahren.
+
+### Geltungsbereich
+Diese Bindungen haben auch einen Geltungsbereich. Der Bereich ist der Bereich des Programms, in dem die Bindung verwendet werden kann. Lassen Sie mich es Ihnen anhand eines Beispiels zeigen:
+```rust
+fn main() {
+	let outer = 10;
+	
+	{
+		let inner = 20;
+		println!("{outer}")
+		println!("{inner}")
+	}
+	
+	println!("{outer}")
+}
+```
+Ich denke, Sie haben diesen Umfang sicher auch in anderen Sprachen gesehen. Der innere Bindungsbereich existiert nur innerhalb des verschachtelten Blocks und der äußere Bindungsbereich existiert bis zum Ende des Programms. Wenn Sie also das Programm ausführen, ist die `inner`-Bindung nicht mehr verfügbar, sobald unser Programm den verschachtelten Block verlässt. Deshalb erhalten Sie eine Fehlermeldung, wenn Sie versuchen, den Bindungswert `inner` außerhalb dieses verschachtelten Blocks zu drucken. Lassen Sie mich Ihnen den Umfang unseres obigen Codes mit diesem Bild zeigen:
+![Bild 3](/images/rust-04.png)
+Wir werden die Idee des Scopings später verstehen und mit Eigentum und Lebensdauer verknüpfen. Zunächst müssen wir jedoch verstehen, dass der Scope ein Bereich ist, in dem eine Bindung verfügbar ist
+
+### Wo wohnt eigentlich der Wert?
+Ich weiß, dass Sie sich vielleicht fragen, was tatsächlich passiert, wenn wir `let number = 10;` in ein Rust-Programm schreiben. Ich kann Ihnen jetzt eine kurze Erklärung geben, aber wir werden in einem späteren Artikel näher darauf eingehen.
+
+Bei einfachen Werten wie Ganzzahlen kann der Compiler den Wert daher im Allgemeinen direkt im Maschinenspeicher darstellen, häufig in einem Register oder Stapelspeicher, je nachdem, wie der generierte Code optimiert und verwendet wird. 
+> Variablen sind nicht immer live auf dem Stapel. Bitte nehmen Sie die obige kurze Aussage mit Vorsicht, da ich sie stark vereinfache. Wie gesagt, wir werden dies ausführlicher in einem separaten Artikel erfahren. Es wäre also großartig, wenn Sie etwas Geduld hätten und sich vorerst nur auf das Erlernen des Verhaltens auf Sprachebene und nicht auf Details auf Maschinenebene konzentrieren würden.
+
+### Ein letztes Experiment
+Kombinieren wir einfach das Gelernte mit diesem Programm:
+```rust
+fn main() {
+	let number = 10;
+	
+	{
+		let mut number = number;
+		
+		number = 20;
+		
+		println!("{number}");
+	}
+	
+	println!("{number}")
+}
+```
+Ich würde sagen, versuchen Sie zuerst, die Ausgabe zu erraten, bevor Sie das Programm ausführen und die Ausgabe überprüfen. Zuerst haben wir eine äußere Bindung `number` erstellt und der Wert ist `10`, dann haben wir innerhalb des verschachtelten Blocks eine innere Bindung mit demselben Namen erstellt, die die äußere `number`-Bindung überschattet und der Wert dieser inneren Bindung ist `10`, dann weisen wir den Wert neu zu `20` (wir können dies aufgrund von `mut` in der inneren Bindung tun), dann würde das Drucken von `number` uns `20` ergeben. Schließlich existieren wir aus dem verschachtelten Block heraus und geben erneut `number` aus, aber dieses Mal zeigt es auf die äußere `number`-Bindung und gibt daher den Wert `10` aus.
+
+Ich denke, mittlerweile sollten Sie mit dem grundlegenden Variablenmodell vertraut sein. Jetzt können wir uns mit den Typen befassen
+
+## Typen
+Wie einige andere Sprachen haben wir auch in Rust Typen. Lassen Sie uns dasselbe Beispiel verwenden, das wir zuerst verwendet haben, und schauen wir uns den Wert selbst an:
+```rust
+let number = 10;
+```
+Wir wissen, dass sich `number` auf `10` bezieht, aber die Frage ist: *Was für ein Wert, wenn 10?* Darauf konzentrieren wir uns für den Rest des Abschnitts, in dem wir alle gängigen Typen verstehen, die Rust bereitstellt.
+
+Im Allgemeinen sagt uns ein Typ, mit welcher Art von Wert er arbeitet und welche Operationen für diesen Wert gültig sind.
+
+Beginnen wir mit einem sehr einfachen Beispiel:
+```rust
+fn main() {
+	let number = 10;
+	
+	println!("{number}")
+}
+```
+Sobald Sie es ausführen, sehen Sie die Ausgabe `10`. Das wissen wir bereits, nichts Überraschendes. Machen wir nun seinen Typ explizit:
+```rust
+fn main() {
+	let number: i32 = 10;
+	
+	println!("{number}")
+}
+```
+Dadurch wird wieder `10` ausgegeben, aber in diesem Programm haben wir explizit erwähnt, welchen Typ der Wert haben sollte.
+
+Die Syntax, der Sie folgen werden, um den Typ eines Werts explizit anzugeben, lautet wie folgt:
+```rust
+let name: Type = value;
+```
+In unserem einfachen Beispiel ist also `number` der Bindungsname, `i32` der Typ und `10` der Wert
+
+### Was bestimmt ein Typ eigentlich?
+Ein Typ bestimmt beispielsweise, welche Werte dargestellt werden können, wie sich Operationen auf diesen Werten verhalten, welche Operationen gültig sind, wie Werte mit anderen Werten interagieren können, wie der Compiler den Wert zur Laufzeit darstellt und kann etwas anderes sein, aber ich denke, das sind die häufigsten Dinge, die Sie wissen sollten
+Beispielsweise unterstützen ganze Zahlen arithmetische Operationen:
+```rust
+fn main() {
+	let a: i32 = 10;
+	let b: i32 = 20;
+	
+	let result = a + b;
+	
+	println!("{result}");
+}
+```
+Dies funktioniert, weil `i32` die Addition unterstützt. Aber Rust erlaubt nicht, dass beliebige Werte unabhängiger Typen kombiniert werden. Zum Beispiel:
+```rust
+fn main() {
+	let a: i32 = 10;
+	let b: f64 = 20.5;
+	
+	let result = a + b;
+	
+	println!("result")
+}
+```
+Wenn Sie dies ausführen, schlägt dies fehl, da Rust zwei verschiedene Typen `i32` und `f64` erkennt und der Compiler sich beschwert, dass beide nicht vom gleichen Typ sind und daher den Vorgang nicht ausführen können. Wir werden später sehen, wie man einen Typ konvertiert, um diesen Vorgang durchzuführen. Denken Sie jedoch zunächst daran, dass das Ausführen von Vorgängen für verschiedene Typen in Rust fehlschlagen wird.
+
+### Rusts Skalartypen
+In Rust haben wir einige primitive Skalartypen. Die vier Hauptkategorien sind:
+
+| Skalare Typen |
+| ---------------------- |
+| Ganzzahlen |
+| Gleitkommazahlen |
+| Boolesche Werte |
+| Charaktere |
+
+Die Ganzzahl- und Gleitkomma-Kategorien enthalten mehrere konkrete Typen. Lassen Sie uns jeden dieser Typen durchgehen und nacheinander etwas mehr über jeden dieser Typen erfahren
+
+### Vorzeichenbehaftete Ganzzahlen
+Eine ganze Zahl mit Vorzeichen kann sowohl positive als auch negative ganze Zahlen darstellen. In Rust haben wir mehrere Varianten von vorzeichenbehafteten Ganzzahlen. Diese Varianten stellen die Größe der Ganzzahl in Bits dar.
+
+| Vorzeichenbehaftete ganze Zahlen |
+| --------------- |
+| `i8` |
+| `i16` |
+| `i32` |
+| `i64` |
+| `i128` |
+| `isize` |
+
+Wir haben verschiedene Varianten von vorzeichenbehafteten Ganzzahlen, da Programme manchmal unterschiedliche Zahlenbereiche benötigen. Beispielsweise hat `i8` 8 Bits und kann `-128 through 127` darstellen, während `i32` 32 Bits hat und `-2,147,483,648 through 2,147,483,647` darstellen kann und `i64` noch mehr darstellen kann. Ich hoffe, Sie verstehen die Idee.
+
+### Ganzzahlen ohne Vorzeichen
+Eine vorzeichenlose Ganzzahl (ja, Sie haben es richtig erraten) kann keine negativen Werte darstellen. Zum Beispiel:
+```rust
+fn main() {
+	let count: u32 = 100;
+	
+	println!("{count}");
+}
+```
+Das funktioniert einwandfrei, aber wenn Sie `100` durch eine negative Zahl wie diese ersetzen:
+```rust
+fn main() {
+	let count: u32 = -100;
+	
+	println!("{count}")
+}
+```
+Wenn Sie nun versuchen, es auszuführen, wird sich der Compiler beschweren, weil der Bereich von `u8` `0 through 255` ist und negative Zahlen deshalb nicht gültig sind.
+
+### `usize` und `isize`
+Es gibt zwei Integer-Typen, denen Sie Ihre besondere Aufmerksamkeit schenken möchten: `usize` und `isize`. Im Gegensatz zu `i32` oder `u64` hängt ihre Größe von der Zielarchitektur ab. Beispielsweise beträgt auf einem 64-Bit-System `usize` 64 Bit und `isize` 64 Bit, auf einem 32-Bit-System jedoch: `usize` 32 Bit und `isize` 32 Bit. `usize` wird sehr häufig beim Arbeiten mit Größen und Indizes verwendet. Sie werden es später häufig sehen, wenn wir mit Sammlungen arbeiten. Wir werden die Verwendung von `usize` in einem späteren Artikel sehen. Im Moment möchte ich nur, dass Sie das Wesentliche verstehen, und ich hoffe, dass Sie es verstehen.
+
+### Gleitkommatypen
+Da wir einen wissenschaftlichen Minirechner bauen, benötigen wir natürlich Unterstützung für Dezimalwerte und zur Unterstützung stellt Rust zwei Gleitkommatypen bereit: `f32` und `f64`
+Lassen Sie mich Ihnen auch ein einfaches Beispiel für Gleitkomma zeigen:
+```rust
+fn main() {
+	let a: f32 = 10.5;
+	let b: f64 = 20.5;
+	
+	println!("{a}");
+	println!("{b}");
+}
+```
+
+### Boolescher Wert
+Rust unterstützt auch den booleschen Typ und wird mit `bool` dargestellt. Es hat genau zwei mögliche Werte: `true` und `false`. Lassen Sie mich Ihnen ein einfaches Beispiel geben:
+```rust
+fn main() {
+	let is_running: bool = true;
+	let is_finished: bool = false;
+	
+	println!("{is_running}");
+	println!("{is_finished}");
+}
+```
+
+### Charakter
+Rust unterstützt auch den Zeichentyp und dessen Darstellung durch das Schlüsselwort `char`. Ein `char` stellt einen einzelnen Unicode-Skalarwert dar. Zum Beispiel:
+```rust
+fn main() {
+	let letter: char = 'R';
+	let symbol: char = '😀';
+	
+	println!("{letter}");
+	println!("{symbol}");
+}
+```
+Denken Sie daran, dass wir beim Definieren eines Zeichens einfache Anführungszeichen verwenden. Wenn Sie doppelte Anführungszeichen verwenden, wird daraus ein String-Literal. Diese beiden sind unterschiedliche Typen.
+
+Aus dem obigen Beispiel können Sie also ersehen, dass ein Rust `char` Unicode-Skalarwerte darstellen kann. Aus diesem Grund sollten Sie sich `char` nicht als „ein Byte“ vorstellen. Rusts `char` ist ein Vier-Byte-Typ, der einen Unicode-Skalarwert darstellt.
+
+### Typinferenz
+Am Anfang haben wir keine Typen für unsere Variablen geschrieben, aber vor Kurzem haben wir damit begonnen, die Typen unserer Variablen explizit zu erwähnen. Das heißt, Rust verlangt nicht, dass wir jede Variable mit Anmerkungen versehen, Rust leitet den Typ ab und dies wird **Typinferenz** genannt. 
+Typinferenz bedeutet nicht, dass eine Variable keinen Typ hat. Diese Variable hat immer noch einen konkreten Typ zur Kompilierungszeit. Es ist nur so, dass Rust diesen Typ einfach für uns bestimmt hat. Wir können diese Theorie auch anhand eines Beispiels überprüfen:
+```rust
+fn main() {
+	let number = 10;
+	
+	println!("{}", std::any::type_name_of_val(&number));
+}
+```
+Die Ausgabe sollte als `i32` angezeigt werden.
+
+### Numerische Literalsuffixe
+Mit Rust können wir einem numerischen Literal ein Typsuffix hinzufügen. Dies ist nur eine weitere Möglichkeit, den Typ explizit zu machen.
+```rust
+fn main() {
+	let a = 10_i32;
+	let b = 10_i64;
+	let c = 10.5_f64;
+}
+```
+Das Suffix teilt Rust mit, welchen Typ das Literal haben soll. `10_i64` bedeutet also, dass das Ganzzahlliteral `10` den Typ `i64` haben sollte. Der erste Weg, den wir gelernt haben, verwendet Typanmerkungen für die Bindung und dieser verwendet ein Typsuffix für das Literal.
+
+### Rust konvertiert numerische Typen nicht implizit
+Kehren wir zu dem Beispiel zurück, das wir zuvor verwendet haben:
+```rust
+fn main() {
+	let a: i32 = 10;
+	let b: f64 = 20.5;
+	
+	let result = a + b;
+	
+	println!("{result}");
+}
+```
+Wenn Sie dies ausführen, schlägt dies fehl, da Sie versuchen, den Vorgang mit zwei verschiedenen Typen durchzuführen. Damit es erfolgreich ausgeführt wird, müssen wir einen dieser beiden Typen konvertieren und beide Typen gleich machen:
+```rust
+fn main() {
+	let a: i32 = 10;
+	let b: f64 = 20.5;
+	
+	let result = a as f64 + b;
+	
+	println!("{result}");
+}
+```
+Damit `as f64` haben wir die Ganzzahl `a` in `f64` umgewandelt und jetzt kann die Operation ausgeführt werden. Wir werden später in der Serie mehr über die Typkonvertierung erfahren.
+
+## Aufbau des wissenschaftlichen Rechners
+Von nun an werden wir unseren Rechner schrittweise aufbauen. Ich hoffe, Sie haben Rust bereits installiert. Wenn nicht, gehen Sie bitte zum Anfang dieses Artikels, holen Sie sich den Rust-Installationslink und folgen Sie den Anweisungen. Wenn Sie fertig sind, kommen Sie zurück und beginnen Sie mit der Arbeit an diesem Projekt.
+
+### Erstellen Sie das Projekt
+Öffnen Sie einfach Ihr Terminal, gehen Sie zu Ihrem bevorzugten Ordner, in dem Sie dieses Projekt erstellen möchten, und erstellen Sie dann ein neues Cargo-Projekt:
+```bash
+cargo new scientific-calculator
+```
+Öffnen Sie dann dieses Projekt in Ihrer bevorzugten IDE. Ich verwende [Zed IDE](https://zed.dev/)
+Sobald Sie das Projekt öffnen, sehen Sie diese Ordnerstruktur:
+```
+scientific-calculator/
+├── Cargo.toml
+└── src/
+    └── main.rs
+```
+Für dieses Projekt müssen wir `Cargo.toml` nicht ändern, da wir nur die Standardbibliothek von Rust verwenden
+
+Öffnen Sie nun `src/main.rs` und Sie werden sehen, dass es ein von Cargo generiertes Hallo-Welt-Programm gibt. Lassen Sie uns das ersetzen und `Scientific Calculator` ausdrucken:
+```rust
+fn main() {
+	println!("Scientific Calculator");
+}
+```
+Sobald Sie es mit `cargo run` ausführen, sollte auf Ihrem Terminal `Scientific Calculator` angezeigt werden.
+
+### Fügen Sie die vier Grundoperationen hinzu
+Fügen wir alle vier Grundrechenarten hinzu:
+```rust
+fn main() {
+    let a: f64 = 20.0;
+    let b: f64 = 6.0;
+
+    let addition = a + b;
+    let subtraction = a - b;
+    let multiplication = a * b;
+    let division = a / b;
+
+    println!("Addition: {addition}");
+    println!("Subtraction: {subtraction}");
+    println!("Multiplication: {multiplication}");
+    println!("Division: {division}");
+}
+```
+Wenn Sie dies ausführen, werden Sie feststellen, dass alle Vorgänge einwandfrei funktionieren, aber die Formatierung für die Unterteilung fehlt. Wir werden uns später damit befassen.
+
+### Fügen Sie unsere erste wissenschaftliche Operation hinzu
+Addieren wir Quadratwurzel-, Potenz- und trigonometrische Operationen:
+```rust
+fn main() {
+    let a: f64 = 20.0;
+    let b: f64 = 6.0;
+
+    let addition = a + b;
+    let subtraction = a - b;
+    let multiplication = a * b;
+    let division = a / b;
+
+    let square_root = 25.0_f64.sqrt();
+    let power = 2.0_f64.powi(8);
+    let sine = 0.0_f64.sin();
+    let cosine = 0.0_f64.cos();
+
+    println!("Addition: {addition}");
+    println!("Subtraction: {subtraction}");
+    println!("Multiplication: {multiplication}");
+    println!("Division: {division}");
+    println!("Square root: {square_root}");
+    println!("Power: {power}");
+    println!("Sine: {sine}");
+    println!("Cosine: {cosine}");
+}
+```
+Jetzt sieht es etwas besser aus, aber es gibt immer noch ein Problem: Die Eingaben sind fest codiert. Wir brauchen eine Möglichkeit, Eingaben vom Benutzer entgegenzunehmen. Lassen Sie uns als nächstes daran arbeiten.
+
+### Befehlszeilenargumente lesen
+Um Benutzereingaben zu lesen, können wir Befehlszeilenargumente lesen und Rust stellt `std::env::args` für den Zugriff auf die an ein Programm übergebenen Argumente bereit. Machen wir uns vorerst keine Gedanken über das Analysieren von Zahlen oder das Durchführen von Berechnungen. Schauen wir uns zunächst an, was wir von den Argumenten über die Befehlszeile erhalten:
+Kommentieren Sie den vollständigen `main.rs`-Code aus und schreiben Sie dann diesen Code:
+```rust
+fn main() {
+	let args = std::env::args();
+
+    println!("{:?}", args);
+}
+```
+Führen Sie nun Folgendes aus:
+```bash
+cargo run -- add 10 20
+```
+Sie sollten eine Ausgabe sehen, die die an das Programm übergebenen Argumente darstellt. Allerdings ist `args` ein Iterator und das direkte Drucken ist für unsere Zwecke nicht besonders nützlich. Fassen wir die Argumente in einem Vektor zusammen:
+> Machen Sie sich keine Sorgen, wenn Sie Dinge wie Iterator oder Vektor nicht verstehen, wir werden später mehr darüber erfahren. Hier verwenden wir sie nur, um Benutzereingaben zu erhalten. Das Hauptziel dieses Artikels besteht darin, Ihnen ein Verständnis für Variablen und Typen zu vermitteln, und das ist an dieser Stelle bereits geschehen.
+
+```rust
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+
+    println!("{args:?}");
+}
+```
+
+Ausführen:
+```bash
+cargo run -- add 10 20
+```
+
+Sie sollten etwas Ähnliches sehen:
+```bash
+["target/debug/scientific-calculator", "add", "10", "20"]
+```
+Der genaue erste Wert hängt von Ihrer Umgebung ab.
+
+Der wichtige Teil ist:
+```bash
+"add"
+"10"
+"20"
+```
+Dies sind die Argumente, die wir geliefert haben.
+
+### Warum gibt es ein `--`?
+Möglicherweise ist Ihnen aufgefallen, dass wir das Programm folgendermaßen ausführen:
+```bash
+cargo run -- add 10 20
+```
+Das `--` trennt die Argumente von Cargo von den Argumenten unseres Programms. Alles vor `--` wird von Cargo interpretiert. Alles nach `--` wird an unser Programm übergeben.
+
+Also:
+```bash
+cargo run -- add 10 20
+```
+
+bedeutet:
+```bash
+Cargo
+  |
+  └── run the program
+          |
+          ├── "add"
+          ├── "10"
+          └── "20"
+```
+
+### Zugriff auf einzelne Argumente
+Über einen Index können wir auf einzelne Elemente der gesammelten Argumente zugreifen.
+
+Ändern Sie das Programm in:
+```rust
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+
+    println!("Operation: {}", args[1]);
+    println!("First value: {}", args[2]);
+    println!("Second value: {}", args[3]);
+}
+```
+
+Ausführen:
+```bash
+cargo run -- add 10 20
+```
+
+Sie sollten Folgendes erhalten:
+```bash
+Operation: add
+First value: 10
+Second value: 20
+```
+
+> Warum beginnen wir bei `args[1]` statt bei `args[0]`? Denn das erste Argument, `args[0]`, ist der ausführbare Name oder Pfad des Programms.
+
+![Bild 5](/images/rust-05.png)
+
+### Analysieren der Zahlen
+Wir sind in der Lage, die Operation, die der Benutzer ausführen möchte, und die Werte abzurufen, aber das Problem besteht darin, dass die Werte als Zeichenfolge von der Befehlszeile kommen. Wir müssen sie in Zahlen umwandeln, um mathematische Operationen ausführen zu können. Zum Parsen können wir etwa Folgendes tun:
+```rust
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+
+    let a = args[2].parse::<f64>().unwrap();
+    let b = args[3].parse::<f64>().unwrap();
+
+    let result = a + b;
+
+    println!("{result}");
+}
+```
+Führen Sie es aus und Sie sollten `30` als Ausgabe sehen. Die verbleibende Arbeit, die wir jetzt erledigen müssen, besteht darin, die zuvor auskommentierten Vorgänge wiederherzustellen und Bedingungen zu verwenden, um auszuwählen, welche Operation ausgeführt werden soll.
+
+### Auswahl der Operation
+Bisher können wir die Operation, die der Benutzer ausführen möchte, und die Werte im Gleitkommatyp abrufen. Wir werden in Rust Bedingungen verwenden. Ich werde jetzt nicht tief in die Bedingungen eintauchen, aber wir werden in diesem Projekt den einfachen if-else-Block verwenden, also kein Grund zur Sorge.
+```rust
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+
+    let operation = &args[1];
+
+    if operation == "add" {
+        let a = args[2].parse::<f64>().unwrap();
+        let b = args[3].parse::<f64>().unwrap();
+
+        println!("{}", a + b);
+    } else if operation == "subtract" {
+        let a = args[2].parse::<f64>().unwrap();
+        let b = args[3].parse::<f64>().unwrap();
+
+        println!("{}", a - b);
+    } else if operation == "multiply" {
+        let a = args[2].parse::<f64>().unwrap();
+        let b = args[3].parse::<f64>().unwrap();
+
+        println!("{}", a * b);
+    } else if operation == "divide" {
+        let a = args[2].parse::<f64>().unwrap();
+        let b = args[3].parse::<f64>().unwrap();
+
+        println!("{}", a / b);
+    } else if operation == "sqrt" {
+        let value = args[2].parse::<f64>().unwrap();
+
+        println!("{}", value.sqrt());
+    } else if operation == "pow" {
+	    let base = args[2].parse::<f64>().unwrap();
+	    let exponent = args[3].parse::<i32>().unwrap();
+	
+	    println!("{}", base.powi(exponent));
+    } else if operation == "sin" {
+        let value = args[2].parse::<f64>().unwrap();
+
+        println!("{}", value.sin());
+    } else if operation == "cos" {
+        let value = args[2].parse::<f64>().unwrap();
+
+        println!("{}", value.cos());
+    } else {
+        println!("Unknown operation: {operation}");
+    }
+}
+```
+Ok, das scheint eine Menge Codezeilen zu sein, aber wir verwenden nur viele if-else-Blöcke, das ist alles. Es ist anderen Sprachen sehr ähnlich, daher erkläre ich nichts. Aber um es zusammenzufassen: Wir empfangen die Operation, die der Benutzer ausführen möchte, dann verwenden wir eine Reihe von if-else-Blöcken, um zu überprüfen, welcher Block die Operation erfüllt, und dann lesen wir in diesem Block die Werte aus der Befehlszeile, führen die Operation aus und drucken das Ergebnis aus.
+
+> Wir lesen Werte in jedem Block, damit wir einfach entscheiden können, welche Operation wie viele Werte erfordert, zum Beispiel erfordert die Quadratwurzel nur einen Wert, aber die Addition erfordert zwei
+
+Testen Sie sie jetzt:
+```bash
+cargo run -- sqrt 25
+```
+
+```
+5
+```
+
+```bash
+cargo run -- sin 0
+```
+
+```
+0
+```
+
+```bash
+cargo run -- cos 0
+```
+
+```
+1
+```
+
+So, wir haben gerade unseren wissenschaftlichen Mini-Rechner in Rust fertiggestellt. Wenn Sie weiter experimentieren möchten, versuchen Sie, selbst ein paar weitere Operationen hinzuzufügen. Sie könnten `tan`, `log` oder alles andere hinzufügen, was Ihrer Meinung nach nützlich wäre.
+
+Und wenn Sie mitmachen und den Rechner selbst bauen oder interessante Modifikationen vornehmen, markieren Sie mich gerne auf
+
+Im nächsten Artikel lernen wir den **Kontrollfluss in Rust** kennen, indem wir ein **Zahlen-Ratespiel** erstellen. Wir sehen uns im nächsten.

@@ -1,7 +1,7 @@
 ---
 import DocsLayout from "../layouts/DocsLayout.astro";
 import {
-  getDocsStaticPaths,
+  getVisibleEntries,
   getDocsPageProps,
   getSidebar,
   getPrevNext,
@@ -15,7 +15,22 @@ import { components } from "../components";
 import SeriesSidebar from "../components/SeriesSidebar.astro";
 
 export const prerender = true;
-export const getStaticPaths = getDocsStaticPaths;
+
+// Posts have their intentional short URLs under `/posts/<slug>`; excluding
+// their source-path IDs here prevents duplicate HTML URLs such as
+// `/posts/rust/<slug>` competing in search results. The explicit homepage
+// wrapper likewise owns `/`.
+export async function getStaticPaths() {
+  const entries = await getVisibleEntries(["docs"]) as Array<{ id: string }>;
+  const paths = entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+  return paths.filter(({ props }) => {
+    const entry = (props as { entry?: { id?: string } }).entry;
+    return entry?.id !== "index" && !entry?.id?.startsWith("posts/");
+  });
+}
 
 const { entry, Content, headings } = await getDocsPageProps(Astro);
 

@@ -1,0 +1,100 @@
+---
+import DocsLayout from "../layouts/DocsLayout.astro";
+import { homeLocaleLinks } from "../i18n/links";
+import type { Locale } from "../i18n/config";
+import SeriesSidebar from "./SeriesSidebar.astro";
+
+interface Props {
+  locale: Exclude<Locale, "en">;
+}
+
+const { locale } = Astro.props;
+const copy = {
+  "pt-br": {
+    title: "Blog Mrsheerluck",
+    description: "Anotações pessoais sobre engenharia, sistemas e software.",
+    hello: "Olá,",
+    welcome: "Obrigado por visitar meu blog. Escrevo principalmente sobre o que estou aprendendo e quero compartilhar — tecnologia, ciência, matemática, economia, filosofia, design de jogos, animação e muito mais.",
+    garden: "Este é o meu jardim digital, e agradeço por você fazer parte dessa jornada.",
+    browse: "Explore os posts pelo menu ou assine via",
+    feedback: "Se tiver algum feedback ou quiser sugerir um tema, fique à vontade para entrar em contato.",
+  },
+  hi: {
+    title: "Mrsheerluck ब्लॉग",
+    description: "इंजीनियरिंग, सिस्टम्स और सॉफ्टवेयर पर व्यक्तिगत नोट्स।",
+    hello: "नमस्ते,",
+    welcome: "मेरा ब्लॉग देखने के लिए धन्यवाद। मैं उन चीज़ों के बारे में लिखता हूँ जिन्हें सीख रहा हूँ और साझा करना चाहता हूँ—टेक्नोलॉजी, विज्ञान, गणित, अर्थशास्त्र, दर्शन, गेम डिज़ाइन, एनीमेशन और बहुत कुछ।",
+    garden: "यह मेरा डिजिटल गार्डन है और इस यात्रा का हिस्सा बनने के लिए मैं आपका आभारी हूँ।",
+    browse: "साइडबार से सभी पोस्ट देखें या यहाँ सब्सक्राइब करें",
+    feedback: "अगर आपके पास कोई सुझाव है या आप किसी विषय का अनुरोध करना चाहते हैं, तो बेझिझक संपर्क करें।",
+  },
+  es: {
+    title: "Blog de Mrsheerluck",
+    description: "Notas personales sobre ingeniería, sistemas y software.",
+    hello: "Hola,",
+    welcome: "Gracias por visitar mi blog. Escribo principalmente sobre lo que estoy aprendiendo y quiero compartir: tecnología, ciencia, matemáticas, economía, filosofía, diseño de juegos, animación y mucho más.",
+    garden: "Este es mi jardín digital y agradezco que formes parte de este viaje.",
+    browse: "Explora todas las publicaciones en la barra lateral o suscríbete mediante",
+    feedback: "Si tienes comentarios o quieres solicitar un tema, no dudes en ponerte en contacto.",
+  },
+  de: {
+    title: "Mrsheerluck Blog",
+    description: "Persönliche Notizen über Engineering, Systeme und Software.",
+    hello: "Hallo,",
+    welcome: "Vielen Dank für deinen Besuch. Ich schreibe vor allem über Dinge, die ich gerade lerne und teilen möchte—Technologie, Wissenschaft, Mathematik, Wirtschaft, Philosophie, Spieldesign, Animation und mehr.",
+    garden: "Dies ist mein digitaler Garten, und ich freue mich, dass du Teil dieser Reise bist.",
+    browse: "Alle Beiträge findest du in der Seitenleiste; abonnieren kannst du über",
+    feedback: "Wenn du Feedback hast oder ein Thema vorschlagen möchtest, kannst du dich gerne melden.",
+  },
+  fr: {
+    title: "Blog Mrsheerluck",
+    description: "Notes personnelles sur l’ingénierie, les systèmes et les logiciels.",
+    hello: "Bonjour,",
+    welcome: "Merci de visiter mon blog. J’écris principalement sur ce que j’apprends et souhaite partager : technologie, science, mathématiques, économie, philosophie, conception de jeux, animation et bien plus encore.",
+    garden: "C’est mon jardin numérique, et je vous remercie de faire partie de cette aventure.",
+    browse: "Parcourez les articles dans la barre latérale ou abonnez-vous via",
+    feedback: "Pour tout commentaire ou toute suggestion de sujet, n’hésitez pas à me contacter.",
+  },
+  ja: {
+    title: "Mrsheerluck ブログ",
+    description: "エンジニアリング、システム、ソフトウェアについての個人的なノート。",
+    hello: "こんにちは。",
+    welcome: "ブログをご覧いただきありがとうございます。主に、自分が学んでいることや共有したいことについて書いています。テクノロジー、科学、数学、経済、哲学、ゲームデザイン、アニメーションなど、テーマはさまざまです。",
+    garden: "ここは私のデジタルガーデンです。この旅の一員になってくださることに感謝しています。",
+    browse: "サイドバーから記事を閲覧するか、こちらから購読できます：",
+    feedback: "ご意見や取り上げてほしいテーマがあれば、お気軽にご連絡ください。",
+  },
+} as const;
+const text = copy[locale];
+const languageLinks = homeLocaleLinks();
+---
+
+<DocsLayout
+  title={text.title}
+  description={text.description}
+  sidebar={[]}
+  headings={false}
+  breadcrumbs={[{ label: text.title }]}
+  prevNext={{}}
+  locale={locale}
+  languageLinks={languageLinks}
+  seoLanguageLinks={languageLinks}
+>
+  <SeriesSidebar slot="sidebar" />
+  <div class="mx-auto max-w-(--nb-content-max) px-4 py-10 lg:px-6">
+    <article class="docs-content max-w-3xl">
+      <h1>{text.title}</h1>
+      <p>{text.hello}</p>
+      <p>{text.welcome}</p>
+      <p>{text.garden}</p>
+      <p>{text.browse} <a href="/rss.xml">RSS</a>.</p>
+      <p>{text.feedback}</p>
+      <ul>
+        <li><a href="https://x.com/sheerluck_io">X: @sheerluck_io</a></li>
+        <li><a href="https://bsky.app/profile/mrsheerluck.bsky.social">Bluesky: @mrsheerluck.bsky.social</a></li>
+        <li><a href="https://github.com/MrSheerluck">GitHub: MrSheerluck</a></li>
+        <li><a href="https://www.youtube.com/@sheerluck-dev">YouTube: @sheerluck-dev</a></li>
+      </ul>
+    </article>
+  </div>
+</DocsLayout>
