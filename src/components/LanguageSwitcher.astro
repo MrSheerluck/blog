@@ -7,28 +7,64 @@ interface Props {
 }
 
 const { links = [], currentLocale = "en" } = Astro.props;
+const currentLanguage = links.find((link) => link.locale === currentLocale);
+const compactLabel = currentLocale.split("-")[0].toUpperCase();
 ---
 
 {links.length > 1 && (
-  <nav aria-label="Language" class="flex max-w-[min(52vw,28rem)] items-center gap-1 overflow-x-auto rounded-md border border-border px-1 py-0.5">
-    {links.map((link) => (
-      <a
-        href={link.href}
-        lang={localeTag(link.locale)}
-        data-language-link={link.locale}
-        data-language-equivalent={link.isEquivalent !== false ? "true" : "false"}
-        aria-current={link.locale === currentLocale ? "page" : undefined}
-        class:list={[
-          "shrink-0 rounded px-1.5 py-0.5 text-xs font-medium no-underline transition-colors",
-          link.locale === currentLocale
-            ? "bg-accent text-foreground"
-            : "text-muted-foreground hover:bg-accent hover:text-foreground",
-        ]}
+  <>
+    <details class="group relative shrink-0 2xl:hidden">
+      <summary
+        aria-label={`Choose language. Current language: ${currentLanguage?.label ?? currentLocale}`}
+        title={currentLanguage?.label ?? currentLocale}
+        class="flex size-8 cursor-pointer list-none items-center justify-center rounded-md border border-border text-[0.6875rem] font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground [&::-webkit-details-marker]:hidden"
       >
-        {link.label}
-      </a>
-    ))}
-  </nav>
+        {compactLabel}
+      </summary>
+      <nav
+        aria-label="Language"
+        class="absolute right-0 top-full z-50 mt-2 grid min-w-44 gap-0.5 rounded-md border border-border bg-card p-1.5 shadow-lg"
+      >
+        {links.map((link) => (
+          <a
+            href={link.href}
+            lang={localeTag(link.locale)}
+            data-language-link={link.locale}
+            data-language-equivalent={link.isEquivalent !== false ? "true" : "false"}
+            aria-current={link.locale === currentLocale ? "page" : undefined}
+            class:list={[
+              "rounded px-2.5 py-1.5 text-xs font-medium no-underline transition-colors",
+              link.locale === currentLocale
+                ? "bg-accent text-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            ]}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    </details>
+
+    <nav aria-label="Language" class="hidden max-w-[28rem] items-center gap-1 overflow-x-auto rounded-md border border-border px-1 py-0.5 2xl:flex">
+      {links.map((link) => (
+        <a
+          href={link.href}
+          lang={localeTag(link.locale)}
+          data-language-link={link.locale}
+          data-language-equivalent={link.isEquivalent !== false ? "true" : "false"}
+          aria-current={link.locale === currentLocale ? "page" : undefined}
+          class:list={[
+            "shrink-0 rounded px-1.5 py-0.5 text-xs font-medium no-underline transition-colors",
+            link.locale === currentLocale
+              ? "bg-accent text-foreground"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground",
+          ]}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  </>
 )}
 
 <script>

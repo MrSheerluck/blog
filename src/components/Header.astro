@@ -40,8 +40,8 @@ const showSections = sections.length >= 2;
 ---
 
 <header class="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur-lg">
-  <div class="mx-auto flex items-center justify-between h-14 px-4 lg:px-6">
-    <div class="flex items-center gap-3">
+  <div class="mx-auto flex h-14 min-w-0 items-center justify-between gap-2 px-2 sm:px-4 lg:px-6">
+    <div class="flex min-w-0 items-center gap-2 sm:gap-3">
       {showSidebar && (
         <Button
           variant="ghost"
@@ -54,14 +54,14 @@ const showSections = sections.length >= 2;
         />
       )}
 
-      <a href="/" class="group">
-        <span class="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
+      <a href="/" class="group min-w-0">
+        <span class="block truncate font-semibold text-sm text-foreground transition-colors group-hover:text-primary">
           {config.title}
         </span>
       </a>
 
       {showSections && (
-        <nav aria-label={labels.sections} class="hidden md:flex items-center gap-1 ml-4 pl-4 border-l border-border h-6">
+        <nav aria-label={labels.sections} class="ml-4 hidden h-6 items-center gap-1 border-l border-border pl-4 lg:flex">
           {sections.map((section) => (
             <a
               href={section.href}
@@ -80,7 +80,7 @@ const showSections = sections.length >= 2;
       )}
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex shrink-0 items-center gap-1 sm:gap-2">
       <LanguageSwitcher links={navigationLinks} currentLocale={locale} />
       {config.search !== false && <SearchTrigger />}
       <LinkButton
@@ -89,10 +89,10 @@ const showSections = sections.length >= 2;
         size="sm"
         target="_blank"
         rel="noopener"
-        class="text-[#3b82f6] hover:text-[#60a5fa]"
+        class="hidden text-[#3b82f6] hover:text-[#60a5fa] md:inline-flex"
       >
         <Icon name="ph:envelope" class="w-4 h-4" />
-        <span class="ml-1.5 hidden sm:inline">{labels.subscribe}</span>
+        <span class="ml-1.5 hidden xl:inline">{labels.subscribe}</span>
       </LinkButton>
       <LinkButton
         href="https://github.com/sponsors/MrSheerluck"
@@ -101,10 +101,10 @@ const showSections = sections.length >= 2;
         aria-label="Sponsor on GitHub"
         target="_blank"
         rel="noopener"
-        class="text-[#db61a2] hover:text-[#bf4b8a]"
+        class="hidden text-[#db61a2] hover:text-[#bf4b8a] md:inline-flex"
       >
         <Icon name="ph:heart" class="w-4 h-4" />
-        <span class="ml-1.5 hidden sm:inline">{labels.sponsor}</span>
+        <span class="ml-1.5 hidden xl:inline">{labels.sponsor}</span>
       </LinkButton>
       <LinkButton
         href="/jobs"
@@ -117,7 +117,7 @@ const showSections = sections.length >= 2;
         ]}
       >
         <Icon name="ph:briefcase" class="w-4 h-4" />
-        <span class="ml-1.5 hidden sm:inline">{labels.jobs}</span>
+        <span class="ml-1.5 hidden xl:inline">{labels.jobs}</span>
       </LinkButton>
       {config.github && (
         <LinkButton
@@ -128,7 +128,7 @@ const showSections = sections.length >= 2;
           aria-label={labels.github}
           target="_blank"
           rel="noopener"
-          class="text-muted-foreground"
+          class="hidden text-muted-foreground md:inline-flex"
         >
           <Icon name="ph:github-logo" class="w-4 h-4" />
         </LinkButton>
