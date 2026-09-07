@@ -52,19 +52,16 @@ version = "0.1.1"
 edition = "2024"
 
 [dependencies]
-gpui = { git = "https://github.com/zed-industries/zed" }
-gpui_platform = { git = "https://github.com/zed-industries/zed", features = ["font-kit"] }
-gpui-component = { git = "https://github.com/longbridge/gpui-component" }
-gpui-component-assets = { git = "https://github.com/longbridge/gpui-component" }
+gpui-kit = "0.6"
 rust-embed = "8"
 anyhow = "1"
 ```
-Existe uma caixa publicada para GPUI, mas usaremos a versão mais recente do git. Aqui, adicionamos a dependência `gpui` pois esta é a estrutura que precisamos, `gpui-platform` nos fornece o ponto de entrada do aplicativo específico da plataforma, `gpui-component` nos fornece os componentes de UI de nível superior que usaremos mais tarde, incluindo ícones e botões, `gpui-component-assets` contém os ativos usados por esses componentes, `rust-embed` nos permite incorporar nosso próprio aplicativo assets no binário e finalmente `anyhow` é usado para tratamento de erros.
+Aqui, adicionamos a dependência `gpui-kit`, que reúne o GPUI, o ponto de entrada do aplicativo específico da plataforma, o GPUI Component e seus ativos incluídos. `rust-embed` nos permite incorporar nossos próprios ativos de aplicativo ao binário e, por fim, `anyhow` é usado para tratamento de erros.
 
 ## Criando o menor aplicativo GPUI possível
 Vamos construir este aplicativo de forma incremental, para que após cada etapa você possa executá-lo e verificar sua aparência. Ok, vamos começar abrindo `src/main.rs` e importando GPUI:
 ```rust
-use gpui::*;
+use gpui_kit::*;
 ```
 Agora, vamos definir uma visualização do aplicativo:
 ```rust
@@ -93,18 +90,18 @@ Este é o tipo de padrão que seguiremos no restante do artigo, onde uma visuali
 
 Deixe-me explicar um pouco sobre a característica `Render` também. `fn render` é o método i=required pela característica `Render`, o método `&mut self` médio `render` recebe uma referência mutável à nossa instância `App`. Então, quando começarmos a usar coisas como estado do aplicativo no futuro, poderemos passar esse estado usando isto. A próxima coisa é `_window: &mut Window`, que dá ao método de renderização acesso mutável à janela GPUI atual. Você pode ver que está escrito assim `_window` porque não o estamos usando no momento, estamos dizendo "sabemos que esse parâmetro existe, mas não o estou usando". Começaremos a usá-lo mais tarde, quando trabalharmos em coisas como `focus`, `input` etc. Finalmente, temos o contexto `_cx: &mut Context<Self>`, este contexto fornece acesso à funcionalidade GPUI associada a esta visualização específica. Por exemplo, em nosso artigo futuro, podemos usar o contexto para notificar a GPUI de que o estado da visualização mudou. Na verdade, é ótimo quando estamos lidando com eventos. Aqui também estamos usando esse formato de sublinhado apenas para significar que não o estamos usando no momento.
 ## Iniciando o aplicativo GPUI
-Agora, precisamos de `Root` do componente GPUI. Vamos atualizar nossas importações para:
+Agora, precisamos de `Root` da camada de componentes do GPUI Kit. Vamos atualizar nossas importações para:
 ```rust
-use gpui::*;
-use gpui_component::Root;
+use gpui_kit::*;
+use gpui_kit::component::Root;
 ```
 Agora adicione uma função `main`:
 ```rust
 fn main() {
-	let app = gpui_platform::application();
+	let app = gpui_kit::application();
 	
 	app.run(|cx| {
-		gpui_component::init(cx);
+		gpui_kit::init(cx);
 		
 		cx.open_window(
 			WindowOptions::default(),
@@ -114,10 +111,11 @@ fn main() {
 			},
 		)
 		.expect("failed to open window");
+		cx.activate(true);
 	});
 }
 ```
-Primeiro, estamos criando nosso aplicativo `let app = gpui_platform::application();`, então, quando nosso aplicativo estiver pronto, `app.run(|cx| {...});` iniciamos seu loop de eventos e isso nos dá um contexto de aplicativo `cx`, depois de obtermos o contexto do aplicativo, inicializamos o componente GPUI que estamos usando para estilizar `gpui_component::init(cx);`. 
+Primeiro, estamos criando nosso aplicativo `let app = gpui_kit::application();`; então, quando nosso aplicativo estiver pronto, iniciamos seu loop de eventos com `app.run(|cx| {...});`, o que nos dá um contexto de aplicativo `cx`. Depois de obtermos o contexto do aplicativo, inicializamos o GPUI Kit e seus componentes habilitados com `gpui_kit::init(cx);`.
 Feito tudo isso, começamos criando a janela do nosso aplicativo `cx.open_window(...)`. Não vou explicar todos os detalhes aqui, vou explicá-los mais adiante neste artigo.
 
 Agora, se você executar o aplicativo usando `cargo run`, deverá ver uma janela com o texto `Hello GPUI!`
@@ -274,16 +272,15 @@ Agora é hora de adicionar algum conteúdo à barra lateral. A primeira coisa qu
 
 Primeiro, vamos atualizar nossas importações para que possamos usar ícones e ativos:
 ```rust
-use gpui::prelude::FluentBuilder;
-use gpui::*;
-use gpui_component::{
+use gpui_kit::component::{
     Icon,
     IconName,
     Root,
     Sizable,
-    button::Button,
-    button::ButtonVariants,
+    button::{Button, ButtonVariants},
 };
+use gpui_kit::gpui::prelude::FluentBuilder;
+use gpui_kit::*;
 ```
 
 ```rust
@@ -339,8 +336,7 @@ impl AssetSource for AppAssets {
             return Ok(Some(file.data));
         }
 
-        // Fall back to GPUI Component's bundled icon assets.
-        Ok(gpui_component_assets::Assets::get(path).map(|file| file.data))
+        gpui_kit::assets::Assets.load(path)
     }
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
@@ -349,21 +345,17 @@ impl AssetSource for AppAssets {
             .map(SharedString::from)
             .collect::<Vec<_>>();
 
-        files.extend(
-            gpui_component_assets::Assets::iter()
-                .filter(|file| file.starts_with(path))
-                .map(SharedString::from),
-        );
+        files.extend(gpui_kit::assets::Assets.list(path)?);
 
         Ok(files)
     }
 }
 ```
-Portanto, há duas fontes de ativos aqui, a primeira são os ativos do próprio aplicativo `AppAssets::get(path)`. Se o arquivo solicitado existir em nosso diretório `assets`, nós o retornamos, caso contrário, retornaremos para `gpui_component_assets::Assets::get(path)`
+Portanto, há duas fontes de ativos aqui: a primeira são os ativos do próprio aplicativo `AppAssets::get(path)`. Se o arquivo solicitado existir em nosso diretório `assets`, nós o retornamos; caso contrário, usamos os ativos incluídos do GPUI Kit com `gpui_kit::assets::Assets.load(path)`. O mesmo padrão é usado por `list()` para expor as duas fontes de ativos.
 
-Agora que isso foi feito, precisamos registrar esta fonte de ativos com o aplicativo, então altere `let app = gpui_platform::application();` para isto:
+Agora que isso foi feito, precisamos registrar esta fonte de ativos com o aplicativo, então altere `let app = gpui_kit::application();` para isto:
 ```rust
-let app = gpui_platform::application().with_assets(AppAssets);
+let app = gpui_kit::application().with_assets(AppAssets);
 ```
 
 agora, se você executar isso, deverá ver:
@@ -627,7 +619,7 @@ Adicione isto como o primeiro filho de `main_content()`:
 
 Depois de executá-lo, você deverá ver isto:
 ![Cabeçalho do conteúdo principal com localização atual e botões](/images/gpui/first/main-header.png)
-Há uma coisa que quero explicar é que `ghost()` vem do componente GPUI para seu componente `Button`, é apenas uma questão de estilo, não estamos criando esse estilo manualmente.
+Há uma coisa que quero explicar: `ghost()` vem da camada de componentes do GPUI Kit para seu componente `Button`. É apenas uma questão de estilo; não estamos criando esse estilo manualmente.
 
 ## Criando a área de conteúdo
 vamos adicionar o conteúdo principal abaixo do cabeçalho:

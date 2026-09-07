@@ -52,19 +52,16 @@ version = "0.1.1"
 edition = "2024"
 
 [dependencies]
-gpui = { git = "https://github.com/zed-industries/zed" }
-gpui_platform = { git = "https://github.com/zed-industries/zed", features = ["font-kit"] }
-gpui-component = { git = "https://github.com/longbridge/gpui-component" }
-gpui-component-assets = { git = "https://github.com/longbridge/gpui-component" }
+gpui-kit = "0.6"
 rust-embed = "8"
 anyhow = "1"
 ```
-Il existe une caisse publiée pour GPUI mais nous allons utiliser la dernière version de git. Ici, nous avons ajouté la dépendance `gpui` car c'est le framework dont nous avons besoin, `gpui-platform` nous donne un point d'entrée d'application spécifique à la plate-forme, `gpui-component` nous donne les composants d'interface utilisateur de niveau supérieur que nous utiliserons plus tard, y compris les icônes et les boutons, `gpui-component-assets` contient les actifs utilisés par ces composants, `rust-embed` nous permet d'intégrer notre propres actifs d'application dans le binaire et enfin `anyhow` est utilisé pour la gestion des erreurs.
+Ici, nous avons ajouté la dépendance `gpui-kit`, qui regroupe GPUI, le point d'entrée d'application spécifique à la plate-forme, GPUI Component et ses ressources intégrées. `rust-embed` nous permet d'intégrer nos propres ressources d'application dans le binaire et `anyhow` est utilisé pour la gestion des erreurs.
 
 ## Création de la plus petite application GPUI possible
 Nous allons créer cette application progressivement, de sorte qu'après chaque étape, vous puissiez exécuter l'application et vérifier à quoi elle ressemble. Ok, commençons par ouvrir `src/main.rs` et importer GPUI :
 ```rust
-use gpui::*;
+use gpui_kit::*;
 ```
 Maintenant, définissons une vue d'application :
 ```rust
@@ -93,18 +90,18 @@ C'est le genre de modèle que nous suivrons pour le reste de l'article où une v
 
 Permettez-moi également de vous expliquer un peu le trait `Render`. `fn render` est la méthode i=requise par le trait `Render`, la méthode `&mut self` moyenne `render` reçoit une référence mutable à notre instance `App`. Ainsi, lorsque nous commencerons à utiliser des éléments tels que l'état de l'application à l'avenir, nous pourrons transmettre cet état en utilisant ceci. La chose suivante est `_window: &mut Window`, cela donne à la méthode de rendu un accès modifiable à la fenêtre GPUI actuelle. Vous pouvez le voir écrit comme ceci `_window` car nous ne l'utilisons pas pour le moment, nous disons "nous savons que ce paramètre existe, mais je ne l'utilise pas". Nous commencerons à l'utiliser plus tard une fois que nous aurons travaillé sur des choses comme `focus`, `input` etc. Enfin, nous avons le contexte `_cx: &mut Context<Self>`, ce contexte donne accès à la fonctionnalité GPUI associée à cette vue particulière. Par exemple, dans notre prochain article, nous pouvons utiliser le contexte pour informer GPUI que l'état de la vue a changé, ce qui est vraiment génial lorsque nous gérons un événement. Ici également, nous utilisons ce format de trait de soulignement simplement pour signifier que nous ne l'utilisons pas pour le moment.
 ## Démarrage de l'application GPUI
-Maintenant, nous avons besoin de `Root` du composant GPUI. Mettons à jour nos importations vers :
+Maintenant, nous avons besoin de `Root` de la couche de composants de GPUI Kit. Mettons à jour nos importations vers :
 ```rust
-use gpui::*;
-use gpui_component::Root;
+use gpui_kit::*;
+use gpui_kit::component::Root;
 ```
 Ajoutez maintenant une fonction `main` :
 ```rust
 fn main() {
-	let app = gpui_platform::application();
+	let app = gpui_kit::application();
 	
 	app.run(|cx| {
-		gpui_component::init(cx);
+		gpui_kit::init(cx);
 		
 		cx.open_window(
 			WindowOptions::default(),
@@ -114,10 +111,11 @@ fn main() {
 			},
 		)
 		.expect("failed to open window");
+		cx.activate(true);
 	});
 }
 ```
-Tout d'abord, nous créons notre application `let app = gpui_platform::application();`, puis une fois notre application prête, `app.run(|cx| {...});` nous démarrons sa boucle d'événements et cela nous donne un contexte d'application `cx`, après avoir obtenu le contexte de l'application, nous initialisons le composant GPUI que nous utilisons pour le style `gpui_component::init(cx);`. 
+Tout d'abord, nous créons notre application `let app = gpui_kit::application();`, puis une fois notre application prête, `app.run(|cx| {...});` nous démarrons sa boucle d'événements et cela nous donne un contexte d'application `cx`. Après avoir obtenu le contexte de l'application, nous initialisons GPUI Kit et ses composants activés avec `gpui_kit::init(cx);`.
 Une fois tout cela fait, nous commençons par créer la fenêtre de notre application `cx.open_window(...)`. Je ne vais pas expliquer tous les détails ici, je les expliquerai plus tard dans cet article.
 
 Maintenant, si vous exécutez l'application en utilisant `cargo run`, vous devriez voir une fenêtre avec le texte `Hello GPUI!`
@@ -274,16 +272,15 @@ Il est maintenant temps d'ajouter du contenu à la barre latérale. La première
 
 Tout d’abord, mettons à jour nos importations afin que nous puissions utiliser des icônes et des ressources :
 ```rust
-use gpui::prelude::FluentBuilder;
-use gpui::*;
-use gpui_component::{
+use gpui_kit::component::{
     Icon,
     IconName,
     Root,
     Sizable,
-    button::Button,
-    button::ButtonVariants,
+    button::{Button, ButtonVariants},
 };
+use gpui_kit::gpui::prelude::FluentBuilder;
+use gpui_kit::*;
 ```
 
 ```rust
@@ -339,8 +336,7 @@ impl AssetSource for AppAssets {
             return Ok(Some(file.data));
         }
 
-        // Fall back to GPUI Component's bundled icon assets.
-        Ok(gpui_component_assets::Assets::get(path).map(|file| file.data))
+        gpui_kit::assets::Assets.load(path)
     }
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
@@ -349,21 +345,17 @@ impl AssetSource for AppAssets {
             .map(SharedString::from)
             .collect::<Vec<_>>();
 
-        files.extend(
-            gpui_component_assets::Assets::iter()
-                .filter(|file| file.starts_with(path))
-                .map(SharedString::from),
-        );
+        files.extend(gpui_kit::assets::Assets.list(path)?);
 
         Ok(files)
     }
 }
 ```
-Il y a donc deux sources d'actifs ici, la première concerne nos propres actifs d'application `AppAssets::get(path)`. Si le fichier demandé existe dans notre répertoire `assets`, nous le renvoyons, sinon nous retomberons sur `gpui_component_assets::Assets::get(path)`
+Il y a donc deux sources d'actifs ici : la première concerne nos propres actifs d'application `AppAssets::get(path)`. Si le fichier demandé existe dans notre répertoire `assets`, nous le renvoyons ; sinon, nous utilisons les actifs intégrés de GPUI Kit avec `gpui_kit::assets::Assets.load(path)`. Le même modèle est utilisé par `list()` pour exposer les deux sources d'actifs.
 
-Maintenant que cela est fait, nous devons maintenant enregistrer cette source d'actifs auprès de l'application, alors remplacez ceci `let app = gpui_platform::application();` par ceci :
+Maintenant que cela est fait, nous devons enregistrer cette source d'actifs auprès de l'application, alors remplacez ceci `let app = gpui_kit::application();` par ceci :
 ```rust
-let app = gpui_platform::application().with_assets(AppAssets);
+let app = gpui_kit::application().with_assets(AppAssets);
 ```
 
 maintenant, si vous exécutez ceci, vous devriez voir :
@@ -627,7 +619,7 @@ Ajoutez ceci comme premier enfant de `main_content()` :
 
 Une fois que vous l'aurez exécuté, vous devriez voir ceci :
 ![En-tête du contenu principal avec fil d'Ariane et boutons](/images/gpui/first/main-header.png)
-Il y a une chose que je veux expliquer, c'est que `ghost()` vient du composant GPUI pour son composant `Button`, c'est juste une question de style, nous ne créons pas ce style manuellement.
+Il y a une chose que je veux expliquer : `ghost()` vient de la couche de composants de GPUI Kit pour son composant `Button`. C'est simplement une question de style ; nous ne créons pas ce style manuellement.
 
 ## Création de la zone de contenu
 ajoutons le contenu principal sous l'en-tête :

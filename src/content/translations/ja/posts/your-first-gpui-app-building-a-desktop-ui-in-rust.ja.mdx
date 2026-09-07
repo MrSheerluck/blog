@@ -52,19 +52,16 @@ version = "0.1.1"
 edition = "2024"
 
 [dependencies]
-gpui = { git = "https://github.com/zed-industries/zed" }
-gpui_platform = { git = "https://github.com/zed-industries/zed", features = ["font-kit"] }
-gpui-component = { git = "https://github.com/longbridge/gpui-component" }
-gpui-component-assets = { git = "https://github.com/longbridge/gpui-component" }
+gpui-kit = "0.6"
 rust-embed = "8"
 anyhow = "1"
 ```
-GPUI 用の公開されたクレートがありますが、git の最新バージョンを使用します。ここでは、必要なフレームワークである `gpui` 依存関係を追加しました。 `gpui-platform` はプラットフォーム固有のアプリケーション エントリ ポイントを提供します。 `gpui-component` はアイコンやボタンなど、後で使用する高レベルの UI コンポーネントを提供します。 `gpui-component-assets` にはこれらのコンポーネントで使用されるアセットが含まれます。 `rust-embed` は埋め込みを可能にします。独自のアプリケーション資産をバイナリに変換し、最後に `anyhow` がエラー処理に使用されます。
+ここでは、GPUI、プラットフォーム固有のアプリケーション エントリポイント、GPUI Component、およびその組み込みアセットをまとめて提供する `gpui-kit` 依存関係を追加します。`rust-embed` を使うと独自のアプリケーションアセットをバイナリに埋め込むことができ、最後に `anyhow` はエラー処理に使用します。
 
 ## 可能な限り最小の GPUI アプリケーションの作成
 このアプリケーションは段階的に構築していき、各ステップの後にアプリケーションを実行して見た目を確認できるようにします。 `src/main.rs` を開いて GPUI をインポートすることから始めましょう。
 ```rust
-use gpui::*;
+use gpui_kit::*;
 ```
 次に、アプリケーション ビューを定義しましょう。
 ```rust
@@ -93,18 +90,18 @@ App
 
 `Render` トレイトについても少し説明しましょう。 `fn render` は `Render` トレイトで必要なメソッド i= であり、`&mut self` メソッドは `App` インスタンスへの変更可能な参照を受け取ることを意味します。したがって、将来アプリの状態などを使用し始めるときは、これを使用してその状態を渡すことができます。次は `_window: &mut Window` です。これにより、レンダリング メソッドに現在の GPUI ウィンドウへの変更可能なアクセスが与えられます。 `_window` のように書かれているのがわかります。これは、現在使用していないためです。「このパラメータの存在は知っていますが、使用していません」と言っていることになります。 `focus`、`input` などの作業を行った後、後で使用を開始します。最後に、コンテキスト `_cx: &mut Context<Self>` があり、このコンテキストは、この特定のビューに関連付けられた GPUI 機能へのアクセスを提供します。たとえば、将来の記事では、コンテキストを使用して、ビューの状態が変更されたことを GPUI に通知できます。これは、イベントを処理するときに実際に最適です。ここでも、現在は使用していないことを意味するためにそのアンダースコア形式を使用しています。
 ## GPUI アプリケーションの起動
-ここで、GPUI コンポーネントから `Root` が必要になります。インポートを次のように更新しましょう。
+ここで、GPUI Kit のコンポーネント層から `Root` が必要になります。インポートを次のように更新しましょう。
 ```rust
-use gpui::*;
-use gpui_component::Root;
+use gpui_kit::*;
+use gpui_kit::component::Root;
 ```
 ここで `main` 関数を追加します。
 ```rust
 fn main() {
-	let app = gpui_platform::application();
+	let app = gpui_kit::application();
 	
 	app.run(|cx| {
-		gpui_component::init(cx);
+		gpui_kit::init(cx);
 		
 		cx.open_window(
 			WindowOptions::default(),
@@ -114,10 +111,11 @@ fn main() {
 			},
 		)
 		.expect("failed to open window");
+		cx.activate(true);
 	});
 }
 ```
-まず、アプリケーション `let app = gpui_platform::application();` を作成します。次に、アプリの準備ができたら `app.run(|cx| {...});`、イベント ループを開始します。これにより、アプリケーション コンテキスト `cx` が得られます。アプリのコンテキストを取得した後、スタイル設定に使用する GPUI コンポーネントを初期化します `gpui_component::init(cx);`。 
+まず、アプリケーション `let app = gpui_kit::application();` を作成します。次に、アプリの準備ができたら `app.run(|cx| {...});` でイベントループを開始します。これによりアプリケーションコンテキスト `cx` が得られます。アプリのコンテキストを取得した後、GPUI Kit と有効なコンポーネントを `gpui_kit::init(cx);` で初期化します。
 これがすべて完了したら、アプリ `cx.open_window(...)` のウィンドウを作成することから始めます。ここでは詳細をすべて説明するつもりはありません。この記事の後半で説明します。
 
 `cargo run` を使用してアプリを実行すると、`Hello GPUI!` というテキストが表示されたウィンドウが表示されるはずです。
@@ -274,16 +272,15 @@ fn sidebar() -> impl IntoElement {
 
 まず、アイコンとアセットを使用できるようにインポートを更新しましょう。
 ```rust
-use gpui::prelude::FluentBuilder;
-use gpui::*;
-use gpui_component::{
+use gpui_kit::component::{
     Icon,
     IconName,
     Root,
     Sizable,
-    button::Button,
-    button::ButtonVariants,
+    button::{Button, ButtonVariants},
 };
+use gpui_kit::gpui::prelude::FluentBuilder;
+use gpui_kit::*;
 ```
 
 ```rust
@@ -339,8 +336,7 @@ impl AssetSource for AppAssets {
             return Ok(Some(file.data));
         }
 
-        // Fall back to GPUI Component's bundled icon assets.
-        Ok(gpui_component_assets::Assets::get(path).map(|file| file.data))
+        gpui_kit::assets::Assets.load(path)
     }
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
@@ -349,21 +345,17 @@ impl AssetSource for AppAssets {
             .map(SharedString::from)
             .collect::<Vec<_>>();
 
-        files.extend(
-            gpui_component_assets::Assets::iter()
-                .filter(|file| file.starts_with(path))
-                .map(SharedString::from),
-        );
+        files.extend(gpui_kit::assets::Assets.list(path)?);
 
         Ok(files)
     }
 }
 ```
-したがって、ここには 2 つのアセット ソースがあり、1 つ目は独自のアプリケーション アセット `AppAssets::get(path)` です。要求されたファイルが `assets` ディレクトリに存在する場合はそれを返します。そうでない場合は `gpui_component_assets::Assets::get(path)` にフォールバックします。
+したがって、ここには 2 つのアセットソースがあります。1 つ目は独自のアプリケーションアセット `AppAssets::get(path)` です。要求されたファイルが `assets` ディレクトリに存在する場合はそれを返し、そうでない場合は `gpui_kit::assets::Assets.load(path)` を使って GPUI Kit の組み込みアセットにフォールバックします。`list()` でも同じパターンを使い、両方のアセットソースを公開します。
 
-これが完了したら、このアセット ソースをアプリケーションに登録する必要があるため、`let app = gpui_platform::application();` を次のように変更します。
+これが完了したら、このアセットソースをアプリケーションに登録する必要があるため、`let app = gpui_kit::application();` を次のように変更します。
 ```rust
-let app = gpui_platform::application().with_assets(AppAssets);
+let app = gpui_kit::application().with_assets(AppAssets);
 ```
 
 これを実行すると、次のように表示されるはずです。
@@ -627,7 +619,7 @@ fn main_content() -> impl IntoElement {
 
 実行すると、次のように表示されるはずです。
 ![ブレッドクラムとボタンを含むメイン コンテンツ ヘッダー](/images/gpui/first/main-header.png)
-説明したいことが 1 つあります。`ghost()` は `Button` コンポーネントの GPUI コンポーネントから来ており、これは単なるスタイル設定であり、このスタイルを手動で作成しているわけではないということです。
+説明したいことが 1 つあります。`ghost()` は GPUI Kit のコンポーネント層にある `Button` コンポーネントから提供されます。これは単なるスタイル設定であり、このスタイルを手動で作成しているわけではありません。
 
 ## コンテンツエリアの作成
 ヘッダーの下にメインコンテンツを追加してみましょう。
