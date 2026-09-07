@@ -1,0 +1,524 @@
+---
+title: Rust の制御フローを実践 — 数当てゲームを作る
+description: この記事では、数当てゲームを作りながら Rust の制御フローを学びます
+date: 2026-09-06
+locale: ja
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game
+---
+前回は関数電卓を作成し、それを使用して変数と型に慣れました。ここで、数字推測ゲームを構築し、人生でプレイしたことのあるゲームの再試行メカニズムのようにプログラムがどのように繰り返されるのか、また特定の条件に基づいて決定を下す方法を学習します。
+
+<div class="aspect-video w-full overflow-hidden rounded-xl border border-border bg-black">
+  <iframe
+    class="h-full w-full"
+    src="https://www.youtube.com/embed/ZietDOQYn5Y?si=qz4hozxxmADjfxek"
+    title="Rust Control Flow in Practice - Build a Number Guessing Game"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+  ></iframe>
+</div>
+
+このゲームでは、プログラムが数値を決定し、複数回再試行してその数値を推測する必要があります。数字を推測すると、プログラムは推測が正しいか、推測した数字が実際の数字より大きいか小さいかを応答し、再度試行します。
+
+`if` を使用して数値を比較し、ループを使用してゲームの実行を継続し、`match` を使用して入力を処理し、ループの次の動作を変更する必要がある場合は `break` または `continue` を使用します。
+
+## 制御フロー
+まずは制御フローについて理解しましょう。分岐のないプログラムは、ステートメントを 1 つずつ実行します。最初の記事では、プログラムには分岐がなく、実行または順次実行されていました。例を挙げると
+
+```rust
+fn main() {
+    let a = 10;
+    let b = 20;
+    let result = a + b;
+
+    println!("{result}");
+}
+```
+
+しかし、私たちの推測ゲームでは、特定の条件に応じてアクションを実行し、再試行ループを含めることができるプログラムを作成する方法が必要です。これらを実現するために、Rust だけでなくあらゆるプログラミング言語で制御フローの概念を使用します。したがって、条件の概念から始めて、この記事の後半でループについて学びます。
+
+## `if`
+Rust の `if` 構文は他のプログラミング言語と非常によく似ていますが、それでもいくつかの違いがあります。
+```rust
+fn main() {
+    let number = 10;
+
+    if number > 5 {
+        println!("Number is greater than 5");
+    }
+}
+```
+このプログラムでは、まず変数 `number` を `10` の値で初期化し、次に `if` を使用して条件を設定します。条件は、条件 `number > 5` が true または満たされている場合に、「数値が 5 より大きい」という文字列を出力します。他の言語と同様、この条件が満たされない場合、`if` ブロック内にあるものは何も実行されないため、プログラムは何も出力せずにプログラムを終了します。
+
+## 条件はブール値である必要があります
+他の言語とは異なり、Rust には真偽の値がありません。これが何を意味するのかを説明しましょう。
+```rust
+fn main() {
+    let number = 10;
+
+    if number {
+        println!("Number exists");
+    }
+}
+```
+これを実行すると、コンパイラが bool を期待していたが整数を取得したというメッセージを表示することがわかります。最初の記事で私が言ったことを思い出してください。`if` 条件は `bool` を生成するはずですが、現時点では `number` は実際には `i32` 整数です。Rust がその条件を評価できるように条件を設定する必要があり、その条件は true または false のいずれかのブール値を返します。したがって、これを修正するには、次のようにします。
+```rust
+fn main() {
+    let number = 10;
+
+    if number != 0 {
+        println!("Number is not zero");
+    }
+}
+```
+他の言語では、これが真の値と偽の値の概念を使用するのに非常に一般的であるため、これを覚えておく必要があります。 `bool` を要求することで、`0` が false になる、空でない文字列が true になる、null 参照が false になるなどのルールが防止されるため、これは Rust からは良いことだと思います。
+
+## `else` および `else if`
+名前から推測できるように、残りのケースには `else` を使用します
+```rust
+fn main() {
+    let number = 3;
+
+    if number > 5 {
+        println!("Number is greater than 5");
+    } else {
+        println!("Number is 5 or less");
+    }
+}
+```
+他の言語と同様、`else` ブロックはオプションですが、`else` ブロックを使用したい場合は `if` ブロックを使用する必要があります。 `else` ブロックでは、基本的に残りのすべてのケースに対して、他の言語と同様に `else` ブロックにあるものを実行すると言っているため、条件を与える必要はありません。
+
+`else if` については (はい、ご想像のとおりです)、これはさらに多くのケースがある場合に使用されます。
+```rust
+fn main() {
+    let number = 10;
+
+    if number > 10 {
+        println!("Number is greater than 10");
+    } else if number == 10 {
+        println!("Number is exactly 10");
+    } else {
+        println!("Number is less than 10");
+    }
+}
+```
+これも他の言語とよく似ており、複数の条件チェックがあり、条件の 1 つが満たされると、残りの条件はまったく実行されません。私たちのゲームもこれと同じ構造を使用します。
+
+## `if` は式です
+Rust では `if` が値を生成できることに注意してください。
+```rust
+fn main() {
+    let number = 10;
+
+    let message = if number > 5 {
+        "greater than 5"
+    } else {
+        "5 or less"
+    };
+
+    println!("{message}");
+}
+```
+
+## ループ
+さて、Rust のループを理解しましょう。 Rust には、`loop`、`while`、および `for` という 3 つの一般的なループ形式があります。他の言語と同様に、ループはブロックを一定回数繰り返すために使用されます。
+
+## `loop`
+`loop` から始めましょう。 `loop` の構文には条件がありません。実行が `break`、`return`、パニックまたは分岐操作を介して終了するまで繰り返されます。それが何を意味するのか教えてみましょう
+```rust
+fn main() {
+    loop {
+        println!("Hello");
+    }
+}
+```
+したがって、このループは無限ループであることがわかります。`Ctrl + C` を使用して手動で停止する必要があります。決して終了できないループは、Rust の型モデルでは Never 型 `!` になります。 Never タイプは、それ以降は実行が続行されないため、通常の値を生成しない式を表します。
+
+したがって、この無限ループ システムを停止するには、`break`、`break` を使用して、最も近いループを終了し、そのループの後に実行が再開されます。 `return` とは異なり、`return` は関数全体を終了しますが、`break` は現在のブロックから抜け出すだけです。 
+```rust
+fn main() {
+    let mut number = 1;
+
+    loop {
+        println!("{number}");
+
+        if number == 5 {
+            break;
+        }
+
+        number += 1;
+    }
+}
+```
+ループ内に数値を出力していますが、`number == 5` の場合にこのループから抜け出すという `if` 条件があることがわかります。
+
+`continue` もあります。現在の反復は終了する必要があるが、ループ自体は実行し続ける必要がある場合にこれを使用します。
+```rust
+fn main() {
+    let mut number = 0;
+
+    loop {
+        number += 1;
+
+        if number == 3 {
+            continue;
+        }
+
+        println!("{number}");
+
+        if number == 5 {
+            break;
+        }
+    }
+}
+```
+繰り返しますが、ループ内で `number` 変数をインクリメントしています。次に、`number == 3`、次に `continue` の場合は、この特定の反復の残りをスキップし、制御をループ境界に戻すという条件があります。
+
+したがって、これは 1、2、4、5 を出力します。 3 はスキップします。これをドライランすると、最初に数値が 0 になり、次にループに入って数値が 1 に増加し、その後 if 条件が失敗するため、それをスキップして数値を出力し、1 を出力します。その後、別の if チェックが失敗し、再びループに戻り、2 を出力するのと同じようにして、先頭に戻ります。ループの値を 3 にインクリメントします。この後、if チェックが満たされ、`continue` と表示されます。これは、この反復の残りの行をスキップしてループの先頭に戻ることを意味します。その後、値が 4 に増分されて 4 が出力され、次に 5 が出力されますが、この反復の最後に、最後の if チェックが満たされ、`break` が実行され、そのループから抜け出します。ループ。
+
+注意すべき点は、`break` と `continue` の両方が、ループ ラベルが指定されていない限り、最も近いループで動作することです (Python にはこのようなものがあると思いますが、わかりません)。ラベルは、ループがネストされている場合に役立ちます。
+```rust
+fn main() {
+    'outer: loop {
+        loop {
+            break 'outer;
+        }
+    }
+}
+```
+アポストロフィはラベルの始まりです。それは文字列ではありません。 `break 'outer` は外側のループを直接終了します。推測ゲームにはループが 1 つしかないため、ラベルは必要ありません。これは素晴らしい追加機能だと言えます。なぜなら、内側のループ内に条件が必要で、その条件が満たされた場合に内側と外側の両方のループから抜け出したいという状況に直面したことがあったからです。その場合、この種の機能は本当に役立ちます。
+
+## `while`
+次に、`while` と呼ばれる別の形式のループを見てみましょう。 `while` は、他の言語とよく似た反復の前に条件をチェックします。
+```rust
+fn main() {
+    let mut number = 1;
+
+    while number <= 5 {
+        println!("{number}");
+        number += 1;
+    }
+}
+```
+値 1 の `number` 変数があり、ループに入ると条件チェックが行われ、条件が満たされる場合はコード ブロックが実行され、満たされない場合はループから抜け出します。したがって、このプログラムは数値 1、2、3、4、5 を出力し、条件が満たされなくなると中断します。
+
+ある意味、`while` ループは、条件が `false` の場合に `break` を呼び出す `if` を含む `loop` のように動作します。
+
+## `for`
+`for` ループは反復子から値を取得します
+```rust
+fn main() {
+    for number in 1..=5 {
+        println!("{number}");
+    }
+}
+```
+範囲 `1..=5` には両方のエンドポイントが含まれます。反復ごとに、次の項目が `number` にバインドされ、その項目に対して本体が 1 回実行されます。 1 から 5 (両端を含みません) までの反復を実行する場合は、等号なしで `1..5` を使用できます。より正確には、`for` は `IntoIterator` を実装する任意の値を受け入れ、それを反復子に変換し、`next` を繰り返し呼び出し、`next` が `None` を返すと停止します。 `for` の後の変数は技術的にはパターンであるため、生成時に項目を構造化できます。 Rust の標準 `for` 構文では、C スタイルのループを使用した言語でコレクションを走査するために一般的に使用される手動のインデックス作成と境界チェックも回避されます。イテレータとパターンについては後ほど詳しく説明します。
+
+## `match`
+`match` は、精査対象と呼ばれる 1 つの値を評価し、それを一連のパターンと比較します
+```rust
+fn main() {
+    let number = 2;
+
+    match number {
+        1 => println!("One"),
+        2 => println!("Two"),
+        3 => println!("Three"),
+        _ => println!("Something else"),
+    }
+}
+```
+`match` ブロック内のこれらの各行またはセクションはアームと呼ばれ、各アームには `=>` の左側にパターンがあり、右側にそのパターンの式があります。 Rust はアームを上から下までテストし、最初に一致するアームを実行します。 `number` は `2` であるため、2 番目のアームが実行されます
+
+`_` パターンは、以前のアームに一致しなかったすべての値を処理するワイルドカードです。 Rust では、プログラムをコンパイルする前に、考えられるすべてのケースをカバーする必要があるため、これを削除するとコンパイラからエラーが発生します。これは、`match` を使用するときは、可能な値をすべてカバーする必要があることを覚えておく必要があります。そうしないとコンパイルできません。
+
+パターンはリテラル値を比較する以上のことを行うことができます。名前のバインド、タプルと構造体の分解、列挙型の選択、値の一部の無視、および範囲の組み込みが可能です。この記事では、リテラル パターン、ワイルドカード、`Ok` および `Err` 列挙パターンのみが必要です。
+
+`if` と同様に、`match` は式であり、値を生成できます。
+```rust
+fn main() {
+    let number = 2;
+
+    let message = match number {
+        1 => "One",
+        2 => "Two",
+        3 => "Three",
+        _ => "Something else",
+    };
+
+    println!("{message}");
+}
+```
+`number` の値が 2 であることがわかります。そのため、それぞれのアームが一致し、`message` が `"Two"` を指すことになるため、`message` を出力すると、`"Two"` が出力されます。
+
+`match` を式として使用する場合、すべてのアームが互換性のある型を生成する必要があることに注意する必要があります。
+
+`match` は `switch` を思い出させるかもしれませんが、網羅性、式の値、および構造化により、タグ付き共用体をサポートする言語の代数パターン マッチングに近づきます。ここではこれを使用して、入力の解析で考えられる 2 つの結果を処理します。
+
+## `Result`
+前の記事では、コマンド ラインを介してユーザーから入力を取得すると、それが文字列として取得され、場合によってはそれに応じて型を変換する必要があることを見てきました。推測プロジェクトでは、入力を数値に変換する必要があります。
+```rust
+fn main() {
+    let number = "42".parse::<u32>();
+
+    println!("{number:?}");
+}
+```
+これを印刷すると、出力は `Ok(42)` になります。文字列が「hello」の場合、出力は `Err(ParseIntError {...})` のようになります。ここで何が起こっているのかというと、操作が成功するか失敗する可能性があるため、解析によって `Result<T, E>` が返されるということです (この例では両方のケースを確認しました)。 `T` は成功タイプ、`E` はエラー タイプです。その定義の簡略版は次のようになります
+```rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+各 `Result` 値には、これらのバリアント `Ok(value)` または `Err(error)` のいずれか 1 つが正確に含まれます。
+`T` および `E` は汎用パラメーターであるため、異なる操作では、異なる成功タイプとエラー タイプを持つ同じ `Result` 構造体を使用できます。 `"42".parse::<u32>()` の場合、成功の種類は `u32`、エラーの種類は `ParseIntError` です。 `::<u32>` 構文は一般に Turbofish と呼ばれます。周囲のコードが十分な情報を提供しない場合に、汎用の `parse` メソッドに必要なターゲット タイプを伝えます。
+
+列挙型とジェネリック型については個別に説明しますが、バリアントは `match` ですでに処理できます。
+
+```rust
+fn main() {
+    let result = "42".parse::<u32>();
+
+    match result {
+        Ok(number) => println!("Parsed number: {number}"),
+        Err(error) => println!("Failed to parse: {error}"),
+    }
+}
+```
+パターン `Ok(number)` はバリアントをチェックし、それに含まれる値を `number` にバインドしますが、 `Err(error)` はエラーに対して同じことを行います。これは、値を取得するための 2 回目の呼び出しに続く個別のステータス チェックではなく、構造化です。
+
+以前の Rust コードで `unwrap()` を使用した可能性があります
+```rust
+let number = "42".parse::<u32>().unwrap();
+```
+`unwrap()` は `Ok` 内の値を返します。 `Err` で呼び出すとパニックが発生します
+```rust
+fn main() {
+    let number = "hello".parse::<u32>().unwrap();
+
+    println!("{number}");
+}
+```
+`unwrap()` は、構造上故障が不可能な場合、簡単な実験中、またはパニックが意図された対応である場合に便利です。ユーザー入力には間違いが含まれることが予想されるため、パニックが発生すると通常の入力がプログラムクラッシュに変わります。ゲームは `match` で解析結果を処理し、実行を継続します。
+
+## 数字当てゲームを構築する
+さて、学習は十分にしました。プロジェクトの構築を始めましょう
+
+### プロジェクトを作成する
+まず貨物プロジェクトを作成し、これを好みの IDE で開きます。
+```bash
+cargo new number-guessing-game
+```
+
+これで、ドリルはわかりました。`src/main.rs` を開いて、既存の hello world コードを削除します。
+
+### 乱数生成を追加
+標準ライブラリにはここで必要な乱数関数が含まれていないため、`rand` クレートを `Cargo.toml` に追加します。 Cargo はこのマニフェストを読み取り、互換性のあるクレート バージョンを解決し、そのソースをダウンロードし、解決された正確な依存関係グラフを `Cargo.lock` に記録します。
+```toml
+[package]
+name = "number-guessing-game"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rand = "0.10"
+```
+
+`rand` クレートができたので、包含範囲 `1..=100` から数値を生成することから始めましょう。
+```rust
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("Secret number: {secret_number}");
+}
+```
+`random_range` は、範囲の値の型に対して汎用です。この分離された例では、接尾辞のない整数リテラルはデフォルトで `i32` となるため、`secret_number` は `i32` として推論されます。最終的なプログラムでは、解析された `u32` と比較することで、代わりに `u32` を推論するのに十分なコンテキストがコンパイラーに与えられます。 `let secret_number: u32 = ...` を使用すると、どの段階でも型を明示的に指定できます。
+
+`..=` 構文は包括的な範囲を構築するため、`1` と `100` の両方が結果として考えられます。比較すると、`1..100` は `100` を除外します。プログラムを数回実行して、値が変化することを確認します。 `println!` は一時的なもので、このチェック後に削除されます。
+
+### 入力の読み取り
+ユーザーが推測する必要がある乱数を生成する方法がわかったので、ユーザーから推測された数字を取得しましょう。
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+    println!("Enter your guess:");
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    println!("You entered: {input}");
+    println!("Secret number: {secret_number}");
+}
+```
+`String::new()` は、所有され、拡張可能な UTF-8 文字列を作成します。 `read_line` は、標準入力から読み取られたバイトをその文字列に追加します。そのため、不変参照ではなく `&mut input` が必要です。変更可能な参照を渡すと、`read_line` は所有権を取得せずに文字列を変更できるため、`main` はその後も `input` を使用できます。
+
+このメソッドは `io::Result<usize>` を返します。成功値は読み取られたバイト数ですが、エラー値は入出力の失敗を表します。このドラフトでは、その下位レベルの障害に対して `unwrap()` を使用するため、記事は制御フローと通常の無効な推測に重点を置くことができます。運用プログラムでもこれ `Result` を処理できます。
+
+### 推測を解析する
+さて、ユーザーが推測した値を受け取ったので、それを解析して数値に変換します。
+
+現在、`input` は `String` で、`secret_number` は数値であるため、これら 2 つの値を直接比較することはできません。まず、推測された数値を `u32` として変換する必要があります (i32 を使用することもできますが、秘密の数値は常に正であるため、`u32` は使いやすいです）
+```rust
+let guess = input.trim().parse::<u32>();
+```
+`read_line` は通常、ユーザーが Enter キーを押したときに作成された改行を保持します。 `trim()` は先頭と末尾の空白を削除した文字列スライスを返し、`parse::<u32>()` はそのスライスから数値を構築しようとします。 `match` を使用して、返された `Result` を処理します。
+```rust
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+    println!("Enter your guess:");
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    let guess = match input.trim().parse::<u32>() {
+        Ok(number) => number,
+        Err(error) => {
+            println!("Invalid input: {error}");
+            return;
+        }
+    };
+
+    println!("Your guess: {guess}");
+    println!("Secret number: {secret_number}");
+}
+```
+完全な `match` 式は、`guess` に割り当てられる値になります。 `Ok` アームは `u32` を生成し、`Err` アームはエラーを出力して `return` を実行します。これらのアームには異なるタイプがあるように見えますが、`return` は現在の関数で値を生成しないため、never タイプ `!` を持ちます。分岐式は別の型が必要な場所に適合するため、完全一致の型は `u32` になります。
+
+この最初のバージョンは `return` を使用しており、これにより `main` が終了し、プログラムが終了します。無効なテキストは現在の試行のみを終了する必要があるため、次のバージョンでは別の制御フロー ターゲットが必要です。
+
+### 再試行の追加
+ユーザーからの推測された数値を正しく解析できたので、次は再試行メカニズムを追加して、ユーザーが正解するまで試行し続けられるようにします。
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+
+    loop {
+        println!("Enter your guess:");
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let guess = match input.trim().parse::<u32>() {
+            Ok(number) => number,
+            Err(error) => {
+                println!("Invalid input: {error}");
+                continue;
+            }
+        };
+
+        println!("Your guess: {guess}");
+    }
+}
+```
+`hello` と入力すると、エラーが出力され、プロンプトに戻るようになりました。 `return` と同様、`continue` はタイプ `!` の分岐式であるため、`Err` アームは `Ok` アームから期待される `u32` を生成する必要はありません。 `guess` が作成される前に、制御を次の反復に移します。有効な数値は最後の `println!` に達します。
+
+### 推測を比較する
+次に、ユーザーの推測した番号と秘密の番号を比較して、それらが正しいか、推測が低すぎるか高すぎるかを判断できます。最後の `println!` を比較に置き換えます
+```rust
+if guess < secret_number {
+    println!("Too low!");
+} else if guess > secret_number {
+    println!("Too high!");
+} else {
+    println!("You got it!");
+}
+```
+これらの条件は相互に排他的です。順序付けされた 2 つの整数の場合、推測値は秘密の数値より小さいか、大きいか、または等しい必要があります。したがって、最後の `else` は、比較を繰り返さずに等しいことを表します。
+
+プログラムは正しいヒントを与えることができますが、正しい推測の後もループは継続します。 `break` を最後のブランチに追加します。このプレーン `break` により、完全なループが `()` と評価され、ループの後に実行が再開されます。ループは `main` の最後の操作であるため、関数は終了します
+
+### 完全なプログラム
+参考用の完全なコードは次のとおりです
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+
+    loop {
+        println!("Enter your guess:");
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let guess = match input.trim().parse::<u32>() {
+            Ok(number) => number,
+            Err(error) => {
+                println!("Invalid input: {error}");
+                continue;
+            }
+        };
+
+        if guess < secret_number {
+            println!("Too low!");
+        } else if guess > secret_number {
+            println!("Too high!");
+        } else {
+            println!("You got it!");
+            break;
+        }
+    }
+}
+```
+
+今すぐ実行してゲームをプレイすると、次のようになります。
+```text
+I'm thinking of a number between 1 and 100.
+Enter your guess:
+50
+Too low!
+Enter your guess:
+75
+Too high!
+Enter your guess:
+68
+You got it!
+```
+
+## 演習
+この記事では、プログラムに追加したり改善したりできるいくつかの演習課題を提供することを考えました。これにより、練習も積むことができます。
+
+#### 有効な試行回数をカウントする
+
+可変カウンターを追加し、有効な推測が行われるたびに値を増やします。プレーヤーが勝ったときのカウントを出力します。
+
+```text
+You got it in 7 attempts!
+```
+
+解析後に増分を配置すると、無効なテキストは試行としてカウントされなくなります。 2 つの無効な入力とそれに続く 3 つの有効な推測を使用してプログラムをテストします。報告されるカウントは `3` である必要があります。
+
+#### 範囲を検証する
+
+解析と検証は別のステップです。 `500` は有効な `u32` であるため、数値がゲームの範囲外であっても解析は成功します。解析後に `if` 条件を追加し、推測が `1..=100` の範囲外の場合は `continue` を使用します。 `1` と `100` が比較に到達する一方で、`0`、`101`、および `500` が拒否されることを確認します。
+
+#### `while` を `loop` を使用して書き換えます
+
+前述の `while number <= 5` の例を取り上げ、`loop`、`if`、および `break` で同じ動作を表現します。どちらのプログラムも `1` から `5` までの数値を出力する必要があります。この演習では、条件付きループと、明示的に終了する無条件ループとの関係を確認します。
+
+#### ループから値を返す
+
+`number * number` が `100` より大きい場合、上方にカウントして `break number;` を使用するループを作成します。ループの値を保存して出力します。結果は `11` となるはずです。
+
+さて、この記事では良いことを学べたと思います。プロジェクトが単純だったことは認めますが、心配する必要はありません。5 番目か 6 番目の記事から、プロジェクトはますます挑戦的で興味深いものになります。それまでは Rust の基本を学ばなければなりません。
+
+次の記事では、関数と式について説明し、温度コンバーターを構築します (これが単純であることはわかっていますが、認知的負荷をあまりかけずに概念を早く学ぶには単純なプロジェクトが非常に適しています)。またすぐにお会いしましょう、それまで素晴らしい人生を過ごしてください！

@@ -1,0 +1,524 @@
+---
+title: Le contrôle de flux en Rust en pratique — construisons un jeu de devinettes
+description: Dans cet article, nous allons découvrir le contrôle de flux en Rust en construisant un jeu de devinettes
+date: 2026-09-06
+locale: fr
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game
+---
+La dernière fois, nous avons construit une calculatrice scientifique et l'avons utilisée pour nous familiariser avec les variables et les types. Nous allons maintenant créer un jeu de devinettes et apprendre comment notre programme peut se répéter, comme le mécanisme de nouvelle tentative dans les jeux auxquels vous avez joué dans votre vie et comment prendre des décisions en fonction de certaines conditions.
+
+<div class="aspect-video w-full overflow-hidden rounded-xl border border-border bg-black">
+  <iframe
+    class="h-full w-full"
+    src="https://www.youtube.com/embed/ZietDOQYn5Y?si=qz4hozxxmADjfxek"
+    title="Rust Control Flow in Practice - Build a Number Guessing Game"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+  ></iframe>
+</div>
+
+Dans ce jeu, notre programme décidera d'un nombre et nous devrons ensuite deviner ce nombre en plusieurs tentatives. Une fois que nous avons deviné un nombre, le programme répondra si notre supposition est correcte ou si notre nombre estimé est supérieur ou inférieur au nombre réel et nous réessayerons.
+
+Nous utiliserons `if` pour comparer les nombres, une boucle pour faire fonctionner le jeu, `match` pour gérer les entrées et `break` ou `continue` lorsque nous devons modifier ce que fait ensuite la boucle.
+
+## Flux de contrôle
+Commençons par comprendre le flux de contrôle. Un programme sans branche exécute une instruction après l’autre. Dans notre premier article, notre programme n'avait pas de branches, il s'exécutait ou s'exécutait de manière séquentielle. Pour vous donner un exemple
+
+```rust
+fn main() {
+    let a = 10;
+    let b = 20;
+    let result = a + b;
+
+    println!("{result}");
+}
+```
+
+Mais pour notre jeu de devinettes, nous avons besoin d'un moyen d'écrire un programme afin qu'il puisse entreprendre des actions en fonction de certaines conditions et qu'il puisse également avoir une boucle de nouvelle tentative. Pour obtenir ces choses, nous utilisons le concept de flux de contrôle non seulement dans Rust mais dans n'importe quel langage de programmation. Commençons donc par le concept de conditions, puis nous en apprendrons davantage sur les boucles plus loin dans cet article.
+
+## `if`
+Dans Rust, la syntaxe `if` ressemble beaucoup à d'autres langages de programmation mais il existe encore quelques différences
+```rust
+fn main() {
+    let number = 10;
+
+    if number > 5 {
+        println!("Number is greater than 5");
+    }
+}
+```
+Dans ce programme, nous initialisons d'abord la variable `number` avec une valeur de `10` puis nous mettons une condition en utilisant `if`. La condition est que si la condition `number > 5` est vraie ou satisfaite, alors continuez et imprimez la chaîne "Le nombre est supérieur à 5". Comme d'autres langages, si cette condition n'est pas satisfaite, alors il n'exécutera pas tout ce qui se trouve à l'intérieur de ce bloc `if`, donc notre programme n'imprimera rien et quittera ensuite le programme.
+
+## Les conditions doivent être booléennes
+Contrairement à d’autres langages, Rust n’a pas de valeurs vraies ou fausses. Laissez-moi vous montrer ce que je veux dire par là :
+```rust
+fn main() {
+    let number = 10;
+
+    if number {
+        println!("Number exists");
+    }
+}
+```
+si vous exécutez ceci, vous verrez que le compilateur se plaindra en disant le booléen attendu mais a obtenu un entier. Rappelez-vous, ce que j'ai dit dans le premier article, la condition `if` devrait produire un `bool` et pour le moment `number` est en fait un entier `i32`, nous devons mettre une condition pour que Rust puisse évaluer cette condition, puis la condition renverra une valeur booléenne vraie ou fausse. Donc, pour résoudre ce problème, vous pouvez faire ceci :
+```rust
+fn main() {
+    let number = 10;
+
+    if number != 0 {
+        println!("Number is not zero");
+    }
+}
+```
+Vous devez vous en souvenir car dans certaines autres langues, il est très courant d'utiliser le concept de valeurs véridiques et fausses. Je dirais que c'est une bonne chose de Rust car exiger un `bool` empêche des règles telles que `0` d'être fausses ou une chaîne non vide d'être vraie ou une référence nulle d'être fausse et ainsi de suite.
+
+## `else` et `else if`
+Comme vous pouvez le deviner d'après le nom, nous utiliserons `else` pour les cas restants.
+```rust
+fn main() {
+    let number = 3;
+
+    if number > 5 {
+        println!("Number is greater than 5");
+    } else {
+        println!("Number is 5 or less");
+    }
+}
+```
+Tout comme les autres langages, le bloc `else` est facultatif mais vous devez utiliser le bloc `if` si jamais vous souhaitez utiliser le bloc `else`. Dans le bloc `else`, nous n'avons pas besoin de donner de conditions car nous disons essentiellement pour tous les cas restants, exécutez tout ce qui se trouve dans le bloc `else` comme les autres langages.
+
+Maintenant, pour le `else if` (oui, vous l'avez bien deviné), ceci est utilisé lorsqu'il y a plus de cas
+```rust
+fn main() {
+    let number = 10;
+
+    if number > 10 {
+        println!("Number is greater than 10");
+    } else if number == 10 {
+        println!("Number is exactly 10");
+    } else {
+        println!("Number is less than 10");
+    }
+}
+```
+C'est encore une fois très similaire à d'autres langages, nous avons plusieurs vérifications de conditions, si l'une des conditions est satisfaite, alors le reste des conditions ne s'exécutera pas du tout. Notre jeu utilisera également cette même structure.
+
+## `if` est une expression
+Une chose importante à noter : dans Rust, `if` peut produire une valeur
+```rust
+fn main() {
+    let number = 10;
+
+    let message = if number > 5 {
+        "greater than 5"
+    } else {
+        "5 or less"
+    };
+
+    println!("{message}");
+}
+```
+
+## Boucles
+Maintenant, comprenons les boucles dans Rust. dans Rust, il existe trois formes de boucle courantes : `loop`, `while` et `for`. Comme d’autres langages, la boucle est utilisée pour répéter un bloc un certain nombre de fois.
+
+## `loop`
+Commençons par `loop`. `loop` n'a pas de condition dans sa syntaxe, il se répète jusqu'à ce que l'exécution le quitte par `break`, `return`, une panique ou toute opération divergente. Laisse-moi te montrer ce que je veux dire par là
+```rust
+fn main() {
+    loop {
+        println!("Hello");
+    }
+}
+```
+Ainsi, vous pouvez voir que cette boucle est une boucle infinie, vous devez l'arrêter manuellement avec `Ctrl + C`. Une boucle qui ne peut jamais se terminer a le type never `!` dans le modèle de type de Rust. Le type never représente une expression qui ne produit pas de valeur normale car l'exécution ne continue pas au-delà de cette valeur.
+
+Ainsi, pour arrêter ce système de boucle infinie, nous pouvons utiliser `break`, `break` quitte la boucle englobante la plus proche et l'exécution reprend après cette boucle. C'est différent de `return`, `return` quitte toute la fonction mais `break` sort simplement du bloc actuel. 
+```rust
+fn main() {
+    let mut number = 1;
+
+    loop {
+        println!("{number}");
+
+        if number == 5 {
+            break;
+        }
+
+        number += 1;
+    }
+}
+```
+Nous imprimons le numéro à l'intérieur de la boucle mais vous pouvez voir qu'il y a une condition `if` qui dit que si `number == 5` alors sortez de cette boucle
+
+Il y a aussi `continue`, nous l'utilisons lorsque l'itération en cours doit se terminer mais que la boucle elle-même doit continuer à s'exécuter
+```rust
+fn main() {
+    let mut number = 0;
+
+    loop {
+        number += 1;
+
+        if number == 3 {
+            continue;
+        }
+
+        println!("{number}");
+
+        if number == 5 {
+            break;
+        }
+    }
+}
+```
+Encore une fois, nous incrémentons la variable `number` à l'intérieur de la boucle, puis il y a une condition qui dit que si le `number == 3`, alors `continue` cela signifie ignorer le reste de cette itération spécifique et transférer le contrôle à la limite de la boucle.
+
+Donc, cela imprimera 1, 2, 4 et 5. Cela sautera 3 parce que si vous exécutez cela à sec, d'abord le nombre est 0, puis nous entrons dans la boucle et incrémentons la valeur numérique à 1, puis la condition if échoue, donc nous sautons cela, puis nous imprimons le numéro, donc il imprime 1, puis il y a une autre vérification si qui échoue, maintenant il retourne à nouveau dans la boucle, de la même manière il imprimera 2, maintenant il retourne en haut de la boucle et incrémente la valeur à 3, après quoi le contrôle if satisfait et il dit `continue`, cela signifie sauter les lignes restantes pour cette itération et revenir en haut de la boucle, puis la valeur est incrémentée à 4 et imprime 4, puis il imprime 5 mais à la fin de cette itération, le contrôle if final satisfait et `break` s'exécute et nous sortons de cette boucle.
+
+Une chose à noter que `break` et `continue` agissent sur la boucle la plus proche à moins qu'une étiquette de boucle ne soit fournie (je pense que nous avons quelque chose comme ça en python mais je n'en suis pas sûr). Les étiquettes sont utiles lorsque les boucles sont imbriquées :
+```rust
+fn main() {
+    'outer: loop {
+        loop {
+            break 'outer;
+        }
+    }
+}
+```
+L'apostrophe commence l'étiquette ; ce n'est pas une chaîne. `break 'outer` quitte directement la boucle externe. Le jeu de devinettes n’a qu’une seule boucle, il n’a donc pas besoin d’étiquette. Je dirais que c'est un excellent ajout car j'ai été confronté à des situations où, à l'intérieur de la boucle interne, je veux avoir une condition et si cette condition est satisfaite, je veux sortir de la boucle interne et externe, dans ce cas, ce type de fonctionnalité aide vraiment.
+
+## `while`
+Examinons maintenant une autre forme de boucle appelée `while`. `while` vérifie son état avant chaque itération, c'est assez similaire aux autres langages :
+```rust
+fn main() {
+    let mut number = 1;
+
+    while number <= 5 {
+        println!("{number}");
+        number += 1;
+    }
+}
+```
+Nous avons une variable `number` avec la valeur 1, alors nous entrons dans la boucle et la vérification de la condition se produit, si la condition est satisfaite alors le bloc de code s'exécutera et sinon nous sortirons de cette boucle. Donc ce programme imprimera les nombres 1,2,3,4,5 puis il éclatera car la condition ne sera plus satisfaite.
+
+D'une certaine manière, la boucle `while` agit comme un `loop` contenant un `if` qui appelle `break` lorsque la condition est `false`.
+
+## `for`
+La boucle `for` prend les valeurs d'un itérateur
+```rust
+fn main() {
+    for number in 1..=5 {
+        println!("{number}");
+    }
+}
+```
+La plage `1..=5` inclut les deux points de terminaison. À chaque itération, l'élément suivant est lié à `number` et le corps s'exécute une fois pour cet élément. Si vous souhaitez exécuter l'itération de 1 à 5 (non inclus), vous pouvez simplement utiliser `1..5` sans les égaux. Plus précisément, `for` accepte toute valeur qui implémente `IntoIterator`, la convertit en itérateur, appelle à plusieurs reprises `next` et s'arrête lorsque `next` renvoie `None`. La variable après `for` est techniquement un modèle, elle peut donc déstructurer les éléments au fur et à mesure de leur production. La syntaxe standard `for` de Rust évite également l'indexation manuelle et les vérifications de limites couramment utilisées pour parcourir les collections dans des langages avec des boucles de style C. Nous aborderons en profondeur les itérateurs et les modèles plus tard.
+
+## `match`
+`match` évalue une valeur, appelée le candidat et la compare à un ensemble de modèles
+```rust
+fn main() {
+    let number = 2;
+
+    match number {
+        1 => println!("One"),
+        2 => println!("Two"),
+        3 => println!("Three"),
+        _ => println!("Something else"),
+    }
+}
+```
+Chacune de ces lignes ou sections à l'intérieur du bloc `match` est appelée un bras, chaque bras a un motif à gauche de `=>` et l'expression de ce motif à droite. Rust teste les bras de haut en bas et exécute le premier bras correspondant. Puisque `number` est `2`, le deuxième bras s'exécute
+
+Le modèle `_` est un caractère générique qui gère chaque valeur qui ne correspondait pas à un bras précédent. si vous le supprimez, le compilateur se plaindra car Rust exige que tous les cas possibles soient couverts avant que le programme puisse se compiler. C'est l'une des choses dont vous devez vous rappeler que lorsque vous utilisez `match`, vous devez couvrir toutes les valeurs possibles, sinon la compilation ne sera pas effectuée.
+
+Les modèles peuvent faire plus que comparer des valeurs littérales. Ils peuvent lier des noms, déstructurer des tuples et des structures, sélectionner des variantes d'énumération, ignorer des parties d'une valeur et inclure des plages. Dans cet article, nous n'avons besoin que des modèles littéraux, du caractère générique et des modèles d'énumération `Ok` et `Err`.
+
+Tout comme `if`, `match` est une expression et peut produire une valeur
+```rust
+fn main() {
+    let number = 2;
+
+    let message = match number {
+        1 => "One",
+        2 => "Two",
+        3 => "Three",
+        _ => "Something else",
+    };
+
+    println!("{message}");
+}
+```
+Vous pouvez voir que la valeur de `number` est 2, donc le bras respectif correspondrait et le `message` pointerait vers `"Two"`, donc lorsque nous imprimerons `message`, il imprimera `"Two"`
+
+Une chose que vous devez noter : lorsque vous utilisez `match` comme expression, assurez-vous que toutes les armes doivent produire un type compatible.
+
+`match` peut vous rappeler `switch`, mais l'exhaustivité, les valeurs d'expression et la déstructuration le rapprochent de la correspondance de modèles algébriques dans les langages prenant en charge les unions étiquetées. Nous l'utiliserons ici pour gérer les deux résultats possibles de l'analyse des entrées.
+
+## `Result`
+Dans l'article précédent, nous avons vu que lorsque nous obtenons une entrée de l'utilisateur via la ligne de commande, nous l'obtenons sous forme de chaîne et nous devons parfois convertir leur type en conséquence. Pour notre projet de devinettes, nous devons convertir l'entrée en nombre
+```rust
+fn main() {
+    let number = "42".parse::<u32>();
+
+    println!("{number:?}");
+}
+```
+Si vous imprimez ceci, le résultat sera `Ok(42)`. Si la chaîne est "hello", le résultat ressemblera à `Err(ParseIntError {...})`. Ce qui se passe ici, c'est que l'analyse renvoie `Result<T, E>` car l'opération peut réussir ou échouer (nous venons de voir les deux cas de notre exemple). `T` est le type de réussite et `E` est le type d'erreur. Une version simplifiée de sa définition ressemble à ceci
+```rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+Chaque valeur `Result` contient exactement une de ces variantes `Ok(value)` ou `Err(error)`
+`T` et `E` sont des paramètres génériques, donc différentes opérations peuvent utiliser la même structure `Result` avec différents types de réussite et d'erreur. Pour `"42".parse::<u32>()`, le type de réussite est `u32` et le type d'erreur est `ParseIntError`. La syntaxe `::<u32>` est communément appelée le turbofish ; il indique à la méthode générique `parse` quel type de cible nous voulons lorsque le code environnant ne fournit pas suffisamment d'informations.
+
+Nous couvrirons les énumérations et les génériques séparément, mais nous pouvons déjà gérer les variantes avec `match` :
+
+```rust
+fn main() {
+    let result = "42".parse::<u32>();
+
+    match result {
+        Ok(number) => println!("Parsed number: {number}"),
+        Err(error) => println!("Failed to parse: {error}"),
+    }
+}
+```
+Le modèle `Ok(number)` vérifie à la fois la variante et lie sa valeur contenue à `number`, tandis que `Err(error)` fait de même pour l'erreur. Il s'agit d'une déstructuration plutôt que d'une vérification d'état distincte suivie d'un deuxième appel pour obtenir la valeur.
+
+Vous avez peut-être utilisé `unwrap()` dans un code Rust antérieur
+```rust
+let number = "42".parse::<u32>().unwrap();
+```
+`unwrap()` renvoie la valeur à l'intérieur de `Ok`. L'appeler sur un `Err` provoque une panique
+```rust
+fn main() {
+    let number = "hello".parse::<u32>().unwrap();
+
+    println!("{number}");
+}
+```
+`unwrap()` est pratique lorsque l'échec est impossible par construction, lors d'expériences rapides ou lorsqu'une panique est la réponse prévue. Les entrées utilisateur sont censées contenir des erreurs, donc une panique transformerait une entrée normale en un crash du programme. Notre jeu gérera le résultat de l'analyse avec `match` et continuera à fonctionner.
+
+## Construire le jeu de devinettes numériques
+Ok, assez d'apprentissage, commençons maintenant à construire notre projet
+
+### Créer le projet
+Créons d'abord un projet cargo et ouvrons-le dans votre IDE préféré
+```bash
+cargo new number-guessing-game
+```
+
+Maintenant que vous connaissez le principe, ouvrez `src/main.rs` et supprimez le code Hello World existant.
+
+### Ajouter la génération de nombres aléatoires
+La bibliothèque standard n'inclut pas la fonction de nombre aléatoire nécessaire ici, alors ajoutez la caisse `rand` à `Cargo.toml`. Cargo lit ce manifeste, résout une version de caisse compatible, télécharge sa source et enregistre le graphique de dépendances résolu exact dans `Cargo.lock`
+```toml
+[package]
+name = "number-guessing-game"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rand = "0.10"
+```
+
+Ok, maintenant que nous avons la caisse `rand`, commençons par générer un nombre à partir de la plage inclusive `1..=100`
+```rust
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("Secret number: {secret_number}");
+}
+```
+`random_range` est générique sur le type de valeur de la plage. Dans cet exemple isolé, les littéraux entiers sans suffixe sont par défaut `i32`, donc `secret_number` est déduit comme un `i32`. Dans le programme final, le comparer avec le `u32` analysé donne au compilateur suffisamment de contexte pour déduire `u32` à la place. Nous pourrions rendre le type explicite à tout moment avec `let secret_number: u32 = ...`.
+
+La syntaxe `..=` construit une plage inclusive, donc `1` et `100` sont des résultats possibles. En comparaison, `1..100` exclurait `100`. Exécutez le programme plusieurs fois et confirmez que la valeur change. Le `println!` est temporaire et sera supprimé après cette vérification.
+
+### Lire l'entrée
+Maintenant que nous savons comment générer un nombre aléatoire que l'utilisateur doit deviner, prenons maintenant le nombre deviné par l'utilisateur.
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+    println!("Enter your guess:");
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    println!("You entered: {input}");
+    println!("Secret number: {secret_number}");
+}
+```
+`String::new()` crée une chaîne UTF-8 propriétaire et extensible. `read_line` ajoute les octets lus à partir de l'entrée standard à cette chaîne, c'est pourquoi elle a besoin de `&mut input` plutôt que d'une référence immuable. Passer une référence mutable permet à `read_line` de modifier la chaîne sans en prendre possession, donc `main` peut toujours utiliser `input` par la suite.
+
+La méthode renvoie `io::Result<usize>`. Sa valeur de réussite est le nombre d'octets lus, tandis que sa valeur d'erreur décrit un échec d'entrée/sortie. Ce brouillon utilise `unwrap()` pour cet échec de niveau inférieur afin que l'article puisse rester concentré sur le flux de contrôle et les suppositions invalides ordinaires. Un programme de production pourrait également gérer ce `Result`.
+
+### Analyser la supposition
+Ok, maintenant que nous avons reçu la valeur que l'utilisateur a devinée, il est temps de l'analyser et de la convertir en nombre.
+
+Actuellement, `input` est un `String` et `secret_number` est un nombre, nous ne pouvons donc pas comparer directement ces deux valeurs, nous devons d'abord convertir le nombre deviné en `u32` (nous pourrions également opter pour i32 mais comme notre numéro secret sera toujours positif, `u32` est bon à utiliser)
+```rust
+let guess = input.trim().parse::<u32>();
+```
+`read_line` conserve normalement la nouvelle ligne créée lorsque l'utilisateur appuie sur Entrée. `trim()` renvoie une tranche de chaîne avec les espaces de début et de fin supprimés, puis `parse::<u32>()` tente de créer un nombre à partir de cette tranche. Utilisez `match` pour gérer le `Result` renvoyé :
+```rust
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+    println!("Enter your guess:");
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    let guess = match input.trim().parse::<u32>() {
+        Ok(number) => number,
+        Err(error) => {
+            println!("Invalid input: {error}");
+            return;
+        }
+    };
+
+    println!("Your guess: {guess}");
+    println!("Secret number: {secret_number}");
+}
+```
+L'expression `match` complète devient la valeur attribuée à `guess`. Le bras `Ok` produit un `u32`, tandis que le bras `Err` imprime l'erreur et exécute `return`. Bien que ces bras semblent avoir des types différents, `return` a le type never `!` car il ne produit pas de valeur dans la fonction actuelle. Une expression divergente peut s'adapter partout où un autre type est requis, le type de correspondance complète est donc `u32`.
+
+Cette première version utilise `return`, qui quitte `main` et termine donc le programme. La version suivante nécessite une cible de flux de contrôle différente, car un texte non valide ne doit mettre fin qu'à la tentative en cours.
+
+### Ajouter des tentatives
+Maintenant que nous avons analysé correctement le numéro deviné par l'utilisateur, il est temps d'ajouter le mécanisme de nouvelle tentative afin que l'utilisateur puisse continuer à essayer jusqu'à ce qu'il réussisse.
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+
+    loop {
+        println!("Enter your guess:");
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let guess = match input.trim().parse::<u32>() {
+            Ok(number) => number,
+            Err(error) => {
+                println!("Invalid input: {error}");
+                continue;
+            }
+        };
+
+        println!("Your guess: {guess}");
+    }
+}
+```
+La saisie de `hello` imprime désormais une erreur et renvoie à l'invite. Comme `return`, `continue` est une expression divergente de type `!`, donc le bras `Err` n'a pas besoin de produire le `u32` attendu du bras `Ok`. Il transfère le contrôle à l'itération suivante avant la création de `guess`. Un numéro valide atteint le `println!` final.
+
+### Comparez la supposition
+Maintenant, comparons le numéro deviné de l'utilisateur et le numéro secret, et nous pouvons leur dire s'ils sont corrects ou si leur estimation est trop faible ou trop élevée. Remplacez le dernier `println!` par la comparaison
+```rust
+if guess < secret_number {
+    println!("Too low!");
+} else if guess > secret_number {
+    println!("Too high!");
+} else {
+    println!("You got it!");
+}
+```
+Les conditions s’excluent mutuellement. Pour deux entiers ordonnés, la supposition doit être inférieure, supérieure ou égale au nombre secret. Le `else` final représente donc l'égalité sans répéter la comparaison.
+
+Le programme peut maintenant donner l'indice correct, mais la boucle continue après une estimation correcte. Ajoutez `break` à la branche finale. Ce simple `break` fait que la boucle complète est évaluée à `()` et l'exécution reprend après la boucle. Puisque la boucle est l'opération finale dans `main`, la fonction se termine alors
+
+### Programme complet
+Voici le code complet pour votre référence
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+
+    loop {
+        println!("Enter your guess:");
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let guess = match input.trim().parse::<u32>() {
+            Ok(number) => number,
+            Err(error) => {
+                println!("Invalid input: {error}");
+                continue;
+            }
+        };
+
+        if guess < secret_number {
+            println!("Too low!");
+        } else if guess > secret_number {
+            println!("Too high!");
+        } else {
+            println!("You got it!");
+            break;
+        }
+    }
+}
+```
+
+Si vous l'exécutez maintenant et jouez au jeu, vous pouvez obtenir quelque chose comme ceci :
+```text
+I'm thinking of a number between 1 and 100.
+Enter your guess:
+50
+Too low!
+Enter your guess:
+75
+Too high!
+Enter your guess:
+68
+You got it!
+```
+
+## Exercices
+À partir de cet article, j'ai pensé à vous proposer quelques défis d'exercices que vous pouvez ajouter et améliorer le programme, de cette façon vous pourrez également acquérir un peu de pratique :
+
+#### Compter les tentatives valides
+
+Ajoutez un compteur mutable et augmentez-le après chaque supposition valide. Imprimez le décompte lorsque le joueur gagne :
+
+```text
+You got it in 7 attempts!
+```
+
+Placer l'incrément après l'analyse signifie qu'un texte invalide ne comptera pas comme une tentative. Testez le programme avec deux entrées invalides suivies de trois suppositions valides ; le nombre signalé doit être `3`.
+
+#### Valider la plage
+
+L'analyse et la validation sont des étapes distinctes. `500` est un `u32` valide, donc l'analyse réussit même si le nombre est en dehors de la plage du jeu. Ajoutez une condition `if` après l'analyse et utilisez `continue` lorsque la supposition est en dehors de `1..=100`. Vérifiez que `0`, `101` et `500` sont rejetés tandis que `1` et `100` atteignent la comparaison.
+
+#### Réécrivez `while` en utilisant `loop`
+
+Prenez l'exemple précédent de `while number <= 5` et exprimez le même comportement avec `loop`, `if` et `break`. Les deux programmes doivent imprimer les numéros de `1` à `5`. Cet exercice vérifie la relation entre les boucles conditionnelles et les boucles inconditionnelles avec des sorties explicites.
+
+#### Renvoie une valeur à partir d'une boucle
+
+Écrivez une boucle qui compte vers le haut et utilise `break number;` lorsque `number * number` est supérieur à `100`. Stockez la valeur de la boucle et imprimez-la. Le résultat devrait être `11`.
+
+Ok alors, je pense que vous avez appris de bonnes choses dans cet article, j'avoue que le projet était simple mais ne vous inquiétez pas, à partir du 5ème ou 6ème article, les projets vont être de plus en plus stimulants et intéressants, d'ici là il va falloir apprendre les bases de Rust.
+
+Dans le prochain article, nous aborderons les fonctions et les expressions et construirons un convertisseur de température (je sais que c'est simple mais les projets simples sont vraiment utiles pour apprendre les concepts plus rapidement sans trop de charge cognitive). Je te verrai bientôt, d'ici là, profite d'une belle vie !

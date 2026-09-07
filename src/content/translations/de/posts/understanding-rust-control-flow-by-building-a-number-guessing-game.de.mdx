@@ -1,0 +1,524 @@
+---
+title: Kontrollfluss in Rust in der Praxis — ein Zahlenratespiel bauen
+description: In diesem Artikel lernen wir den Kontrollfluss in Rust kennen, indem wir ein Zahlenratespiel bauen
+date: 2026-09-06
+locale: de
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game
+---
+Beim letzten Mal haben wir einen wissenschaftlichen Taschenrechner gebaut und ihn verwendet, um uns mit Variablen und Typen vertraut zu machen. Jetzt werden wir ein Zahlen-Ratespiel erstellen und lernen, wie sich unser Programm wiederholen kann, wie der Wiederholungsmechanismus in Spielen, die Sie in Ihrem Leben gespielt haben, und eine Möglichkeit, Entscheidungen auf der Grundlage bestimmter Bedingungen zu treffen.
+
+<div class="aspect-video w-full overflow-hidden rounded-xl border border-border bg-black">
+  <iframe
+    class="h-full w-full"
+    src="https://www.youtube.com/embed/ZietDOQYn5Y?si=qz4hozxxmADjfxek"
+    title="Rust Control Flow in Practice - Build a Number Guessing Game"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+  ></iframe>
+</div>
+
+In diesem Spiel bestimmt unser Programm eine Zahl und wir müssen diese Zahl dann in mehreren Versuchen erraten. Sobald wir eine Zahl erraten haben, antwortet das Programm, wenn unsere Schätzung richtig ist oder unsere geschätzte Zahl höher oder niedriger als die tatsächliche Zahl ist, und wir werden es erneut versuchen.
+
+Wir verwenden `if`, um Zahlen zu vergleichen, eine Schleife, um das Spiel am Laufen zu halten, `match`, um Eingaben zu verarbeiten, und `break` oder `continue`, wenn wir ändern müssen, was die Schleife als nächstes tut.
+
+## Kontrollfluss
+Beginnen wir mit dem Verständnis des Kontrollflusses. Ein Programm ohne Verzweigungen führt eine Anweisung nach der anderen aus. In unserem ersten Artikel hatte unser Programm keine Verzweigungen, es lief oder wurde sequentiell ausgeführt. Um Ihnen ein Beispiel zu geben
+
+```rust
+fn main() {
+    let a = 10;
+    let b = 20;
+    let result = a + b;
+
+    println!("{result}");
+}
+```
+
+Aber für unser Ratespiel brauchen wir eine Möglichkeit, ein Programm zu schreiben, damit es abhängig von bestimmten Bedingungen Aktionen ausführen kann und auch über eine Wiederholungsschleife verfügt. Um diese Dinge zu erreichen, verwenden wir das Kontrollflusskonzept nicht nur in Rust, sondern in jeder Programmiersprache. Beginnen wir also mit dem Konzept der Bedingungen und lernen später in diesem Artikel etwas über Schleifen.
+
+## `if`
+In Rust sieht die `if`-Syntax anderen Programmiersprachen sehr ähnlich, es gibt jedoch dennoch einige Unterschiede
+```rust
+fn main() {
+    let number = 10;
+
+    if number > 5 {
+        println!("Number is greater than 5");
+    }
+}
+```
+In diesem Programm initialisieren wir zunächst die Variable `number` mit dem Wert `10` und stellen dann eine Bedingung mit `if` ein. Die Bedingung lautet: Wenn die Bedingung `number > 5` wahr oder erfüllt ist, drucken Sie die Zeichenfolge „Zahl ist größer als 5“ aus. Wenn diese Bedingung nicht erfüllt ist, wird wie bei anderen Sprachen nicht alles ausgeführt, was sich in diesem `if`-Block befindet, sodass unser Programm nichts ausgibt und das Programm dann verlässt.
+
+## Bedingungen müssen boolesch sein
+Im Gegensatz zu einigen anderen Sprachen gibt es in Rust keine wahren und falschen Werte. Lassen Sie mich Ihnen zeigen, was ich damit meine:
+```rust
+fn main() {
+    let number = 10;
+
+    if number {
+        println!("Number exists");
+    }
+}
+```
+Wenn Sie dies ausführen, werden Sie feststellen, dass sich der Compiler darüber beschwert, dass er einen erwarteten Bool-Wert, aber eine Ganzzahl erhalten hat. Denken Sie daran, was ich im ersten Artikel gesagt habe: Die `if`-Bedingung sollte einen `bool` erzeugen und im Moment ist `number` tatsächlich eine `i32`-Ganzzahl. Wir müssen eine Bedingung festlegen, damit Rust diese Bedingung auswerten kann, und dann gibt die Bedingung einen Bool-Wert zurück, entweder wahr oder falsch. Um das Problem zu beheben, können Sie Folgendes tun:
+```rust
+fn main() {
+    let number = 10;
+
+    if number != 0 {
+        println!("Number is not zero");
+    }
+}
+```
+Sie müssen sich das merken, denn in einigen anderen Sprachen wird häufig das Konzept wahrer und falscher Werte verwendet. Ich würde sagen, das ist eine gute Sache von Rust, weil das Erfordernis eines `bool` verhindert, dass Regeln wie `0` falsch sind oder ein nicht leerer String wahr ist oder eine Nullreferenz falsch ist und so weiter
+
+## `else` und `else if`
+Wie Sie dem Namen entnehmen können, verwenden wir für die übrigen Fälle `else`.
+```rust
+fn main() {
+    let number = 3;
+
+    if number > 5 {
+        println!("Number is greater than 5");
+    } else {
+        println!("Number is 5 or less");
+    }
+}
+```
+Genau wie andere Sprachen ist der Block `else` optional, aber Sie müssen den Block `if` verwenden, wenn Sie jemals den Block `else` verwenden möchten. Im Block `else` müssen wir keine Bedingungen angeben, da wir grundsätzlich sagen, dass für alle übrigen Fälle alles ausgeführt werden soll, was sich im Block `else` befindet, genau wie in anderen Sprachen.
+
+Nun, für `else if` (ja, Sie haben es richtig erraten) wird dies verwendet, wenn es mehr Fälle gibt
+```rust
+fn main() {
+    let number = 10;
+
+    if number > 10 {
+        println!("Number is greater than 10");
+    } else if number == 10 {
+        println!("Number is exactly 10");
+    } else {
+        println!("Number is less than 10");
+    }
+}
+```
+Dies ist wiederum sehr ähnlich zu anderen Sprachen. Wir führen mehrere Bedingungsprüfungen durch. Wenn eine der Bedingungen erfüllt ist, werden die restlichen Bedingungen überhaupt nicht ausgeführt. Auch unser Spiel wird dieselbe Struktur verwenden.
+
+## `if` ist ein Ausdruck
+Es ist wichtig zu beachten, dass `if` in Rust einen Wert erzeugen kann
+```rust
+fn main() {
+    let number = 10;
+
+    let message = if number > 5 {
+        "greater than 5"
+    } else {
+        "5 or less"
+    };
+
+    println!("{message}");
+}
+```
+
+## Schleifen
+Lassen Sie uns nun die Schleifen in Rust verstehen. In Rust gibt es drei gängige Schleifenformen: `loop`, `while` und `for`. Wie andere Sprachen wird auch eine Schleife verwendet, um einen Block für eine bestimmte Anzahl von Malen zu wiederholen.
+
+## `loop`
+Beginnen wir mit `loop`. `loop` hat keine Bedingung in seiner Syntax, es wiederholt sich, bis die Ausführung es durch `break`, `return`, eine Panik oder eine abweichende Operation verlässt. Lassen Sie mich Ihnen zeigen, was ich damit meine
+```rust
+fn main() {
+    loop {
+        println!("Hello");
+    }
+}
+```
+Sie sehen also, dass es sich bei dieser Schleife um eine Endlosschleife handelt. Sie müssen sie manuell mit `Ctrl + C` stoppen. Eine Schleife, die niemals beendet werden kann, hat im Typmodell von Rust den Typ „never“ `!`. Der Typ „never“ stellt einen Ausdruck dar, der keinen normalen Wert erzeugt, da die Ausführung nicht über diesen Wert hinaus fortgesetzt wird.
+
+Um dieses Endlosschleifensystem zu stoppen, können wir also `break` verwenden. `break` verlässt die nächste umschließende Schleife und die Ausführung wird nach dieser Schleife fortgesetzt. Im Gegensatz zu `return` beendet `return` die gesamte Funktion, aber `break` verlässt nur den aktuellen Block. 
+```rust
+fn main() {
+    let mut number = 1;
+
+    loop {
+        println!("{number}");
+
+        if number == 5 {
+            break;
+        }
+
+        number += 1;
+    }
+}
+```
+Wir geben die Zahl innerhalb der Schleife aus, aber Sie können sehen, dass es eine `if`-Bedingung gibt, die besagt, dass wenn `number == 5` diese Schleife verlassen wird
+
+Es gibt auch `continue`, wir verwenden dies, wenn die aktuelle Iteration enden soll, die Schleife selbst aber weiterlaufen soll
+```rust
+fn main() {
+    let mut number = 0;
+
+    loop {
+        number += 1;
+
+        if number == 3 {
+            continue;
+        }
+
+        println!("{number}");
+
+        if number == 5 {
+            break;
+        }
+    }
+}
+```
+Auch hier erhöhen wir die Variable `number` innerhalb der Schleife. Dann gibt es eine Bedingung, die besagt, wenn `number == 3`, dann `continue`, was bedeutet, dass der Rest dieser spezifischen Iteration übersprungen und die Kontrolle zurück an die Schleifengrenze übertragen wird.
+
+Das gibt also 1, 2, 4 und 5 aus. Es wird 3 übersprungen, denn wenn Sie dies trocken ausführen, ist zuerst die Zahl 0, dann kommen wir in die Schleife und erhöhen den Zahlenwert auf 1, dann schlägt die if-Bedingung fehl, also überspringen wir das, dann drucken wir die Zahl, also gibt es 1 aus, dann gibt es eine weitere if-Prüfung, die fehlschlägt, jetzt geht es wieder zurück zur Schleife, auf die gleiche Weise wird 2 gedruckt, jetzt geht es zurück zu am Anfang der Schleife und erhöht den Wert auf 3, danach ist die If-Prüfung erfüllt und es heißt `continue`, das bedeutet, dass die verbleibenden Zeilen für diese Iteration übersprungen werden und zum Anfang der Schleife zurückgekehrt wird, dann wird der Wert auf 4 erhöht und 4 ausgegeben, dann wird 5 ausgegeben, aber am Ende dieser Iteration wird die letzte If-Prüfung erfüllt und `break` ausgeführt und wir verlassen die Schleife dieser Schleife.
+
+Beachten Sie, dass sowohl `break` als auch `continue` auf die nächste Schleife einwirken, es sei denn, eine Schleifenbezeichnung wird angegeben (ich glaube, wir haben so etwas in Python, bin mir aber nicht sicher). Beschriftungen sind nützlich, wenn Schleifen verschachtelt sind:
+```rust
+fn main() {
+    'outer: loop {
+        loop {
+            break 'outer;
+        }
+    }
+}
+```
+Der Apostroph beginnt die Bezeichnung; es ist keine Zeichenfolge. `break 'outer` verlässt die äußere Schleife direkt. Das Ratespiel hat nur eine Schleife und benötigt daher keine Beschriftung. Ich würde sagen, dass dies eine großartige Ergänzung ist, da ich Situationen erlebt habe, in denen ich innerhalb der inneren Schleife eine Bedingung haben möchte und wenn diese Bedingung erfüllt ist, möchte ich sowohl die innere als auch die äußere Schleife verlassen. In diesem Fall hilft diese Art von Funktion wirklich.
+
+## `while`
+Schauen wir uns nun eine andere Form einer Schleife namens `while` an. `while` überprüft seinen Zustand vor jeder Iteration. Es ist ziemlich ähnlich zu anderen Sprachen:
+```rust
+fn main() {
+    let mut number = 1;
+
+    while number <= 5 {
+        println!("{number}");
+        number += 1;
+    }
+}
+```
+Wir haben eine `number`-Variable mit dem Wert 1, dann betreten wir die Schleife und die Bedingungsprüfung findet statt. Wenn die Bedingung erfüllt ist, wird der Codeblock ausgeführt und wenn nicht, verlassen wir die Schleife. Dieses Programm gibt also die Zahlen 1,2,3,4,5 aus und bricht dann ab, da die Bedingung nicht mehr erfüllt ist.
+
+In gewisser Weise verhält sich die `while`-Schleife wie eine `loop`, die ein `if` enthält, das `break` aufruft, wenn die Bedingung `false` ist.
+
+## `for`
+Die `for`-Schleife übernimmt Werte von einem Iterator
+```rust
+fn main() {
+    for number in 1..=5 {
+        println!("{number}");
+    }
+}
+```
+Der Bereich `1..=5` umfasst beide Endpunkte. Bei jeder Iteration ist das nächste Element an `number` gebunden und der Hauptteil wird einmal für dieses Element ausgeführt. Wenn Sie die Iteration von 1 bis 5 (nicht inklusive) ausführen möchten, können Sie einfach `1..5` ohne die Gleichen verwenden. Genauer gesagt akzeptiert `for` jeden Wert, der `IntoIterator` implementiert, wandelt ihn in einen Iterator um, ruft wiederholt `next` auf und stoppt, wenn `next` `None` zurückgibt. Die Variable nach `for` ist technisch gesehen ein Muster, sodass sie Elemente bei der Herstellung zerstören kann. Die standardmäßige `for`-Syntax von Rust vermeidet außerdem die manuelle Indizierung und Grenzprüfungen, die häufig zum Durchlaufen von Sammlungen in Sprachen mit Schleifen im C-Stil verwendet werden. Wir werden später ausführlicher auf Iteratoren und Muster eingehen.
+
+## `match`
+`match` wertet einen Wert aus, der als Prüfer bezeichnet wird, und vergleicht ihn mit einer Reihe von Mustern
+```rust
+fn main() {
+    let number = 2;
+
+    match number {
+        1 => println!("One"),
+        2 => println!("Two"),
+        3 => println!("Three"),
+        _ => println!("Something else"),
+    }
+}
+```
+Jede dieser Zeilen oder Abschnitte innerhalb des Blocks `match` wird als Arm bezeichnet. Jeder Arm hat links von `=>` ein Muster und rechts den Ausdruck für dieses Muster. Rust testet die Arme von oben nach unten und führt den ersten passenden Arm aus. Da `number` gleich `2` ist, läuft der zweite Arm
+
+Das Muster `_` ist ein Platzhalter, der jeden Wert behandelt, der nicht mit einem früheren Zweig übereinstimmt. Wenn Sie es entfernen, wird sich der Compiler beschweren, da Rust verlangt, dass alle möglichen Fälle abgedeckt werden, bevor das Programm kompiliert werden kann. Dies ist eines der Dinge, an die Sie denken sollten: Wenn Sie `match` verwenden, sollten Sie alle möglichen Werte abdecken, sonst wird es nicht kompiliert.
+
+Muster können mehr als nur Literalwerte vergleichen. Sie können Namen binden, Tupel und Strukturen zerstören, Enum-Varianten auswählen, Teile eines Werts ignorieren und Bereiche einschließen. In diesem Artikel benötigen wir nur Literalmuster, den Platzhalter und die Enum-Muster `Ok` und `Err`.
+
+Genau wie `if` ist `match` ein Ausdruck und kann einen Wert erzeugen
+```rust
+fn main() {
+    let number = 2;
+
+    let message = match number {
+        1 => "One",
+        2 => "Two",
+        3 => "Three",
+        _ => "Something else",
+    };
+
+    println!("{message}");
+}
+```
+Sie können sehen, dass der Wert von `number` 2 ist, also würde der entsprechende Arm übereinstimmen und `message` auf `"Two"` zeigen. Wenn wir also `message` drucken, wird `"Two"` gedruckt.
+
+Beachten Sie Folgendes: Wenn Sie `match` als Ausdruck verwenden, stellen Sie sicher, dass alle Arme einen kompatiblen Typ erzeugen müssen
+
+`match` erinnert Sie vielleicht an `switch`, aber Vollständigkeit, Ausdruckswerte und Destrukturierung nähern es dem algebraischen Mustervergleich in Sprachen, die getaggte Unions unterstützen. Wir werden es hier verwenden, um die beiden möglichen Ergebnisse der Eingabeanalyse zu verarbeiten.
+
+## `Result`
+Im vorherigen Artikel haben wir gesehen, dass wir, wenn wir eine Eingabe vom Benutzer über die Befehlszeile erhalten, diese als Zeichenfolge erhalten und manchmal müssen wir ihren Typ entsprechend konvertieren. Für unser Rateprojekt müssen wir die Eingabe in eine Zahl umwandeln
+```rust
+fn main() {
+    let number = "42".parse::<u32>();
+
+    println!("{number:?}");
+}
+```
+Wenn Sie dies ausdrucken, lautet die Ausgabe `Ok(42)`. Wenn die Zeichenfolge „Hallo“ lautet, sieht die Ausgabe wie folgt aus: `Err(ParseIntError {...})`. Was hier passiert, ist, dass das Parsen `Result<T, E>` zurückgibt, weil der Vorgang erfolgreich sein oder fehlschlagen kann (wir haben gerade beide Fälle in unserem Beispiel gesehen). `T` ist der Erfolgstyp und `E` ist der Fehlertyp. Eine vereinfachte Version seiner Definition sieht so aus
+```rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+Jeder `Result`-Wert enthält genau eine dieser Varianten `Ok(value)` oder `Err(error)`
+`T` und `E` sind generische Parameter, sodass verschiedene Vorgänge dieselbe `Result`-Struktur mit unterschiedlichen Erfolgs- und Fehlertypen verwenden können. Für `"42".parse::<u32>()` ist der Erfolgstyp `u32` und der Fehlertyp `ParseIntError`. Die `::<u32>`-Syntax wird allgemein als Turbofisch bezeichnet. Es teilt der generischen Methode `parse` mit, welchen Zieltyp wir wollen, wenn der umgebende Code nicht genügend Informationen bereitstellt.
+
+Wir werden Aufzählungen und Generika separat behandeln, aber wir können die Varianten bereits mit `match` behandeln:
+
+```rust
+fn main() {
+    let result = "42".parse::<u32>();
+
+    match result {
+        Ok(number) => println!("Parsed number: {number}"),
+        Err(error) => println!("Failed to parse: {error}"),
+    }
+}
+```
+Das Muster `Ok(number)` prüft sowohl die Variante als auch bindet ihren enthaltenen Wert an `number`, während `Err(error)` dasselbe für den Fehler tut. Hierbei handelt es sich eher um eine Destrukturierung als um eine separate Statusprüfung, gefolgt von einem zweiten Aufruf zum Abrufen des Werts.
+
+Möglicherweise haben Sie `unwrap()` in früherem Rust-Code verwendet
+```rust
+let number = "42".parse::<u32>().unwrap();
+```
+`unwrap()` gibt den Wert innerhalb von `Ok` zurück. Der Aufruf an einem `Err` löst Panik aus
+```rust
+fn main() {
+    let number = "hello".parse::<u32>().unwrap();
+
+    println!("{number}");
+}
+```
+`unwrap()` ist praktisch, wenn ein Scheitern aufgrund der Konstruktion unmöglich ist, bei schnellen Experimenten oder wenn eine Panik die beabsichtigte Reaktion ist. Es wird erwartet, dass Benutzereingaben Fehler enthalten, sodass eine Panik normale Eingaben in einen Programmabsturz verwandeln würde. Unser Spiel verarbeitet das Parsing-Ergebnis mit `match` und läuft weiter.
+
+## Aufbau des Zahlenratespiels
+Ok, genug gelernt, jetzt können wir mit der Erstellung unseres Projekts beginnen
+
+### Erstellen Sie das Projekt
+Lassen Sie uns zunächst ein Cargo-Projekt erstellen und dieses in Ihrer bevorzugten IDE öffnen
+```bash
+cargo new number-guessing-game
+```
+
+Jetzt kennen Sie die Übung: Öffnen Sie `src/main.rs` und entfernen Sie den vorhandenen Hallo-Welt-Code
+
+### Zufallszahlengenerierung hinzufügen
+Die Standardbibliothek enthält nicht die hier benötigte Zufallszahlenfunktion. Fügen Sie daher die Kiste `rand` zu `Cargo.toml` hinzu. Cargo liest dieses Manifest, löst eine kompatible Crate-Version auf, lädt deren Quelle herunter und zeichnet das genaue aufgelöste Abhängigkeitsdiagramm in `Cargo.lock` auf.
+```toml
+[package]
+name = "number-guessing-game"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rand = "0.10"
+```
+
+Ok, da wir nun die Kiste `rand` haben, beginnen wir damit, eine Zahl aus dem inklusiven Bereich `1..=100` zu generieren.
+```rust
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("Secret number: {secret_number}");
+}
+```
+`random_range` ist generisch für den Werttyp des Bereichs. In diesem isolierten Beispiel sind die ganzzahligen Literale ohne Suffix standardmäßig `i32`, sodass `secret_number` als `i32` abgeleitet wird. Im endgültigen Programm gibt der Vergleich mit dem analysierten `u32` dem Compiler genügend Kontext, um stattdessen auf `u32` zu schließen. Wir könnten den Typ jederzeit mit `let secret_number: u32 = ...` explizit machen.
+
+Die `..=`-Syntax erstellt einen inklusiven Bereich, sodass sowohl `1` als auch `100` mögliche Ergebnisse sind. Im Vergleich dazu würde `1..100` `100` ausschließen. Führen Sie das Programm mehrmals aus und stellen Sie sicher, dass sich der Wert ändert. Das `println!` ist temporär und wird nach dieser Prüfung entfernt.
+
+### Eingabe lesen
+Nachdem wir nun wissen, wie man eine Zufallszahl generiert, die der Benutzer erraten muss, nehmen wir nun die erratene Zahl vom Benutzer
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+    println!("Enter your guess:");
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    println!("You entered: {input}");
+    println!("Secret number: {secret_number}");
+}
+```
+`String::new()` erstellt eine eigene, erweiterbare UTF-8-Zeichenfolge. `read_line` hängt die aus der Standardeingabe gelesenen Bytes an diese Zeichenfolge an, weshalb es `&mut input` anstelle einer unveränderlichen Referenz benötigt. Durch die Übergabe einer veränderbaren Referenz kann `read_line` die Zeichenfolge ändern, ohne den Besitz davon zu übernehmen, sodass `main` `input` danach immer noch verwenden kann.
+
+Die Methode gibt `io::Result<usize>` zurück. Sein Erfolgswert ist die Anzahl der gelesenen Bytes, während sein Fehlerwert einen Eingabe-/Ausgabefehler beschreibt. Dieser Entwurf verwendet `unwrap()` für diesen Fehler auf niedrigerer Ebene, damit sich der Artikel weiterhin auf den Kontrollfluss und gewöhnliche ungültige Schätzungen konzentrieren kann. Ein Produktionsprogramm könnte dies auch bewältigen `Result`.
+
+### Analysieren Sie die Vermutung
+Ok, da wir nun den Wert erhalten haben, den der Benutzer erraten hat, ist es an der Zeit, ihn zu analysieren und in eine Zahl umzuwandeln
+
+Derzeit ist `input` ein `String` und `secret_number` eine Zahl, sodass wir diese beiden Werte nicht direkt vergleichen können. Wir müssen zunächst die geschätzte Zahl in `u32` umwandeln (wir könnten uns auch für i32 entscheiden, aber da unsere Geheimzahl immer positiv sein wird, ist `u32` der Fall gut zu verwenden)
+```rust
+let guess = input.trim().parse::<u32>();
+```
+`read_line` behält normalerweise die neue Zeile bei, die erstellt wird, wenn der Benutzer die Eingabetaste drückt. `trim()` gibt einen String-Slice zurück, bei dem führende und nachfolgende Leerzeichen entfernt wurden, dann versucht `parse::<u32>()`, aus diesem Slice eine Zahl zu erstellen. Verwenden Sie `match`, um das zurückgegebene `Result` zu verarbeiten:
+```rust
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+    println!("Enter your guess:");
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    let guess = match input.trim().parse::<u32>() {
+        Ok(number) => number,
+        Err(error) => {
+            println!("Invalid input: {error}");
+            return;
+        }
+    };
+
+    println!("Your guess: {guess}");
+    println!("Secret number: {secret_number}");
+}
+```
+Der vollständige `match`-Ausdruck wird zum Wert, der `guess` zugewiesen wird. Der `Ok`-Arm erzeugt einen `u32`, während der `Err`-Arm den Fehler ausgibt und `return` ausführt. Obwohl diese Arme unterschiedliche Typen zu haben scheinen, hat `return` den Never-Typ `!`, da er in der aktuellen Funktion keinen Wert erzeugt. Ein divergierender Ausdruck kann überall dort passen, wo ein anderer Typ erforderlich ist, daher ist der Typ der vollständigen Übereinstimmung `u32`.
+
+Diese erste Version verwendet `return`, wodurch `main` beendet und somit das Programm beendet wird. Die nächste Version benötigt ein anderes Kontrollflussziel, da ungültiger Text nur den aktuellen Versuch beenden sollte.
+
+### Wiederholungsversuche hinzufügen
+Nachdem wir nun die vom Benutzer erratene Zahl korrekt geparst haben, ist es an der Zeit, den Wiederholungsmechanismus hinzuzufügen, damit der Benutzer es so lange versuchen kann, bis er es richtig gemacht hat
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+
+    loop {
+        println!("Enter your guess:");
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let guess = match input.trim().parse::<u32>() {
+            Ok(number) => number,
+            Err(error) => {
+                println!("Invalid input: {error}");
+                continue;
+            }
+        };
+
+        println!("Your guess: {guess}");
+    }
+}
+```
+Die Eingabe von `hello` gibt nun einen Fehler aus und kehrt zur Eingabeaufforderung zurück. Wie `return` ist `continue` ein divergierender Ausdruck mit dem Typ `!`, sodass der `Err`-Arm nicht das vom `Ok`-Arm erwartete `u32` erzeugen muss. Es überträgt die Kontrolle an die nächste Iteration, bevor `guess` erstellt wird. Eine gültige Zahl erreicht das letzte `println!`.
+
+### Vergleichen Sie die Vermutung
+Vergleichen wir nun die vom Benutzer geschätzte Zahl mit der geheimen Zahl und wir können ihm sagen, ob er richtig liegt oder seine Schätzung zu niedrig oder zu hoch ist. Ersetzen Sie das letzte `println!` durch den Vergleich
+```rust
+if guess < secret_number {
+    println!("Too low!");
+} else if guess > secret_number {
+    println!("Too high!");
+} else {
+    println!("You got it!");
+}
+```
+Die Bedingungen schließen sich gegenseitig aus. Für zwei beliebige geordnete ganze Zahlen muss der Schätzwert kleiner, größer oder gleich der geheimen Zahl sein. Das endgültige `else` stellt daher Gleichheit dar, ohne den Vergleich zu wiederholen.
+
+Das Programm kann nun den richtigen Hinweis geben, aber die Schleife wird nach einer richtigen Vermutung fortgesetzt. Fügen Sie `break` zum letzten Zweig hinzu. Dieses einfache `break` führt dazu, dass die gesamte Schleife zu `()` ausgewertet wird und die Ausführung nach der Schleife fortgesetzt wird. Da die Schleife die letzte Operation in `main` ist, endet die Funktion dann
+
+### Komplettes Programm
+Hier ist der vollständige Code als Referenz
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+
+    loop {
+        println!("Enter your guess:");
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let guess = match input.trim().parse::<u32>() {
+            Ok(number) => number,
+            Err(error) => {
+                println!("Invalid input: {error}");
+                continue;
+            }
+        };
+
+        if guess < secret_number {
+            println!("Too low!");
+        } else if guess > secret_number {
+            println!("Too high!");
+        } else {
+            println!("You got it!");
+            break;
+        }
+    }
+}
+```
+
+Wenn Sie es jetzt ausführen und das Spiel spielen, erhalten Sie etwa Folgendes:
+```text
+I'm thinking of a number between 1 and 100.
+Enter your guess:
+50
+Too low!
+Enter your guess:
+75
+Too high!
+Enter your guess:
+68
+You got it!
+```
+
+## Übungen
+In diesem Artikel habe ich mir überlegt, Ihnen einige Übungsherausforderungen zu geben, die Sie dem Programm hinzufügen und verbessern können, damit Sie auch etwas Übung gewinnen können:
+
+#### Gültige Versuche zählen
+
+Fügen Sie einen veränderlichen Zähler hinzu und erhöhen Sie ihn nach jeder gültigen Schätzung. Drucken Sie die Zählung aus, wenn der Spieler gewinnt:
+
+```text
+You got it in 7 attempts!
+```
+
+Wenn Sie das Inkrement nach dem Parsen platzieren, wird ungültiger Text nicht als Versuch gewertet. Testen Sie das Programm mit zwei ungültigen Eingaben, gefolgt von drei gültigen Schätzungen. Die gemeldete Anzahl sollte `3` betragen.
+
+#### Bestätigen Sie den Bereich
+
+Parsing und Validierung sind separate Schritte. `500` ist ein gültiger `u32`, sodass die Analyse erfolgreich ist, auch wenn die Zahl außerhalb des Spielbereichs liegt. Fügen Sie nach dem Parsen eine `if`-Bedingung hinzu und verwenden Sie `continue`, wenn die Schätzung außerhalb von `1..=100` liegt. Stellen Sie sicher, dass `0`, `101` und `500` abgelehnt werden, während `1` und `100` den Vergleich erreichen.
+
+#### Schreiben Sie `while` mit `loop` um.
+
+Nehmen Sie das frühere Beispiel `while number <= 5` und drücken Sie dasselbe Verhalten mit `loop`, `if` und `break` aus. Beide Programme sollten die Zahlen von `1` bis `5` drucken. In dieser Übung wird die Beziehung zwischen bedingten Schleifen und unbedingten Schleifen mit expliziten Ausgängen überprüft.
+
+#### Gibt einen Wert aus einer Schleife zurück
+
+Schreiben Sie eine Schleife, die aufwärts zählt und `break number;` verwendet, wenn `number * number` größer als `100` ist. Speichern Sie den Wert der Schleife und drucken Sie ihn aus. Das Ergebnis sollte `11` sein.
+
+Okay, ich denke, Sie haben in diesem Artikel einiges Gutes gelernt. Ich gebe zu, dass das Projekt einfach war, aber keine Sorge, ab dem 5. oder 6. Artikel werden die Projekte immer anspruchsvoller und interessanter, bis dahin müssen wir die Grundlagen von Rust lernen.
+
+Im nächsten Artikel werden wir uns mit Funktionen und Ausdrücken befassen und einen Temperaturkonverter erstellen (ich weiß, das ist einfach, aber einfache Projekte eignen sich wirklich gut, um die Konzepte schneller und ohne großen kognitiven Aufwand zu erlernen). Bis bald, bis dahin ein schönes Leben!

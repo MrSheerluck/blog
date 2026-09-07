@@ -12,6 +12,48 @@ const articles = [
     source: "src/content/docs/posts/programming-languages/rust/understanding-rust-variables-and-types-by-building-a-scientific-calculator.mdx",
     translations: "src/content/translations/{locale}/posts/understanding-rust-variables-and-types-by-building-a-scientific-calculator.{locale}.mdx",
   },
+  {
+    source: "src/content/docs/posts/programming-languages/rust/understanding-rust-control-flow-by-building-a-number-guessing-game.mdx",
+    translations: "src/content/translations/{locale}/posts/understanding-rust-control-flow-by-building-a-number-guessing-game.{locale}.mdx",
+    frontmatter: {
+      "pt-br": `title: Fluxo de controle em Rust na prática — construindo um jogo de adivinhação
+description: Neste artigo, vamos aprender sobre fluxo de controle em Rust construindo um jogo de adivinhação
+date: 2026-09-06
+locale: pt-br
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game`,
+      hi: `title: Rust में Control Flow का अभ्यास — Number Guessing Game बनाएँ
+description: इस लेख में हम एक number guessing game बनाकर Rust में control flow सीखेंगे
+date: 2026-09-06
+locale: hi
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game`,
+      es: `title: Flujo de control en Rust en la práctica — crea un juego de adivinanzas
+description: En este artículo aprenderemos sobre el flujo de control en Rust construyendo un juego de adivinanzas
+date: 2026-09-06
+locale: es
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game`,
+      de: `title: Kontrollfluss in Rust in der Praxis — ein Zahlenratespiel bauen
+description: In diesem Artikel lernen wir den Kontrollfluss in Rust kennen, indem wir ein Zahlenratespiel bauen
+date: 2026-09-06
+locale: de
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game`,
+      fr: `title: Le contrôle de flux en Rust en pratique — construisons un jeu de devinettes
+description: Dans cet article, nous allons découvrir le contrôle de flux en Rust en construisant un jeu de devinettes
+date: 2026-09-06
+locale: fr
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game`,
+      ja: `title: Rust の制御フローを実践 — 数当てゲームを作る
+description: この記事では、数当てゲームを作りながら Rust の制御フローを学びます
+date: 2026-09-06
+locale: ja
+translationKey: understanding-rust-control-flow-by-building-a-number-guessing-game
+slug: understanding-rust-control-flow-by-building-a-number-guessing-game`,
+    },
+  },
 ];
 
 const BREAK = "[[XQ_BREAK]]";
@@ -31,6 +73,9 @@ function protect(text) {
     return TOKEN(kind, index);
   };
 
+  // The source contains one adjacent pair of opening fences in the parsing
+  // example. Keep that existing block intact before handling normal fences.
+  text = text.replace(/```rust\n```rust[\s\S]*?```/g, (value) => save("CODE", value));
   // Code fences must remain byte-for-byte identical, including language tags.
   text = text.replace(/```[\s\S]*?```/g, (value) => save("CODE", value));
   // Keep inline code unchanged so API names, commands, and filenames stay exact.
@@ -103,7 +148,7 @@ async function translateBody(body, locale) {
   }
   await flush();
   const result = restore(translated.join("\n\n"), protectedBody.values);
-  if (/\[\[XQ_(?:CODE|TAG|URL|INLINE)_\d+\]\]/.test(result)) {
+  if (/\[\[XQ_/.test(result)) {
     throw new Error(`Unrestored protected token in ${locale}`);
   }
   return result;
@@ -113,13 +158,28 @@ function getTranslationPath(template, locale) {
   return template.replaceAll("{locale}", locale);
 }
 
-for (const article of articles) {
+const requestedArticle = process.argv.find((argument) => argument.startsWith("--article="))?.slice("--article=".length);
+const selectedArticles = requestedArticle
+  ? articles.filter((article) => article.source.includes(requestedArticle))
+  : articles;
+
+if (requestedArticle && !selectedArticles.length) {
+  throw new Error(`No article matched: ${requestedArticle}`);
+}
+
+for (const article of selectedArticles) {
   const source = await readFile(join(root, article.source), "utf8");
   const { body } = splitFrontmatter(source);
   for (const locale of locales) {
     const target = getTranslationPath(article.translations, locale);
-    const existing = await readFile(join(root, target), "utf8");
-    const { frontmatter } = splitFrontmatter(existing);
+    let frontmatter;
+    try {
+      const existing = await readFile(join(root, target), "utf8");
+      frontmatter = splitFrontmatter(existing).frontmatter;
+    } catch (error) {
+      if (error.code !== "ENOENT" || !article.frontmatter?.[locale]) throw error;
+      frontmatter = article.frontmatter[locale];
+    }
     process.stdout.write(`Translating ${basename(article.source)} -> ${locale}\n`);
     const translatedBody = await translateBody(body, locale);
     await writeFile(join(root, target), `---\n${frontmatter}\n---\n${translatedBody.trim()}\n`);
