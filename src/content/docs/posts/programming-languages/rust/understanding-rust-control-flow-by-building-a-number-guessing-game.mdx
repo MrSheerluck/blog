@@ -1,0 +1,527 @@
+---
+title: Rust Control Flow in Practice - Build a Number Guessing Game
+description: In this article, we are going to learn about Rust control flow by building a number guessing game
+date: 2026-09-06
+---
+
+
+Last time, we built a scientific calculator and used it to get comfortable with variables and types. Now we are going to build a number guessing game and learn how our program can repeat itself like the retry mechanism in games you have played in your life and a way to take decisions based on certain conditions.
+
+<div class="aspect-video w-full overflow-hidden rounded-xl border border-border bg-black">
+  <iframe
+    class="h-full w-full"
+    src="https://www.youtube.com/embed/ZietDOQYn5Y?si=qz4hozxxmADjfxek"
+    title="Rust Control Flow in Practice - Build a Number Guessing Game"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+  ></iframe>
+</div>
+
+In this game, our program will decide a number and then we have to guess that number in multiple retries. Once we guess a number, the program will reply if our guess is correct or our guessed number is higher or lower than the actual number and we will retry again.
+
+We will use `if` to compare numbers, a loop to keep the game running, `match` to deal with input, and `break` or `continue` when we need to change what the loop does next.
+
+## Control flow
+Lets start with understanding about control flow. A program with no branches runs one statement after another. In our first article, our program had no branches, it was running or executing in a sequential manner. To give you an example
+
+```rust
+fn main() {
+    let a = 10;
+    let b = 20;
+    let result = a + b;
+
+    println!("{result}");
+}
+```
+
+But for our guessing game, we need a way to write program so that it can take actions depending on certain conditions and also can have the retry loop. To get these things, we use the control flow concept not only in Rust but in any programming language. So, lets start with the concept of conditions and then we will learn about loops later in this article.
+
+## `if`
+In Rust, the `if` syntax looks very similar to other programming languages but there are still some differences
+```rust
+fn main() {
+    let number = 10;
+
+    if number > 5 {
+        println!("Number is greater than 5");
+    }
+}
+```
+In this program, we are first initialising the variable `number` with a value of `10` and then we are putting a condition using `if`. The condition is if the condition `number > 5` is true or satisfied, then go ahead and print the "Number is greater than 5" string. Like other languages, if this condition is not satsified, then it won't execute whatever is inside that `if` block, so our program won't print anything and then exit out of the program.
+
+## Conditions Must be Boolean
+Unlike some other languages, Rust does not have truthy and falsy values. Let me show you what I mean by that:
+```rust
+fn main() {
+    let number = 10;
+
+    if number {
+        println!("Number exists");
+    }
+}
+```
+if you'll run this, you'll see the compiler will complain saying expected bool but got integer. Remember, what I said in the first article, the `if` condition should produce a `bool` and right now `number` is actually an `i32` integer, we need to put a condition so that Rust can evaluate that condition and then the condition will return a bool value either true or false. So, to fix this, you can do this:
+```rust
+fn main() {
+    let number = 10;
+
+    if number != 0 {
+        println!("Number is not zero");
+    }
+}
+```
+You need to remember this because in some other languages, this is very common to use the concept of truthy and falsy values. I would say, this is a good thing from Rust because requiring a `bool` prevents rules such as `0` being false or a non-empty string being true or a null reference being false and so on
+
+## `else` and `else if`
+As you can guess from the name, we will use `else` for the remaining cases
+```rust
+fn main() {
+    let number = 3;
+
+    if number > 5 {
+        println!("Number is greater than 5");
+    } else {
+        println!("Number is 5 or less");
+    }
+}
+```
+Just like other languages, `else` block is optional but you gotta use `if` block if you ever want to use `else` block. In the `else` block, we don't need to give any conditions because we are basically saying for all the remaining cases, execute whatever is in the `else` block just like other languages.
+
+Now, for the `else if` (yeah, you guessed it right), this is used when there are more cases
+```rust
+fn main() {
+    let number = 10;
+
+    if number > 10 {
+        println!("Number is greater than 10");
+    } else if number == 10 {
+        println!("Number is exactly 10");
+    } else {
+        println!("Number is less than 10");
+    }
+}
+```
+This is again very similar to other languages, we are having multiple condition checks, if one of the condition satisfies, then the rest of the conditions won't execute at all. Our game will use this same structure as well.
+
+## `if` is an expression
+One important thing to note that in Rust, `if` can produce a value
+```rust
+fn main() {
+    let number = 10;
+
+    let message = if number > 5 {
+        "greater than 5"
+    } else {
+        "5 or less"
+    };
+
+    println!("{message}");
+}
+```
+
+
+## Loops
+Now, lets understand loops in Rust. in Rust, there are three common loop forms: `loop`, `while` and `for`. Like other languages, loop is used to repeat a block for a certain amount of times. 
+
+## `loop`
+Let's start with `loop`. `loop` has not condition in its syntax, it repeats until execution leaves it through `break`, `return`, a panic or any diverging operation. Let me show you what I mean by that
+```rust
+fn main() {
+    loop {
+        println!("Hello");
+    }
+}
+```
+So, you can see this loop is an infinite loop, you have to stop it manually with `Ctrl + C`. A loop that can never finish has the never type `!` in Rust's type model. The never type represents an expression that does not produce a normal value because execution does not continue past it.
+
+So, to stop this infinite loop system we can use `break`, `break` exits the nearest enclosing loop and execution resumes after that loop. Its different than `return`, `return` exits the entire function but `break` just gets out of the current block. 
+```rust
+fn main() {
+    let mut number = 1;
+
+    loop {
+        println!("{number}");
+
+        if number == 5 {
+            break;
+        }
+
+        number += 1;
+    }
+}
+```
+We are printing the number inside the loop but you can see there is a `if` condition that says if `number == 5` then break out of this loop
+
+There's also `continue`, we use this when the current iteration should end but the loop itself should keep running
+```rust
+fn main() {
+    let mut number = 0;
+
+    loop {
+        number += 1;
+
+        if number == 3 {
+            continue;
+        }
+
+        println!("{number}");
+
+        if number == 5 {
+            break;
+        }
+    }
+}
+```
+Again, we are incrementing the `number` variable inside the loop, then there is a condition that says if the `number == 3`, then `continue` that means skip the rest of this specific iteration and transfer the control back to the loop boundary. 
+
+So, this will print 1, 2, 4 and 5. It'll skip 3 because if you'll dry run this, first the number is 0, then we get into the loop and increment the number value to 1, then the if condition fails, so we skip that, then we print the number, so it prints 1, then there's another if check that fails, now it goes back to the loop again, in the same way it'll print 2, now it goes back to the top of the loop, and increments the value to 3, after this the if check satisfies and it says `continue`, this means skip the remaining lines for this iteration and go back to the top of the loop, then the value gets incremented to 4 and prints 4, then it prints 5 but in the end of this iteration, the final if check satisfies and `break` executes and we exit out of that loop.
+
+
+One thing to note that both `break` and `continue` act on the nearest loop unless a loop label is supplied (i think we have something like this in python but not sure). Labels are useful when loops are nested:
+```rust
+fn main() {
+    'outer: loop {
+        loop {
+            break 'outer;
+        }
+    }
+}
+```
+The apostrophe begins the label; it is not a string. `break 'outer` exits the outer loop directly. The guessing game has only one loop, so it does not need a label. I would say this is a great addition because I have faced situations where inside the inner loop I want to have a condition and if that condition satisfies I want exit out of both the inner and outer loop, in that case this kind of feature really helps.
+
+## `while`
+Now lets look at another form of loop called `while`. `while` checks its condition before every iteration its pretty similar to other languages:
+```rust
+fn main() {
+    let mut number = 1;
+
+    while number <= 5 {
+        println!("{number}");
+        number += 1;
+    }
+}
+```
+We have a `number` variable with value 1, then we are entering the loop and the condition check happens, if the condition satisfies then the code block will execute and if not we will get out of that loop. So this program will print numbers 1,2,3,4,5 then it'll break out as the condition won't be satisfied anymore.
+
+In a way, `while` loop acts like a `loop` containing an `if` that calls `break` when the condition is `false`.
+
+## `for`
+The `for` loop takes values from an iterator
+```rust
+fn main() {
+    for number in 1..=5 {
+        println!("{number}");
+    }
+}
+```
+The range `1..=5` includes both endpoints. On every iteration, the next item is bound to `number` and the body runs once for that item. If you want to run the iteration from 1 to 5 (not inclusive), then you can just use `1..5` without the equals. More precisely, `for` accepts any value that implements `IntoIterator`, converts it into an iterator, repeatedly calls `next`, and stops when `next` returns `None`. The variable after `for` is technically a pattern, so it can destructure items as they are produced. Rust's standard `for` syntax also avoids the manual indexing and boundary checks commonly used to traverse collections in languages with C-style loops. We will cover iterators and patterns in depth later.
+
+## `match`
+`match` evaluates one value, called the scrutinee and compares it against a set of patterns
+```rust
+fn main() {
+    let number = 2;
+
+    match number {
+        1 => println!("One"),
+        2 => println!("Two"),
+        3 => println!("Three"),
+        _ => println!("Something else"),
+    }
+}
+```
+Each of these lines or sections inside the `match` block is called an arm, each arm has a pattern on the left of `=>` and the expression for that pattern on the right. Rust tests the arms from top to bottom and runs the first matching arm. Since `number` is `2`, the second arm runs
+
+The `_` pattern is a wildcard that handles every value which did not match an earlier arm. if you'll remove it, the compiler will complain because Rust requires every possible case to be covered before the program can compile. This is one of the things you should remember that when you're using `match`, you should cover all the possible values otherwise it won't compile.
+
+Patterns can do more than compare literal values. They can bind names, destructure tuples and structs, select enum variants, ignore parts of a value, and include ranges. In this article we only need literal patterns, the wildcard, and the `Ok` and `Err` enum patterns.
+
+Just like `if`, `match` is an expression and can produce a value
+```rust
+fn main() {
+    let number = 2;
+
+    let message = match number {
+        1 => "One",
+        2 => "Two",
+        3 => "Three",
+        _ => "Something else",
+    };
+
+    println!("{message}");
+}
+```
+You can see that the value of `number` is 2, so the respective arm would match and the `message` will point to `"Two"`, so when we will print `message`, its gonna print `"Two"`
+
+One thing you need to note that when using `match` as an expression make sure all arms must produce compatible type
+
+`match` may remind you of `switch`, but exhaustiveness, expression values, and destructuring make it closer to algebraic pattern matching in languages that support tagged unions. We will use it here to handle the two possible results of parsing input.
+
+## `Result`
+In the previous article, we saw that when we get an input from user though command line, we get that as a string and sometimes we need to convert their type accordingly. For our guessing project, we need to convert the input to a number
+```rust
+fn main() {
+    let number = "42".parse::<u32>();
+
+    println!("{number:?}");
+}
+```
+If you'll print this, the output will be `Ok(42)`. If the string is "hello", the output will look like `Err(ParseIntError {...})`. What is happening here is that parsing returns `Result<T, E>` because the operation may succeed or fail (we just saw both the cases from our example). `T` is the success type and `E` is the error type. A simplified version of its definition looks like this
+```rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+Each `Result` value contains exactly one of those variants `Ok(value)` or `Err(error)`
+`T` and `E` are generic parameters, so different operations can use the same `Result` structure with different success and error types. For `"42".parse::<u32>()`, the success type is `u32` and the error type is `ParseIntError`. The `::<u32>` syntax is commonly called the turbofish; it tells the generic `parse` method which target type we want when the surrounding code does not provide enough information.
+
+We will cover enums and generics separately, but we can already handle the variants with `match`:
+
+```rust
+fn main() {
+    let result = "42".parse::<u32>();
+
+    match result {
+        Ok(number) => println!("Parsed number: {number}"),
+        Err(error) => println!("Failed to parse: {error}"),
+    }
+}
+```
+The pattern `Ok(number)` both checks the variant and binds its contained value to `number`, while `Err(error)` does the same for the error. This is destructuring rather than a separate status check followed by a second call to obtain the value.
+
+You may have used `unwrap()` in earlier Rust code
+```rust
+let number = "42".parse::<u32>().unwrap();
+```
+`unwrap()` returns the value inside `Ok`. Calling it on an `Err` causes a panic
+```rust
+fn main() {
+    let number = "hello".parse::<u32>().unwrap();
+
+    println!("{number}");
+}
+```
+`unwrap()` is convenient when failure is impossible by construction, during quick experiments, or when a panic is the intended response. User input is expected to contain mistakes, so a panic would turn normal input into a program crash. Our game will handle the parsing result with `match` and continue running.
+
+
+## Building the Number Guessing Game
+Ok then, enough learning, now lets start building our project
+
+### Create the project
+Lets first create a cargo project and open this in your preferred IDE
+```bash
+cargo new number-guessing-game
+```
+
+Now, you know the drill, open `src/main.rs` and remove the existing hello world code
+
+### Add Random Number Generation
+The standard library does not include the random number function needed here, so add the `rand` crate to `Cargo.toml`. Cargo reads this manifest, resolves a compatible crate version, downloads its source, and records the exact resolved dependency graph in `Cargo.lock`
+```toml
+[package]
+name = "number-guessing-game"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rand = "0.10"
+```
+
+Ok now that we have the `rand` crate, lets start by generating a number from the inclusive range `1..=100`
+```rust
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("Secret number: {secret_number}");
+}
+```
+`random_range` is generic over the range's value type. In this isolated example, the unsuffixed integer literals default to `i32`, so `secret_number` is inferred as an `i32`. In the final program, comparing it with the parsed `u32` gives the compiler enough context to infer `u32` instead. We could make the type explicit at any stage with `let secret_number: u32 = ...`.
+
+The `..=` syntax constructs an inclusive range, so both `1` and `100` are possible results. By comparison, `1..100` would exclude `100`. Run the program several times and confirm that the value changes. The `println!` is temporary and will be removed after this check.
+
+### Read input
+Now that we know how to generate a random number that the user needs to guess, lets now take the guessed number from the user
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+    println!("Enter your guess:");
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    println!("You entered: {input}");
+    println!("Secret number: {secret_number}");
+}
+```
+`String::new()` creates an owned, growable UTF-8 string. `read_line` appends the bytes read from standard input to that string, which is why it needs `&mut input` rather than an immutable reference. Passing a mutable reference allows `read_line` to change the string without taking ownership of it, so `main` can still use `input` afterward.
+
+The method returns `io::Result<usize>`. Its success value is the number of bytes read, while its error value describes an input/output failure. This draft uses `unwrap()` for that lower-level failure so the article can stay focused on control flow and ordinary invalid guesses. A production program could handle this `Result` as well.
+
+### Parse The Guess
+Ok so now that we have received the value that the user has guessed, its time to parse it and convert it to a number
+
+Currently, `input` is a `String` and `secret_number` is a number, so we can't compare these two values directly, we first need to convert the guessed number as a `u32` (we could go for i32 as well but as our secret number will always be positive, `u32` is good to use)
+```rust
+let guess = input.trim().parse::<u32>();
+```
+`read_line` normally keeps the newline created when the user presses Enter. `trim()` returns a string slice with leading and trailing whitespace removed, then `parse::<u32>()` attempts to build a number from that slice. Use `match` to handle the returned `Result`:
+```rust
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+    println!("Enter your guess:");
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+
+    let guess = match input.trim().parse::<u32>() {
+        Ok(number) => number,
+        Err(error) => {
+            println!("Invalid input: {error}");
+            return;
+        }
+    };
+
+    println!("Your guess: {guess}");
+    println!("Secret number: {secret_number}");
+}
+```
+The complete `match` expression becomes the value assigned to `guess`. The `Ok` arm produces a `u32`, while the `Err` arm prints the error and executes `return`. Although these arms appear to have different types, `return` has the never type `!` because it does not produce a value in the current function. A diverging expression can fit wherever another type is required, so the type of the complete match is `u32`.
+
+This first version uses `return`, which exits `main` and therefore ends the program. The next version needs a different control-flow target because invalid text should end only the current attempt.
+
+### Add Retries
+Now that we have parsed the guessed number from the user correctly, its time to add the retry mechanism so that user can keep trying until they get it right
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+
+    loop {
+        println!("Enter your guess:");
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let guess = match input.trim().parse::<u32>() {
+            Ok(number) => number,
+            Err(error) => {
+                println!("Invalid input: {error}");
+                continue;
+            }
+        };
+
+        println!("Your guess: {guess}");
+    }
+}
+```
+Entering `hello` now prints an error and returns to the prompt. Like `return`, `continue` is a diverging expression with type `!`, so the `Err` arm does not need to produce the `u32` expected from the `Ok` arm. It transfers control to the next iteration before `guess` is created. A valid number reaches the final `println!`.
+
+### Compare the Guess
+Now, lets compare user's guessed number and the secret number, and we can tell them whether they are correct or their guess is too low or too high. Replace the last `println!` with the comparison
+```rust
+if guess < secret_number {
+    println!("Too low!");
+} else if guess > secret_number {
+    println!("Too high!");
+} else {
+    println!("You got it!");
+}
+```
+The conditions are mutually exclusive. For any two ordered integers, the guess must be less than, greater than, or equal to the secret number. The final `else` therefore represents equality without repeating the comparison.
+
+The program can now give the correct hint, but the loop continues after a correct guess. Add `break` to the final branch. This plain `break` makes the complete loop evaluate to `()`, and execution resumes after the loop. Since the loop is the final operation in `main`, the function then ends
+
+### Complete Program
+Here's the complete code for your reference
+```rust
+use std::io;
+
+fn main() {
+    let secret_number = rand::random_range(1..=100);
+
+    println!("I'm thinking of a number between 1 and 100.");
+
+    loop {
+        println!("Enter your guess:");
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let guess = match input.trim().parse::<u32>() {
+            Ok(number) => number,
+            Err(error) => {
+                println!("Invalid input: {error}");
+                continue;
+            }
+        };
+
+        if guess < secret_number {
+            println!("Too low!");
+        } else if guess > secret_number {
+            println!("Too high!");
+        } else {
+            println!("You got it!");
+            break;
+        }
+    }
+}
+```
+
+If you'll run it now and play the game, you can have something like this:
+```text
+I'm thinking of a number between 1 and 100.
+Enter your guess:
+50
+Too low!
+Enter your guess:
+75
+Too high!
+Enter your guess:
+68
+You got it!
+```
+
+## Exercises
+From this article, I thought of giving you some exercise challenges that you can add and improve the program, this way you can gain some practice as well:
+
+#### Count valid attempts
+
+Add a mutable counter and increase it after each valid guess. Print the count when the player wins:
+
+```text
+You got it in 7 attempts!
+```
+
+Placing the increment after parsing means invalid text will not count as an attempt. Test the program with two invalid inputs followed by three valid guesses; the reported count should be `3`.
+
+#### Validate the range
+
+Parsing and validation are separate steps. `500` is a valid `u32`, so parsing succeeds even though the number is outside the game's range. Add an `if` condition after parsing and use `continue` when the guess is outside `1..=100`. Verify that `0`, `101`, and `500` are rejected while `1` and `100` reach the comparison.
+
+#### Rewrite `while` using `loop`
+
+Take the earlier `while number <= 5` example and express the same behavior with `loop`, `if`, and `break`. Both programs should print the numbers from `1` through `5`. This exercise checks the relationship between conditional loops and unconditional loops with explicit exits.
+
+#### Return a value from a loop
+
+Write a loop that counts upward and uses `break number;` when `number * number` is greater than `100`. Store the loop's value and print it. The result should be `11`.
+
+
+Ok then, I think you learned some good stuff in this article, I admit that the project was simple but worry not, from 5th or 6th article, the projects are going to be increasingly challenging and interesting, till then we gotta learn the basics of Rust.
+
+In the next article, we will cover functions and expressions and build a temperature converter (I know this is simple but simple projects are really good to learn the concepts faster without much cognitive load). I'll see you soon, till then have a great life!
