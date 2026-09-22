@@ -29,6 +29,7 @@ export const slugMap: Record<string, string> = {
   "scalars-explained": "math/linear-algebra/scalars-explained.mdx",
   "the-basic-laws-of-human-stupidity": "book-notes/the-basic-laws-of-human-stupidity.mdx",
   "understanding-rust-control-flow-by-building-a-number-guessing-game": "programming-languages/rust/understanding-rust-control-flow-by-building-a-number-guessing-game.mdx",
+  "understanding-rust-ownership-by-building-a-zero-copy-log-line-parser": "programming-languages/rust/understanding-rust-ownership-by-building-a-zero-copy-log-line-parser.mdx",
   "understanding-rust-variables-and-types-by-building-a-scientific-calculator": "programming-languages/rust/understanding-rust-variables-and-types-by-building-a-scientific-calculator.mdx",
   "welcome-to-mrsheerluck-blog": "misc/welcome-to-mrsheerluck-blog.mdx",
   "wtf-is-a-supply-chain-attack": "misc/wtf-is-a-supply-chain-attack.mdx",
