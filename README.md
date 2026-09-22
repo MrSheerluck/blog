@@ -101,11 +101,11 @@ Push to `main`. Cloudflare Pages auto-deploys using the build command `pnpm buil
 
 ## Google AdSense
 
-The shared layout already includes the AdSense script when the publisher ID is configured. Add these environment variables to local development and to the Cloudflare Pages build environment:
+The shared layout includes the AdSense verification meta tag and script for publisher `ca-pub-5206404453602193`. You can override the publisher ID with these environment variables in local development or Cloudflare Pages:
 
 ```bash
 PUBLIC_ADSENSE_CLIENT=ca-pub-1234567890123456
 PUBLIC_ADSENSE_SLOT=1234567890
 ```
 
-`PUBLIC_ADSENSE_CLIENT` enables AdSense site verification and Auto ads. In your AdSense account, add `https://blog.sheerluck.dev`, copy the publisher ID, and enable Auto ads after the site is approved. `PUBLIC_ADSENSE_SLOT` is optional; when set, the site renders one responsive display unit below page content on every `DocsLayout` page. The site also generates `/ads.txt` from the publisher ID during the build.
+`PUBLIC_ADSENSE_CLIENT` overrides the built-in publisher ID and enables AdSense site verification and Auto ads. In your AdSense account, add `https://blog.sheerluck.dev` and enable Auto ads after the site is approved. `PUBLIC_ADSENSE_SLOT` is optional; when set, the site renders one responsive display unit below page content on every `DocsLayout` page. The site also generates `/ads.txt` from the publisher ID during the build.

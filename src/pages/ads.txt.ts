@@ -1,6 +1,6 @@
 export const prerender = true;
 
-const client = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
+const client = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim() || "ca-pub-5206404453602193";
 const publisher = client?.startsWith("ca-pub-")
   ? `pub-${client.slice("ca-pub-".length)}`
   : null;

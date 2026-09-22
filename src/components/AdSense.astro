@@ -13,7 +13,7 @@ const {
   class: className = "",
 } = Astro.props;
 
-const client = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
+const client = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim() || "ca-pub-5206404453602193";
 const canRender = Boolean(client && slot);
 ---
 

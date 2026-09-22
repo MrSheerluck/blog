@@ -52,7 +52,7 @@ const llmsIndexPath = collection
 const llmsUrl = Astro.site
   ? new URL(llmsIndexPath, Astro.site).href
   : llmsIndexPath;
-const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
+const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim() || "ca-pub-5206404453602193";
 ---
 
 <!doctype html>
@@ -60,6 +60,7 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="google-adsense-account" content={adsenseClient} />
 
     <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-FTJ10CMM55"></script>
     <script is:inline>
