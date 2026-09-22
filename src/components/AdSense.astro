@@ -1,0 +1,34 @@
+---
+interface Props {
+  slot?: string;
+  format?: "auto" | "rectangle" | "horizontal" | "vertical";
+  fullWidthResponsive?: boolean;
+  class?: string;
+}
+
+const {
+  slot = import.meta.env.PUBLIC_ADSENSE_SLOT?.trim(),
+  format = "auto",
+  fullWidthResponsive = true,
+  class: className = "",
+} = Astro.props;
+
+const client = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
+const canRender = Boolean(client && slot);
+---
+
+{canRender && (
+  <div class:list={["adsense-slot", className]} aria-label="Advertisement">
+    <ins
+      class="adsbygoogle"
+      style="display:block"
+      data-ad-client={client}
+      data-ad-slot={slot}
+      data-ad-format={format}
+      data-full-width-responsive={String(fullWidthResponsive)}
+    ></ins>
+    <script is:inline>
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+)}

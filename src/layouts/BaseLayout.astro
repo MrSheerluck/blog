@@ -52,6 +52,7 @@ const llmsIndexPath = collection
 const llmsUrl = Astro.site
   ? new URL(llmsIndexPath, Astro.site).href
   : llmsIndexPath;
+const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
 ---
 
 <!doctype html>
@@ -67,6 +68,15 @@ const llmsUrl = Astro.site
       gtag('js', new Date());
       gtag('config', 'G-FTJ10CMM55');
     </script>
+
+    {adsenseClient && (
+      <script
+        is:inline
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+        crossorigin="anonymous"
+      ></script>
+    )}
 
     <script is:inline>
       (() => {

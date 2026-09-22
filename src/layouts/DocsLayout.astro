@@ -19,6 +19,7 @@ import type { DocsPageProps } from "@cloudflare/nimbus-docs/types";
 import { getVersionStatus, getVersionAlternates } from "@cloudflare/nimbus-docs";
 import type { LanguageLink, Locale } from "../i18n/config";
 import { fallbackLocaleLinks } from "../i18n/links";
+import AdSense from "../components/AdSense.astro";
 
 type Props = DocsPageProps & {
   audience?: "human";
@@ -238,6 +239,7 @@ const hasPagination = Astro.slots.has("pagination");
                 <article class="docs-content max-w-none">
                   <slot />
                 </article>
+                {import.meta.env.PUBLIC_ADSENSE_SLOT && <AdSense class="mt-10" />}
                 {hasContentFooter ? (
                   <slot name="content-footer" />
                 ) : editUrl && (
